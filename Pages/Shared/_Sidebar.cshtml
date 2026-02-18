@@ -1,38 +1,59 @@
-<aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+<aside class="app-sidebar shadow" data-bs-theme="dark">
+    <!-- Brand Logo -->
     <div class="sidebar-brand">
+        <!-- Default Brand Logo -->
         <a href="/" class="brand-link">
-            <img src="~/lib/adminlte/assets/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image opacity-75 shadow" />
-            <span class="brand-text fw-light">HR Portal</span>
+            <img src="~/img/branding-assets/Specialized-Engineering-Logo-white.webp" alt="Specialized Engineering" class="brand-image opacity-75 shadow" style="max-height: 50px;" />
+            <span class="brand-text fw-light d-none">HR Portal</span> <!-- Hide text as logo contains text -->
+        </a>
+        <!-- Collapsed Brand Logo (Rect + Side-by-Side SE) -->
+        <a href="/" class="brand-link brand-link-small d-none">
+            <svg width="52" height="45" viewBox="0 0 46 40" xmlns="http://www.w3.org/2000/svg">
+                <!-- Standing White Rectangle -->
+                <rect x="2" y="5" width="8" height="30" fill="rgba(255, 255, 255, 0.75)" rx="1" />
+                
+                <!-- SE Text (Side by Side) -->
+                <text x="14" y="28" fill="rgba(255, 255, 255, 0.75)" font-family="Arial, sans-serif" font-weight="bold" font-size="24">SE</text>
+            </svg>
         </a>
     </div>
+
+    <!-- Sidebar Menu -->
     <div class="sidebar-wrapper">
         <nav class="mt-2">
             <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation" aria-label="Main navigation">
                 <li class="nav-item">
                     <a asp-page="/Index" class="nav-link">
-                        <i class="nav-icon bi bi-speedometer"></i>
+                        <i data-lucide="layout-dashboard" class="nav-icon"></i>
                         <p>Dashboard</p>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a asp-page="/Requests/Index" class="nav-link">
-                        <i class="nav-icon bi bi-file-earmark-text"></i>
-                        <p>Certification Requests</p>
+                        <i data-lucide="clipboard-list" class="nav-icon"></i>
+                        <p>Requests</p>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a asp-page="/Certifications/Index" class="nav-link">
-                        <i class="nav-icon bi bi-patch-check"></i>
+                        <i data-lucide="award" class="nav-icon"></i>
                         <p>Certifications</p>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a asp-page="/Admin/Settings" class="nav-link">
-                        <i class="nav-icon bi bi-gear"></i>
-                        <p>Admin Settings</p>
+                        <i data-lucide="settings" class="nav-icon"></i>
+                        <p>Settings</p>
                     </a>
                 </li>
             </ul>
         </nav>
     </div>
+
+    <!-- Floating Toggle Button -->
+    <a href="#" class="sidebar-floating-toggle">
+        <i data-lucide="chevron-left" class="toggle-icon-expanded"></i>
+        <i data-lucide="chevron-right" class="toggle-icon-collapsed"></i>
+    </a>
 </aside>
+

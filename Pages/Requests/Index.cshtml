@@ -5,14 +5,29 @@
 }
 
 <div class="card mb-4">
-    <div class="card-header">
-        <h3 class="card-title">Recent Requests</h3>
-        <div class="card-tools">
-            <a href="#" class="btn btn-primary btn-sm">Create New Request</a>
+    <div class="card-header border-0">
+        <h3 class="card-title">Manage Requests</h3>
+        
+        <div class="card-tools d-flex gap-2">
+            <!-- Search & Filter -->
+            <form method="get" class="d-flex gap-2">
+                <input type="text" name="SearchString" class="form-control form-control-sm" placeholder="Search Employee/Cert...">
+                <select name="Status" class="form-select form-select-sm" style="width: 120px;">
+                    <option value="">All Status</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+            </form>
+            
+            <a href="#" class="btn btn-success btn-sm ms-2">
+                <i class="bi bi-plus-lg"></i> New Request
+            </a>
         </div>
     </div>
-    <div class="card-body p-0">
-        <table class="table table-striped">
+    <div class="card-body p-0 table-responsive">
+        <table class="table table-hover text-nowrap">
             <thead>
                 <tr>
                     <th style="width: 10px">#</th>
@@ -20,29 +35,29 @@
                     <th>Certification</th>
                     <th>Status</th>
                     <th>Date</th>
-                    <th style="width: 150px">Actions</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>1.</td>
-                    <td>John Doe</td>
-                    <td>AWS Certified Solutions Architect</td>
+                    <td>132</td>
+                    <td>Alexander Pierce</td>
+                    <td>ACI Field Tech</td>
                     <td><span class="badge text-bg-warning">Pending</span></td>
-                    <td>2023-10-01</td>
+                    <td>2023-10-15</td>
                     <td>
-                        <a href="#" class="btn btn-sm btn-info">View</a>
-                        <a href="#" class="btn btn-sm btn-success">Approve</a>
+                        <a href="#" class="btn btn-sm btn-outline-primary" title="View"><i class="bi bi-eye"></i></a>
+                        <a href="#" class="btn btn-sm btn-outline-success" title="Approve"><i class="bi bi-check-lg"></i></a>
                     </td>
                 </tr>
                 <tr>
-                    <td>2.</td>
-                    <td>Jane Smith</td>
-                    <td>PMP Certification</td>
+                    <td>133</td>
+                    <td>Sarah Connor</td>
+                    <td>OSHA 30</td>
                     <td><span class="badge text-bg-success">Approved</span></td>
-                    <td>2023-09-28</td>
+                    <td>2023-10-12</td>
                     <td>
-                        <a href="#" class="btn btn-sm btn-info">View</a>
+                        <a href="#" class="btn btn-sm btn-outline-primary" title="View"><i class="bi bi-eye"></i></a>
                     </td>
                 </tr>
             </tbody>

@@ -4,65 +4,121 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="row">
+<div class="row mb-4">
     <!-- Total Requests -->
     <div class="col-lg-3 col-6">
-        <div class="small-box text-bg-primary">
+        <div class="small-box">
             <div class="inner">
                 <h3>150</h3>
                 <p>Total Requests</p>
             </div>
-            <div class="small-box-icon">
-                <i class="bi bi-file-earmark-text"></i>
+            <div class="icon">
+                <i data-lucide="file-text"></i>
             </div>
-            <a href="/Requests" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
-                More info <i class="bi bi-link-45deg"></i>
+            <a href="/Requests/Index" class="small-box-footer">
+                View All <i data-lucide="arrow-right-circle"></i>
             </a>
         </div>
     </div>
     <!-- Pending Approvals -->
     <div class="col-lg-3 col-6">
-        <div class="small-box text-bg-warning">
+        <div class="small-box status-warning">
             <div class="inner">
                 <h3>53</h3>
                 <p>Pending Approvals</p>
             </div>
-            <div class="small-box-icon">
-                <i class="bi bi-hourglass-split"></i>
+            <div class="icon">
+                <i data-lucide="hourglass"></i>
             </div>
-            <a href="#" class="small-box-footer link-dark link-underline-opacity-0 link-underline-opacity-50-hover">
-                More info <i class="bi bi-link-45deg"></i>
+            <a href="/Requests/Index?status=Pending" class="small-box-footer">
+                Filter Pending <i data-lucide="filter"></i>
             </a>
         </div>
     </div>
     <!-- Expiring Soon -->
     <div class="col-lg-3 col-6">
-        <div class="small-box text-bg-danger">
+        <div class="small-box status-danger">
             <div class="inner">
                 <h3>10</h3>
                 <p>Expiring Soon</p>
             </div>
-            <div class="small-box-icon">
-                <i class="bi bi-exclamation-triangle"></i>
+            <div class="icon">
+                <i data-lucide="alert-triangle"></i>
             </div>
-            <a href="#" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
-                More info <i class="bi bi-link-45deg"></i>
+            <a href="/Certifications/Index?filter=expiring" class="small-box-footer">
+                View Expiring <i data-lucide="arrow-right-circle"></i>
             </a>
         </div>
     </div>
     <!-- Active Certifications -->
     <div class="col-lg-3 col-6">
-        <div class="small-box text-bg-success">
+        <div class="small-box">
             <div class="inner">
                 <h3>1,200</h3>
                 <p>Active Certifications</p>
             </div>
-            <div class="small-box-icon">
-                <i class="bi bi-patch-check-fill"></i>
+            <div class="icon">
+                <i data-lucide="award"></i>
             </div>
-            <a href="#" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
-                More info <i class="bi bi-link-45deg"></i>
+            <a href="/Certifications/Index?status=Active" class="small-box-footer">
+                View Active <i data-lucide="arrow-right-circle"></i>
             </a>
         </div>
     </div>
 </div>
+
+<!-- Recent Requests Table -->
+<div class="card">
+    <div class="card-header border-0">
+        <h3 class="card-title">Recent Requests</h3>
+        <div class="card-tools">
+            <a href="#" class="btn btn-tool btn-sm">
+                <i class="bi bi-download"></i>
+            </a>
+            <a href="#" class="btn btn-tool btn-sm">
+                <i class="bi bi-list-task"></i>
+            </a>
+        </div>
+    </div>
+    <div class="card-body table-responsive p-0">
+        <table class="table table-striped table-valign-middle">
+            <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Certification</th>
+                <th>Agency</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>John Doe</td>
+                <td>Concrete Field Testing Grade I</td>
+                <td>ACI</td>
+                <td><span class="badge text-bg-warning">Pending</span></td>
+                <td>2023-10-25</td>
+                <td>
+                    <a href="#" class="text-muted">
+                        <i data-lucide="search" style="width: 16px; height: 16px;"></i>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td>Jane Smith</td>
+                <td>Soils & Aggregate Compaction</td>
+                <td>WACEL</td>
+                <td><span class="badge text-bg-success">Approved</span></td>
+                <td>2023-10-24</td>
+                <td>
+                    <a href="#" class="text-muted">
+                        <i data-lucide="search" style="width: 16px; height: 16px;"></i>
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
