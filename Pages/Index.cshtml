@@ -1,0 +1,68 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="row">
+    <!-- Total Requests -->
+    <div class="col-lg-3 col-6">
+        <div class="small-box text-bg-primary">
+            <div class="inner">
+                <h3>150</h3>
+                <p>Total Requests</p>
+            </div>
+            <div class="small-box-icon">
+                <i class="bi bi-file-earmark-text"></i>
+            </div>
+            <a href="/Requests" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                More info <i class="bi bi-link-45deg"></i>
+            </a>
+        </div>
+    </div>
+    <!-- Pending Approvals -->
+    <div class="col-lg-3 col-6">
+        <div class="small-box text-bg-warning">
+            <div class="inner">
+                <h3>53</h3>
+                <p>Pending Approvals</p>
+            </div>
+            <div class="small-box-icon">
+                <i class="bi bi-hourglass-split"></i>
+            </div>
+            <a href="#" class="small-box-footer link-dark link-underline-opacity-0 link-underline-opacity-50-hover">
+                More info <i class="bi bi-link-45deg"></i>
+            </a>
+        </div>
+    </div>
+    <!-- Expiring Soon -->
+    <div class="col-lg-3 col-6">
+        <div class="small-box text-bg-danger">
+            <div class="inner">
+                <h3>10</h3>
+                <p>Expiring Soon</p>
+            </div>
+            <div class="small-box-icon">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <a href="#" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                More info <i class="bi bi-link-45deg"></i>
+            </a>
+        </div>
+    </div>
+    <!-- Active Certifications -->
+    <div class="col-lg-3 col-6">
+        <div class="small-box text-bg-success">
+            <div class="inner">
+                <h3>1,200</h3>
+                <p>Active Certifications</p>
+            </div>
+            <div class="small-box-icon">
+                <i class="bi bi-patch-check-fill"></i>
+            </div>
+            <a href="#" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                More info <i class="bi bi-link-45deg"></i>
+            </a>
+        </div>
+    </div>
+</div>

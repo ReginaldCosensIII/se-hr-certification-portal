@@ -1,0 +1,51 @@
+@page
+@model SeHrCertificationPortal.Pages.Requests.IndexModel
+@{
+    ViewData["Title"] = "Certification Requests";
+}
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h3 class="card-title">Recent Requests</h3>
+        <div class="card-tools">
+            <a href="#" class="btn btn-primary btn-sm">Create New Request</a>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th style="width: 10px">#</th>
+                    <th>Employee</th>
+                    <th>Certification</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th style="width: 150px">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1.</td>
+                    <td>John Doe</td>
+                    <td>AWS Certified Solutions Architect</td>
+                    <td><span class="badge text-bg-warning">Pending</span></td>
+                    <td>2023-10-01</td>
+                    <td>
+                        <a href="#" class="btn btn-sm btn-info">View</a>
+                        <a href="#" class="btn btn-sm btn-success">Approve</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2.</td>
+                    <td>Jane Smith</td>
+                    <td>PMP Certification</td>
+                    <td><span class="badge text-bg-success">Approved</span></td>
+                    <td>2023-09-28</td>
+                    <td>
+                        <a href="#" class="btn btn-sm btn-info">View</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

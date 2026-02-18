@@ -1,0 +1,38 @@
+<aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+    <div class="sidebar-brand">
+        <a href="/" class="brand-link">
+            <img src="~/lib/adminlte/assets/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image opacity-75 shadow" />
+            <span class="brand-text fw-light">HR Portal</span>
+        </a>
+    </div>
+    <div class="sidebar-wrapper">
+        <nav class="mt-2">
+            <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation" aria-label="Main navigation">
+                <li class="nav-item">
+                    <a asp-page="/Index" class="nav-link">
+                        <i class="nav-icon bi bi-speedometer"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-page="/Requests/Index" class="nav-link">
+                        <i class="nav-icon bi bi-file-earmark-text"></i>
+                        <p>Certification Requests</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-page="/Certifications/Index" class="nav-link">
+                        <i class="nav-icon bi bi-patch-check"></i>
+                        <p>Certifications</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a asp-page="/Admin/Settings" class="nav-link">
+                        <i class="nav-icon bi bi-gear"></i>
+                        <p>Admin Settings</p>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</aside>
