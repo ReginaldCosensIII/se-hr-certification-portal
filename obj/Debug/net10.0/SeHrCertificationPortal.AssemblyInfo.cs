@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SeHrCertificationPortal")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+12c629a3a8fe9fffea8d1cd4609c7fca36623e21")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+110a9a62b3ed520e1e9bb71f72a25b6ce616424f")]
 [assembly: System.Reflection.AssemblyProductAttribute("SeHrCertificationPortal")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SeHrCertificationPortal")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
