@@ -58,7 +58,7 @@ body {
 }
 
 .sidebar-brand {
-    height: 70px;
+    height: 64px;
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -200,7 +200,7 @@ body.sidebar-collapse .nav-icon {
 
 /* Header Navigation Links (Override Generic) */
 .app-header {
-    min-height: 70px;
+    min-height: 64px;
     /* Match Sidebar Brand Height */
     display: flex;
     align-items: center;
@@ -252,8 +252,8 @@ body.sidebar-collapse .toggle-icon-collapsed {
 .sidebar-floating-toggle {
     position: absolute;
     right: -12px;
-    top: 76px;
-    /* 6px below 70px Header */
+    top: 70px;
+    /* 6px below 64px Header */
     width: 24px;
     height: 24px;
     background-color: var(--brand-primary);
