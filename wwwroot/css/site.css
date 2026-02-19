@@ -85,7 +85,7 @@ body.sidebar-collapse .sidebar-brand {
     padding: 12px 16px;
     display: flex;
     align-items: center;
-    transition: all 0.2s;
+    transition: all 0.2s, padding-left 0.55s cubic-bezier(0.4, 0, 0.2, 1);
     border-left: 4px solid transparent;
     white-space: nowrap;
     overflow: hidden;
@@ -158,8 +158,18 @@ body.sidebar-collapse .sidebar-brand .brand-link .brand-image {
 body.sidebar-collapse .brand-link-small {
     display: flex !important;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    /* Left Align */
+    padding-left: 0;
+    /* Reset padding, parent handles offset */
     width: 100%;
+}
+
+body.sidebar-collapse .sidebar-brand {
+    padding-left: 14px;
+    /* Center 52px Logo in 80px space ((80-52)/2 = 14px) */
+    justify-content: flex-start;
+    /* Keep left align */
 }
 
 /* -------------------------------------------------------------------------- */
@@ -172,10 +182,10 @@ body.sidebar-collapse .nav-link p {
     max-width: 0;
 }
 
-/* Center Icons Smoothly */
+/* Center Icons Smoothly via Padding */
 body.sidebar-collapse .nav-link {
-    padding-inline: 0;
-    justify-content: center;
+    padding-left: 30px !important;
+    /* Center 20px Icon in 80px space ((80-20)/2 = 30px) */
 }
 
 body.sidebar-collapse .nav-icon {
@@ -226,7 +236,8 @@ body.sidebar-collapse .toggle-icon-collapsed {
 .sidebar-floating-toggle {
     position: absolute;
     right: -12px;
-    top: 75px;
+    top: 86px;
+    /* 6px below 80px Header */
     width: 24px;
     height: 24px;
     background-color: var(--brand-primary);
@@ -293,21 +304,24 @@ body.sidebar-collapse .toggle-icon-collapsed {
     margin-bottom: 0;
 }
 
-/* Large Faded Icon */
+/* Large Faded Icon (Background Watermark) */
 .small-box .icon {
     position: absolute;
-    right: 15px;
-    top: 15px;
-    z-index: 1;
-    color: var(--brand-primary) !important;
-    opacity: 0.15;
+    right: 10px;
+    top: 10px;
+    z-index: 0;
+    /* Behind text (z-index 2 is on .inner) */
+    color: var(--brand-dark) !important;
+    opacity: 0.10;
+    /* Slightly more visible since smaller */
     transition: all 0.3s linear;
 }
 
-.small-box .icon>i {
-    width: 160px !important;
-    /* 2.5x Increase (64px * 2.5) */
-    height: 160px !important;
+.small-box .icon>i,
+.small-box .icon>svg {
+    width: 70px !important;
+    /* Reduced to ~70px for subtle look */
+    height: 70px !important;
     display: block;
 }
 
@@ -338,9 +352,11 @@ body.sidebar-collapse .toggle-icon-collapsed {
     color: #fff !important;
 }
 
-.small-box-footer i {
-    width: 16px;
-    height: 16px;
+.small-box-footer i,
+.small-box-footer svg {
+    width: 24px;
+    /* Increased to 24px for visual weight balance */
+    height: 24px;
 }
 
 /* Status: Warning (Pending) */
@@ -350,6 +366,11 @@ body.sidebar-collapse .toggle-icon-collapsed {
 
 .small-box.status-warning .small-box-footer {
     background-color: #e5a00d !important;
+}
+
+/* Darker Hover for Warning */
+.small-box.status-warning .small-box-footer:hover {
+    background-color: #c68c0b !important;
 }
 
 .small-box.status-warning .icon {
@@ -363,6 +384,11 @@ body.sidebar-collapse .toggle-icon-collapsed {
 
 .small-box.status-danger .small-box-footer {
     background-color: #dc3545 !important;
+}
+
+/* Darker Hover for Danger */
+.small-box.status-danger .small-box-footer:hover {
+    background-color: #b02a37 !important;
 }
 
 .small-box.status-danger .icon {

@@ -52,13 +52,24 @@
 - Export options for reports.
 
 ## 3. Technical & Workflow Requirements
+- **Architecture Strategy**: **Frontend-First**.
+    1.  **UI Scaffolding**: Build all Razor Pages and visuals first.
+    2.  **Database**: Design schema and seed data *after* UI approval.
+    3.  **Wiring**: Connect UI to DB and implement backend logic last.
 - **Database**: PostgreSQL with Entity Framework Core.
+    - **Migration**: Use `pg_dump` for production schema promotion.
+    - **Seeding**: Realistic mock data required for dev/testing.
 - **Testing**: 100% Unit Test coverage for logic. Regression testing required.
 - **Deployment**: Local IIS on SpecEng network. No Authentication required (Internal only).
 - **Workflow**:
     - Feature Branches (`feat/name`).
     - Standardized Agent Skills for tasks.
-    - Database Seeding Strategy (PgDump for prod).
+
+## 4. Specific View Requirements
+### Dashboard Table ("Recent Requests")
+- **Columns**: Employee ID, Employee Name, Agency, Certification, Request Type, Status, Date.
+- **Actions**: New Request (Header), Edit/Delete (Row).
+- **Restrictions**: No "View All" or "Download" buttons on Dashboard (keep it simple).
 
 ## 4. Assets
 - **Logo**: `wwwroot/img/branding-assets/Specialized-Engineering-Logo-white.webp`

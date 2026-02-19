@@ -2,10 +2,15 @@
 @model IndexModel
 @{
     ViewData["Title"] = "Dashboard";
+    
+    // Mock Data for Conditional Logic Visualization
+    int pendingCount = 53; 
+    int expiringCount = 10;
+    // Set these to 0 to test "Tan" state
 }
 
 <div class="row mb-4">
-    <!-- Total Requests -->
+    <!-- 1. Total Requests -->
     <div class="col-lg-3 col-6">
         <div class="small-box">
             <div class="inner">
@@ -20,37 +25,8 @@
             </a>
         </div>
     </div>
-    <!-- Pending Approvals -->
-    <div class="col-lg-3 col-6">
-        <div class="small-box status-warning">
-            <div class="inner">
-                <h3>53</h3>
-                <p>Pending Approvals</p>
-            </div>
-            <div class="icon">
-                <i data-lucide="hourglass"></i>
-            </div>
-            <a href="/Requests/Index?status=Pending" class="small-box-footer">
-                Filter Pending <i data-lucide="filter"></i>
-            </a>
-        </div>
-    </div>
-    <!-- Expiring Soon -->
-    <div class="col-lg-3 col-6">
-        <div class="small-box status-danger">
-            <div class="inner">
-                <h3>10</h3>
-                <p>Expiring Soon</p>
-            </div>
-            <div class="icon">
-                <i data-lucide="alert-triangle"></i>
-            </div>
-            <a href="/Certifications/Index?filter=expiring" class="small-box-footer">
-                View Expiring <i data-lucide="arrow-right-circle"></i>
-            </a>
-        </div>
-    </div>
-    <!-- Active Certifications -->
+    
+    <!-- 2. Active Certifications -->
     <div class="col-lg-3 col-6">
         <div class="small-box">
             <div class="inner">
@@ -65,18 +41,51 @@
             </a>
         </div>
     </div>
+
+    <!-- 3. Pending Approvals -->
+    <!-- 3. Pending Approvals -->
+    <div class="col-lg-3 col-6">
+        <!-- Conditional Formatting: Only show 'status-warning' if count > 0 -->
+        <div class="small-box @(pendingCount > 0 ? "status-warning" : "")">
+            <div class="inner">
+                <h3>@pendingCount</h3>
+                <p>Pending Approvals</p>
+            </div>
+            <div class="icon">
+                <i data-lucide="hourglass"></i>
+            </div>
+            <a href="/Requests/Index?status=Pending" class="small-box-footer">
+                View Pending <i data-lucide="arrow-right-circle"></i>
+            </a>
+        </div>
+    </div>
+    
+    <!-- 4. Expiring Soon -->
+    <div class="col-lg-3 col-6">
+        <!-- Conditional Formatting: Only show 'status-danger' if count > 0 -->
+        <div class="small-box @(expiringCount > 0 ? "status-danger" : "")">
+            <div class="inner">
+                <h3>@expiringCount</h3>
+                <p>Expiring Soon</p>
+            </div>
+            <div class="icon">
+                <i data-lucide="alert-triangle"></i>
+            </div>
+            <a href="/Certifications/Index?filter=expiring" class="small-box-footer">
+                View Expiring <i data-lucide="arrow-right-circle"></i>
+            </a>
+        </div>
+    </div>
 </div>
 
 <!-- Recent Requests Table -->
 <div class="card">
-    <div class="card-header border-0">
+    <div class="card-header border-0 d-flex align-items-center">
         <h3 class="card-title">Recent Requests</h3>
-        <div class="card-tools">
-            <a href="#" class="btn btn-tool btn-sm">
-                <i class="bi bi-download"></i>
-            </a>
-            <a href="#" class="btn btn-tool btn-sm">
-                <i class="bi bi-list-task"></i>
+        <div class="card-tools ms-auto">
+            <!-- New Request Action Only -->
+            <a href="/Requests/Create" class="btn btn-tool btn-sm text-primary fw-bold">
+                <i data-lucide="plus-circle" class="me-1"></i> New Request
             </a>
         </div>
     </div>
@@ -84,9 +93,11 @@
         <table class="table table-striped table-valign-middle">
             <thead>
             <tr>
+                <th>Req ID</th> <!-- Changed from ID -->
                 <th>Employee</th>
-                <th>Certification</th>
-                <th>Agency</th>
+                <th>Agency</th> 
+                <th>Certification</th> 
+                <th>Type</th>
                 <th>Status</th>
                 <th>Date</th>
                 <th>Actions</th>
@@ -94,26 +105,50 @@
             </thead>
             <tbody>
             <tr>
-                <td>John Doe</td>
-                <td>Concrete Field Testing Grade I</td>
+                <td><span class="text-muted">REQ-1042</span></td>
+                <td>
+                    John Doe
+                    <br/>
+                    <small class="text-muted" style="font-size: 0.75rem;">EMP-056</small>
+                </td>
                 <td>ACI</td>
+                <td>Concrete Field Testing Grade I</td>
+                <td><span class="text-muted">Initial</span></td>
                 <td><span class="badge text-bg-warning">Pending</span></td>
                 <td>2023-10-25</td>
                 <td>
-                    <a href="#" class="text-muted">
+                    <a href="#" class="text-muted me-2" title="View">
                         <i data-lucide="search" style="width: 16px; height: 16px;"></i>
+                    </a>
+                    <a href="#" class="text-muted me-2" title="Edit">
+                        <i data-lucide="pencil" style="width: 16px; height: 16px;"></i>
+                    </a>
+                     <a href="#" class="text-danger" title="Delete">
+                        <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
                     </a>
                 </td>
             </tr>
             <tr>
-                <td>Jane Smith</td>
-                <td>Soils & Aggregate Compaction</td>
+                <td><span class="text-muted">REQ-0981</span></td>
+                <td>
+                    Jane Smith
+                    <br/>
+                    <small class="text-muted" style="font-size: 0.75rem;">EMP-102</small>
+                </td>
                 <td>WACEL</td>
+                <td>Soils & Aggregate Compaction</td>
+                <td><span class="text-muted">Recertification</span></td>
                 <td><span class="badge text-bg-success">Approved</span></td>
                 <td>2023-10-24</td>
                 <td>
-                    <a href="#" class="text-muted">
+                    <a href="#" class="text-muted me-2">
                         <i data-lucide="search" style="width: 16px; height: 16px;"></i>
+                    </a>
+                    <a href="#" class="text-muted me-2">
+                        <i data-lucide="pencil" style="width: 16px; height: 16px;"></i>
+                    </a>
+                     <a href="#" class="text-danger">
+                        <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
                     </a>
                 </td>
             </tr>
