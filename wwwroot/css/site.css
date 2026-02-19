@@ -18,6 +18,12 @@ body {
     /* Light gray background */
 }
 
+/* Prevent Transition on Load (FOUC Fix) */
+.no-transition,
+.no-transition * {
+    transition: none !important;
+}
+
 /* -------------------------------------------------------------------------- */
 /*                               LAYOUT ENGINE                                */
 /* -------------------------------------------------------------------------- */
@@ -193,6 +199,16 @@ body.sidebar-collapse .nav-icon {
 }
 
 /* Header Navigation Links (Override Generic) */
+.app-header {
+    min-height: 80px;
+    /* Match Sidebar Brand Height */
+    display: flex;
+    align-items: center;
+    /* Ensure vertical centering */
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
 .app-header .nav-link {
     color: #6c757d !important;
     /* Bootstrap Secondary */
@@ -404,4 +420,128 @@ body.sidebar-collapse .toggle-icon-collapsed {
 .form-floating>.form-control-plaintext:focus::placeholder,
 .form-floating>.form-control::focus::placeholder {
     text-align: start;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                              BRAND BUTTONS                                 */
+/* -------------------------------------------------------------------------- */
+
+.btn-outline-brand {
+    color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    background-color: transparent;
+}
+
+.btn-outline-brand:hover,
+.btn-outline-brand:active,
+.btn-outline-brand:focus {
+    color: #fff;
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+}
+
+.btn-brand {
+    color: #fff;
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+}
+
+.btn-brand:hover,
+.btn-brand:active,
+.btn-brand:focus {
+    color: #fff;
+    background-color: var(--brand-secondary);
+    border-color: var(--brand-secondary);
+}
+
+/* Pagination Styling to match Brand */
+.page-link.active,
+.active>.page-link {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: #fff;
+}
+
+.page-link {
+    color: var(--brand-primary);
+}
+
+.page-link:hover {
+    color: var(--brand-secondary);
+}
+
+/* -------------------------------------------------------------------------- */
+/*                            ACCORDION OVERRIDES                             */
+/* -------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------- */
+/*                            ACCORDION OVERRIDES                             */
+/* -------------------------------------------------------------------------- */
+
+.accordion-button:focus {
+    z-index: 3;
+    border-color: var(--brand-primary);
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(161, 148, 130, 0.25);
+    /* Brand Primary 25% */
+    color: var(--brand-dark);
+    /* Keep text dark on focus */
+    background-color: #fff;
+    /* Keep background white */
+}
+
+.accordion-button:not(.collapsed) {
+    color: var(--brand-dark);
+    background-color: #fff;
+    /* Prevent default blueish tint */
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .125);
+}
+
+/* -------------------------------------------------------------------------- */
+/*                          GLOBAL FOCUS OVERRIDES                            */
+/* -------------------------------------------------------------------------- */
+
+/* Inputs & Selects */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 0.25rem rgba(161, 148, 130, 0.25);
+}
+
+/* Checkboxes & Radios */
+.form-check-input:checked {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+}
+
+.form-check-input:focus {
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 0.25rem rgba(161, 148, 130, 0.25);
+}
+
+/* Buttons (Generic) */
+.btn-check:focus+.btn,
+.btn:focus {
+    background-color: var(--brand-secondary);
+    border-color: var(--brand-secondary);
+    color: #fff;
+    box-shadow: 0 0 0 0.25rem rgba(161, 148, 130, 0.25);
+}
+
+/* Brand Buttons Specifics (Ensure they don't get messy) */
+.btn-brand:focus,
+.btn-outline-brand:focus {
+    box-shadow: 0 0 0 0.25rem rgba(161, 148, 130, 0.25);
+}
+
+/* Close Buttons (Modals/Alerts) */
+.btn-close:focus {
+    box-shadow: 0 0 0 0.25rem rgba(161, 148, 130, 0.25);
+}
+
+/* Links */
+a:focus {
+    outline: none;
+    /* Often browser default is enough, but if custom focus is needed: */
+    /* box-shadow: 0 0 0 0.25rem rgba(161, 148, 130, 0.25); */
 }

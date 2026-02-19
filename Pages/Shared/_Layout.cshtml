@@ -16,13 +16,21 @@
     <!-- Custom Styles -->
     <link rel="stylesheet" href="~/css/site.css?v=2" />
 </head>
-<body class="bg-body-tertiary">
+<body class="bg-body-tertiary no-transition">
     <script>
         // Immediate State Restoration to prevent FOUC
         const savedState = localStorage.getItem('sidebar-collapse');
         if (savedState === 'true') {
             document.body.classList.add('sidebar-collapse');
         }
+
+        // Remove transition disablement after paint
+        document.addEventListener("DOMContentLoaded", function() {
+            // Small timeout allows the browser to paint the initial state without animating
+            setTimeout(function() {
+                document.body.classList.remove("no-transition");
+            }, 100);
+        });
     </script>
 
     <!-- Grid Layout: Sidebar + Main Content -->
@@ -39,22 +47,15 @@
                     <!-- Left: Page Title -->
                     <ul class="navbar-nav align-items-center">
                         <li class="nav-item d-none d-md-block ms-2">
-                            <h4 class="mb-0 text-muted">@ViewData["Title"]</h4>
+                            <h4 class="mb-0 fw-bold text-dark">@ViewData["Title"]</h4>
                         </li>
                     </ul>
 
                     <!-- Right: Search & User Actions -->
                     <ul class="navbar-nav ms-auto gap-3">
-                        <!-- Search Bar -->
+                        <!-- Search Bar Removed -->
                         <li class="nav-item d-none d-md-block">
-                            <form class="d-flex" role="search">
-                                <div class="input-group">
-                                    <input class="form-control" type="search" placeholder="Search..." aria-label="Search">
-                                    <button class="btn btn-outline-secondary" type="submit">
-                                        <i data-lucide="search"></i>
-                                    </button>
-                                </div>
-                            </form>
+                            <!-- Global Search removed in favor of Table-specific search -->
                         </li>
                         
                         <!-- Notifications -->

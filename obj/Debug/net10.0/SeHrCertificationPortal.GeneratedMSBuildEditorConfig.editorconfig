@@ -30,8 +30,8 @@ build_property._RazorSourceGeneratorDebug =
 build_property.EffectiveAnalysisLevelStyle = 10.0
 build_property.EnableCodeStyleSeverity = 
 
-[C:/Users/Regin/source/repos/se-hr-certification-portal/Pages/Admin/Settings.cshtml]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cU2V0dGluZ3MuY3NodG1s
+[C:/Users/Regin/source/repos/se-hr-certification-portal/Pages/Admin/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Regin/source/repos/se-hr-certification-portal/Pages/Certifications/Index.cshtml]
