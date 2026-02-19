@@ -18,12 +18,6 @@ body {
     /* Light gray background */
 }
 
-/* Prevent Transition on Load (FOUC Fix) */
-.no-transition,
-.no-transition * {
-    transition: none !important;
-}
-
 /* -------------------------------------------------------------------------- */
 /*                               LAYOUT ENGINE                                */
 /* -------------------------------------------------------------------------- */
