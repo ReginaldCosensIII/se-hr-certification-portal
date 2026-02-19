@@ -12,7 +12,7 @@
                 <span class="fs-4 fw-bold"> <i data-lucide="plus-circle" class="me-2 text-brand-primary" style="color: var(--brand-primary);"></i> New Certification Request</span>
             </button>
         </h2>
-        <div id="collapseNewRequest" class="accordion-collapse collapse show" aria-labelledby="headingNewRequest" data-bs-parent="#newRequestAccordion">
+        <div id="collapseNewRequest" class="accordion-collapse collapse" aria-labelledby="headingNewRequest" data-bs-parent="#newRequestAccordion">
             <div class="accordion-body bg-white">
                 <form>
                     <div class="row g-3">
@@ -227,3 +227,41 @@
         </nav>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const accordionId = 'newRequestAccordion';
+            const storageKey = 'accordionState_' + accordionId;
+            const collapseElement = document.getElementById('collapseNewRequest');
+            const toggleButton = document.querySelector('[data-bs-target="#collapseNewRequest"]');
+
+            // 1. Restore State on Load
+            const savedState = localStorage.getItem(storageKey);
+            
+            if (savedState === 'open') {
+                // Open it
+                collapseElement.classList.add('show');
+                toggleButton.classList.remove('collapsed');
+                toggleButton.setAttribute('aria-expanded', 'true');
+            } else {
+                // Ensure closed (default HTML might be open, so we enforce closed if not saved as open)
+                collapseElement.classList.remove('show');
+                toggleButton.classList.add('collapsed');
+                toggleButton.setAttribute('aria-expanded', 'false');
+            }
+            
+            // 2. Listen for Bootstrap Events to Save State
+            // Note: Bootstrap 5 toggle events bubble, but we target specific element
+            if (collapseElement) {
+                collapseElement.addEventListener('shown.bs.collapse', function () {
+                    localStorage.setItem(storageKey, 'open');
+                });
+
+                collapseElement.addEventListener('hidden.bs.collapse', function () {
+                    localStorage.setItem(storageKey, 'closed');
+                });
+            }
+        });
+    </script>
+}
