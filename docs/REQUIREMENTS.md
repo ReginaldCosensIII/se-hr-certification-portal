@@ -74,7 +74,16 @@
     4.  **Interaction**: Clicking a cert in the history list updates the "Selected Certification" view.
 - **Status**: UI Scaffolding only (Backend wiring in Phase 5).
 
-## 3. Technical & Workflow Requirements
+## 3. Global Reporting & Export Features (Future)
+- **Data Tables (Admin, Requests, Certifications)**: 
+    - All data tables must support **Export to CSV/Excel** and **Print View**.
+    - **Admin Page**: Specifically for "Agencies" and "Certifications" lists.
+- **Certification Request Form**:
+    - **Digital Export**: Ability to download a filled request as PDF.
+    - **Blank Form**: Feature to generate/print a **Blank Certification Request PDF** that matches the physical paper form (based on provided screenshots) for manual filling.
+    - *Note*: This requires a dedicated PDF generation service or template.
+
+## 4. Technical & Workflow Requirements
 - **Architecture Strategy**: **Frontend-First**.
     1.  **UI Scaffolding**: Build all Razor Pages and visuals first.
     2.  **Database**: Design schema and seed data *after* UI approval.

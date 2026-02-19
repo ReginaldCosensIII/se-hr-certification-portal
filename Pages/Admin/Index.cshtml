@@ -1,7 +1,7 @@
 @page
 @model SeHrCertificationPortal.Pages.Admin.SettingsModel
 @{
-    ViewData["Title"] = "Admin Settings";
+    ViewData["Title"] = "Admin Management";
 }
 
 <!-- Admin Management Tabs -->
@@ -26,9 +26,14 @@
                 <h5 class="card-title fw-bold mb-0 text-dark">
                     Manage Agencies
                 </h5>
-                <button class="btn btn-sm btn-brand fw-bold text-white">
-                    <i data-lucide="plus" class="me-1" style="width: 14px;"></i> Add Agency
-                </button>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-secondary fw-bold">
+                        <i data-lucide="download" class="me-1" style="width: 14px;"></i> Export List
+                    </button>
+                    <button class="btn btn-sm btn-brand fw-bold text-white">
+                        <i data-lucide="plus" class="me-1" style="width: 14px;"></i> Add Agency
+                    </button>
+                </div>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -93,9 +98,14 @@
                  <h5 class="card-title fw-bold mb-0 text-dark">
                     Manage Certifications
                 </h5>
-                <button class="btn btn-sm btn-brand fw-bold text-white">
-                    <i data-lucide="plus" class="me-1" style="width: 14px;"></i> Add Certification
-                </button>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-secondary fw-bold">
+                        <i data-lucide="download" class="me-1" style="width: 14px;"></i> Export List
+                    </button>
+                    <button class="btn btn-sm btn-brand fw-bold text-white">
+                        <i data-lucide="plus" class="me-1" style="width: 14px;"></i> Add Certification
+                    </button>
+                </div>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -174,7 +184,7 @@
                        <span class="input-group-text bg-light border-end-0"><i data-lucide="mail" style="width: 16px;" class="text-muted"></i></span>
                        <input type="email" class="form-control" placeholder="Admin Email" value="admin@specializedengineering.com" style="min-width: 300px;">
                    </div>
-                   <button class="btn btn-brand fw-bold px-4">Save Changes</button>
+                   <button class="btn btn-brand fw-bold px-4">Save</button>
                </div>
             </div>
         </div>
