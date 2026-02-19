@@ -47,9 +47,15 @@
 - **Certification Management**: Add/Edit/Deactivate Certifications (Linked to Agencies).
 - **Data Seeding**: Pre-load data from `SpecializedEngineering-HR-Portal-Drop-Down-Lists.pdf`.
 
-### Certifications Catalog (Global List)
-- View all certifications and which employees hold them.
-- Export options for reports.
+### Certifications Catalog (Employee Certifications)
+- **Table Name**: "Employee Certifications"
+- **Columns**: Employee Name, Agency, Certification, Status, Expiration Date.
+- **Filters**:
+    - Global Search Bar.
+    - Status Dropdown (Active, Expiring, Expired).
+    - Agency Dropdown (ACI, WACEL, VDEQ, etc.).
+- **Export**: "Generate Report" button (Action: Download CSV/PDF of active/expiring certs).
+- **Styling**: Must match Dashboard/Requests table styles exactly.
 
 ## 3. Technical & Workflow Requirements
 - **Architecture Strategy**: **Frontend-First**.
