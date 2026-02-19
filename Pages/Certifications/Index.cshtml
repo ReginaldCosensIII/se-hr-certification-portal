@@ -7,12 +7,98 @@
 <!-- Page Header with Report Action -->
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
-        <!-- Page Title is handled in Layout, but we can add breadcrumb or subtitle here if needed -->
+        <!-- Page Title is handled in Layout -->
     </div>
     <div>
         <button class="btn btn-brand d-flex align-items-center fw-bold">
             <i data-lucide="file-down" class="me-2 text-white" style="width: 18px;"></i> Generate Report
         </button>
+    </div>
+</div>
+
+<!-- Employee Detail View (Hidden by default, triggered by table row click) -->
+<div class="collapse mb-4" id="employeeDetailContext">
+    <div class="card shadow-sm border-top-brand">
+        <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+            <h5 class="card-title fw-bold mb-0 text-dark">
+                <i data-lucide="user-check" class="me-2 text-brand-primary"></i>
+                Certification Details: <span class="text-brand-primary">John Doe</span>
+            </h5>
+            <button class="btn-close" type="button" data-bs-toggle="collapse" data-bs-target="#employeeDetailContext" aria-label="Close"></button>
+        </div>
+        <div class="card-body pt-0">
+            <div class="row g-4">
+                <!-- Left Col: Employee Info & Current Cert -->
+                <div class="col-md-4 border-end">
+                    <h6 class="text-muted text-uppercase small fw-bold mb-3">Employee Profile</h6>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
+                            <span class="fw-bold text-muted">JD</span>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-dark">John Doe</div>
+                            <div class="small text-muted">Field Technician • ID: EMP-056</div>
+                        </div>
+                    </div>
+                    
+                    <h6 class="text-muted text-uppercase small fw-bold mb-3 mt-4">Selected Certification</h6>
+                    <div class="p-3 bg-light rounded border">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fw-bold text-dark">Concrete Field Testing Grade I</span>
+                            <span class="badge text-bg-success">Active</span>
+                        </div>
+                        <div class="small text-muted mb-1">Agency: <span class="fw-bold text-dark">ACI</span></div>
+                        <div class="small text-muted mb-1">Issued: <span class="fw-bold text-dark">Oct 25, 2022</span></div>
+                        <div class="small text-muted mb-3">Expires: <span class="fw-bold text-dark">Oct 25, 2025</span></div>
+                        
+                        <button class="btn btn-sm btn-outline-brand w-100">
+                             <i data-lucide="download" class="me-1" style="width: 14px;"></i> Download Copy
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Right Col: Cert History -->
+                <div class="col-md-8">
+                    <h6 class="text-muted text-uppercase small fw-bold mb-3">Certification History</h6>
+                    <div class="table-responsive">
+                         <table class="table table-sm table-hover align-middle">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Certification</th>
+                                    <th>Agency</th>
+                                    <th>Status</th>
+                                    <th>Expiration</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                             <tbody>
+                                <tr class="table-active">
+                                    <td><span class="fw-bold">Concrete Field Testing Grade I</span></td>
+                                    <td>ACI</td>
+                                    <td><span class="badge text-bg-success">Active</span></td>
+                                    <td>Oct 25, 2025</td>
+                                    <td class="text-end"><i data-lucide="chevron-right" class="text-muted" style="width: 16px;"></i></td>
+                                </tr>
+                                <tr>
+                                    <td>Soils & Aggregate Compaction</td>
+                                    <td>WACEL</td>
+                                    <td><span class="badge text-bg-secondary">Expired</span></td>
+                                    <td>Jan 15, 2022</td>
+                                    <td class="text-end"></td>
+                                </tr>
+                                 <tr>
+                                    <td>OSHA 10-Hour</td>
+                                    <td>OSHA</td>
+                                    <td><span class="badge text-bg-success">Active</span></td>
+                                    <td>Permanent</td>
+                                    <td class="text-end"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

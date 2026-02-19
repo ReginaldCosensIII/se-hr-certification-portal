@@ -57,6 +57,16 @@
 - **Export**: "Generate Report" button (Action: Download CSV/PDF of active/expiring certs).
 - **Styling**: Must match Dashboard/Requests table styles exactly.
 
+### Employee Detail & Certification History View (Master-Detail)
+- **Trigger**: User clicks a row in the "Employee Certifications" table.
+- **Location**: Top of page (Collapsible/Accordion style), consistent with Requests page.
+- **Content**:
+    1.  **Employee Profile**: Name, ID, Manager, Role.
+    2.  **Selected Certification**: Details of the specific cert clicked (Agency, Issue Date, Expiration, PDF Copy link).
+    3.  **Certification History**: List of *other* certifications held by this employee.
+    4.  **Interaction**: Clicking a cert in the history list updates the "Selected Certification" view.
+- **Status**: UI Scaffolding only (Backend wiring in Phase 5).
+
 ## 3. Technical & Workflow Requirements
 - **Architecture Strategy**: **Frontend-First**.
     1.  **UI Scaffolding**: Build all Razor Pages and visuals first.
