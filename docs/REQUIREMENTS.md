@@ -42,10 +42,17 @@
     - Search: Global search.
     - Actions: View, Edit, Remove.
 
-### Admin Settings
-- **Agency Management**: Add/Edit/Deactivate Agencies.
-- **Certification Management**: Add/Edit/Deactivate Certifications (Linked to Agencies).
-- **Data Seeding**: Pre-load data from `SpecializedEngineering-HR-Portal-Drop-Down-Lists.pdf`.
+### Admin Settings (System Management)
+- **Top Section**: Domain Management (Cards/Tables).
+    - **Agency Management**: List Agencies. Actions: Add New, Edit Name, Toggle Active status.
+    - **Certification Management**: List Certifications. Actions: Add New, Edit Name, Assign Agency, Set Validity Period (Years).
+- **Bottom Section**: General Configuration.
+    - **Admin Email**: Field to set the contact for system notifications (e.g., `hr@speceng.com`).
+    - **Application Name**: *Removed* (Hardcoded to brand).
+- **Future/Suggested Features**:
+    - **Audit Log**: View history of changes.
+    - **Data Seeding**: Button to "Reset to Default" for testing.
+    - **Notification Templates**: Edit email subject/body text.
 
 ### Certifications Catalog (Employee Certifications)
 - **Table Name**: "Employee Certifications"
