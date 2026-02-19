@@ -109,6 +109,54 @@ body.sidebar-collapse .sidebar-brand {
     /* Final Polish: 0.55s */
 }
 
+/* Admin Tabs Customization */
+.admin-tabs {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    /* Match Card Border */
+    margin-bottom: 0 !important;
+    /* Connect to content */
+    gap: 4px;
+}
+
+.admin-tabs .nav-link {
+    color: #6c757d;
+    /* Inactive Text (Gray, not Blue) */
+    background-color: #f8f9fa;
+    /* Inactive BG (Light Gray) */
+    border: 1px solid transparent;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 4px 4px 0 0;
+    margin-bottom: -1px;
+    /* Overlap border */
+    font-weight: 600;
+    padding: 10px 20px;
+    transition: all 0.2s ease-in-out;
+}
+
+.admin-tabs .nav-link:hover {
+    color: var(--brand-primary);
+    background-color: #fff;
+    border-color: rgba(0, 0, 0, 0.125) rgba(0, 0, 0, 0.125) #fff;
+}
+
+.admin-tabs .nav-link.active {
+    color: #212529;
+    /* Active Text (Dark) */
+    background-color: #fff;
+    border-color: rgba(0, 0, 0, 0.125) rgba(0, 0, 0, 0.125) transparent;
+    /* No bottom border */
+    border-top: 4px solid var(--brand-primary) !important;
+    /* Top Accent */
+}
+
+/* Remove Card Top Borders when connected to tabs */
+.tab-content .card {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-top: 0 !important;
+    /* Remove individual card accents/borders */
+}
+
 /* Sidebar Hover State */
 .app-sidebar .nav-link:hover {
     color: #fff !important;

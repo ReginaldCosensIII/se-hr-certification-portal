@@ -5,14 +5,14 @@
 }
 
 <!-- Admin Management Tabs -->
-<ul class="nav nav-tabs mb-4 border-bottom-0" id="adminTabs" role="tablist">
+<ul class="nav nav-tabs admin-tabs" id="adminTabs" role="tablist">
     <li class="nav-item" role="presentation">
-        <button class="nav-link active fw-bold" id="agencies-tab" data-bs-toggle="tab" data-bs-target="#agencies" type="button" role="tab" aria-controls="agencies" aria-selected="true">
+        <button class="nav-link active" id="agencies-tab" data-bs-toggle="tab" data-bs-target="#agencies" type="button" role="tab" aria-controls="agencies" aria-selected="true">
             <i data-lucide="building-2" class="me-2" style="width: 18px;"></i> Agencies
         </button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link fw-bold" id="certifications-tab" data-bs-toggle="tab" data-bs-target="#certifications" type="button" role="tab" aria-controls="certifications" aria-selected="false">
+        <button class="nav-link" id="certifications-tab" data-bs-toggle="tab" data-bs-target="#certifications" type="button" role="tab" aria-controls="certifications" aria-selected="false">
             <i data-lucide="award" class="me-2" style="width: 18px;"></i> Certifications
         </button>
     </li>
@@ -21,7 +21,7 @@
 <div class="tab-content mb-5" id="adminTabsContent">
     <!-- Agency Management Tab -->
     <div class="tab-pane fade show active" id="agencies" role="tabpanel" aria-labelledby="agencies-tab">
-        <div class="card shadow-sm border-top-brand">
+        <div class="card shadow-sm">
             <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
                 <h5 class="card-title fw-bold mb-0 text-dark">
                     Manage Agencies
@@ -88,7 +88,7 @@
 
     <!-- Certification Management Tab -->
     <div class="tab-pane fade" id="certifications" role="tabpanel" aria-labelledby="certifications-tab">
-        <div class="card shadow-sm border-top-brand">
+        <div class="card shadow-sm">
             <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
                  <h5 class="card-title fw-bold mb-0 text-dark">
                     Manage Certifications
