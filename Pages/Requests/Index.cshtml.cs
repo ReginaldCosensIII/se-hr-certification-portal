@@ -13,6 +13,7 @@ namespace SeHrCertificationPortal.Pages.Requests
     }
 
     public IList<SeHrCertificationPortal.Models.CertificationRequest> CertificationRequest { get;set; } = default!;
+    public IList<SeHrCertificationPortal.Models.Agency> Agencies { get; set; } = default!;
 
     public async Task OnGetAsync()
     {
@@ -21,6 +22,11 @@ namespace SeHrCertificationPortal.Pages.Requests
             .Include(c => c.Certification)
             .Include(c => c.Employee)
             .OrderByDescending(c => c.RequestDate)
+            .ToListAsync();
+
+        Agencies = await _context.Agencies
+            .Where(a => a.IsActive)
+            .OrderBy(a => a.Abbreviation)
             .ToListAsync();
     }
     }

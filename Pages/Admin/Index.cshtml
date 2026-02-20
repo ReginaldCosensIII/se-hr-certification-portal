@@ -95,42 +95,31 @@
                             </tr>
                         </thead>
                         <tbody>
+                        @foreach (var cert in Model.Certifications) {
                             <tr>
-                                <td class="ps-3 fw-bold">Concrete Field Testing Grade I</td>
-                                <td>ACI</td>
-                                <td>5 Years</td>
-                                <td><i data-lucide="check" class="text-success" style="width: 16px;"></i> Yes</td>
+                                <td class="ps-3 fw-bold">@cert.Name</td>
+                                <td>@(cert.Agency?.Abbreviation ?? "Unknown")</td>
+                                <td>
+                                    @if (cert.ValidityPeriodMonths == 0) {
+                                        <text>Permanent</text>
+                                    } else if (cert.ValidityPeriodMonths % 12 == 0) {
+                                        <text>@(cert.ValidityPeriodMonths / 12) Years</text>
+                                    } else {
+                                        <text>@cert.ValidityPeriodMonths Months</text>
+                                    }
+                                </td>
+                                <td>
+                                    @if (cert.ValidityPeriodMonths > 0) {
+                                        <i data-lucide="check" class="text-success" style="width: 16px;"></i> <text>Yes</text>
+                                    } else {
+                                        <i data-lucide="x" class="text-muted" style="width: 16px;"></i> <text>No</text>
+                                    }
+                                </td>
                                 <td class="text-end pe-3">
                                     <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="edit-2" style="width: 16px;"></i></button>
                                 </td>
                             </tr>
-                            <tr>
-                                <td class="ps-3 fw-bold">Soils & Aggregate Compaction</td>
-                                <td>WACEL</td>
-                                <td>3 Years</td>
-                                <td><i data-lucide="check" class="text-success" style="width: 16px;"></i> Yes</td>
-                                <td class="text-end pe-3">
-                                    <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="edit-2" style="width: 16px;"></i></button>
-                                </td>
-                            </tr>
-                             <tr>
-                                <td class="ps-3 fw-bold">Concrete Strength Testing</td>
-                                <td>ACI</td>
-                                <td>5 Years</td>
-                                <td><i data-lucide="check" class="text-success" style="width: 16px;"></i> Yes</td>
-                                <td class="text-end pe-3">
-                                    <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="edit-2" style="width: 16px;"></i></button>
-                                </td>
-                            </tr>
-                             <tr>
-                                <td class="ps-3 fw-bold">OSHA 10-Hour Construction</td>
-                                <td>OSHA</td>
-                                <td>Permanent</td>
-                                <td><i data-lucide="x" class="text-muted" style="width: 16px;"></i> No</td>
-                                <td class="text-end pe-3">
-                                    <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="edit-2" style="width: 16px;"></i></button>
-                                </td>
-                            </tr>
+                        }
                         </tbody>
                     </table>
                 </div>

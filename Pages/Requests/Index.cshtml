@@ -35,9 +35,10 @@
                             <label class="form-label fw-bold">Certification Agency</label>
                             <select class="form-select">
                                 <option selected>Select Agency...</option>
-                                <option value="1">ACI</option>
-                                <option value="2">WACEL</option>
-                                <option value="3">VDEQ</option>
+                                @foreach (var agency in Model.Agencies)
+                                {
+                                    <option value="@agency.Id">@agency.Abbreviation</option>
+                                }
                             </select>
                         </div>
                         <div class="col-md-8">
