@@ -48,42 +48,17 @@
                             </tr>
                         </thead>
                         <tbody>
+                        @foreach (var item in Model.Agency) {
                             <tr>
-                                <td class="ps-3 text-muted">1</td>
-                                <td class="fw-bold">ACI (American Concrete Institute)</td>
-                                <td class="text-center text-muted">-</td>
+                                <td class="ps-3 text-muted">@item.Id</td>
+                                <td class="fw-bold">@item.FullName (@item.Abbreviation)</td>
+                                <td class="text-center text-muted">@(item.Certifications.Count) Certifications</td>
                                 <td class="text-center"><span class="badge text-bg-success">Active</span></td>
                                 <td class="text-end pe-3">
                                     <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="more-horizontal" style="width: 16px;"></i></button>
                                 </td>
                             </tr>
-                            <tr>
-                                <td class="ps-3 text-muted">2</td>
-                                <td class="fw-bold">WACEL</td>
-                                <td class="text-center text-muted fw-bold">Sarah Jenkins</td>
-                                <td class="text-center"><span class="badge text-bg-success">Active</span></td>
-                                <td class="text-end pe-3">
-                                    <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="more-horizontal" style="width: 16px;"></i></button>
-                                </td>
-                            </tr>
-                             <tr>
-                                <td class="ps-3 text-muted">3</td>
-                                <td class="fw-bold">OSHA</td>
-                                <td class="text-center text-muted">-</td>
-                                <td class="text-center"><span class="badge text-bg-success">Active</span></td>
-                                <td class="text-end pe-3">
-                                    <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="more-horizontal" style="width: 16px;"></i></button>
-                                </td>
-                            </tr>
-                             <tr>
-                                <td class="ps-3 text-muted">4</td>
-                                <td class="fw-bold">VDEQ (Virginia Dept of Environmental Quality)</td>
-                                <td class="text-center text-muted">-</td>
-                                <td class="text-center"><span class="badge text-bg-success">Active</span></td>
-                                <td class="text-end pe-3">
-                                    <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="more-horizontal" style="width: 16px;"></i></button>
-                                </td>
-                            </tr>
+                        }
                         </tbody>
                     </table>
                 </div>

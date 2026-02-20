@@ -226,7 +226,7 @@ namespace SeHrCertificationPortal.Data
 
                     // Request Data
                     int? agencyId = null;
-                    int? certId = null;
+                    // int? certId = null; // Removed unused variable
                     string? customAgency = null;
                     string? customCert = null;
 

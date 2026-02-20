@@ -134,21 +134,34 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Mock Item 1 -->
+            @foreach (var item in Model.CertificationRequest) {
                 <tr>
-                    <td><span class="text-muted fw-mono">REQ-1042</span></td>
+                    <td><span class="text-muted fw-mono">REQ-@item.Id</span></td>
                     <td>
                         <div class="d-flex flex-column">
-                            <span class="fw-bold">John Doe</span>
-                            <small class="text-muted" style="font-size: 0.75rem;">EMP-056</small>
+                            <span class="fw-bold">@item.Employee?.DisplayName</span>
+                            <small class="text-muted" style="font-size: 0.75rem;">@(item.Employee?.Email ?? "No Email")</small>
                         </div>
                     </td>
-                    <td>Michael Scott</td>
-                    <td>ACI</td>
-                    <td>Concrete Field Testing Grade I</td>
-                    <td><span class="fw-bold">Initial</span></td>
-                    <td><span class="badge text-bg-warning">Pending</span></td>
-                    <td>Oct 25, 2023</td>
+                    <td>@(item.ManagerName ?? "N/A")</td>
+                    <td>@(item.Agency?.Abbreviation ?? item.CustomAgencyName ?? "Custom")</td>
+                    <td>@(item.Certification?.Name ?? item.CustomCertificationName ?? "Custom")</td>
+                    <td><span class="fw-bold">@item.RequestType</span></td>
+                    <td>
+                        @if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Pending)
+                        {
+                            <span class="badge text-bg-warning">Pending</span>
+                        }
+                        else if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Approved)
+                        {
+                            <span class="badge text-bg-success">Approved</span>
+                        }
+                        else
+                        {
+                            <span class="badge text-bg-danger">Rejected</span>
+                        }
+                    </td>
+                    <td>@item.RequestDate.ToString("MMM dd, yyyy")</td>
                     <td class="text-end">
                         <a href="#" class="text-muted me-2" title="View details">
                             <i data-lucide="eye" style="width: 16px;"></i>
@@ -161,53 +174,7 @@
                         </a>
                     </td>
                 </tr>
-                
-                <!-- Mock Item 2 -->
-                <tr>
-                    <td><span class="text-muted fw-mono">REQ-0985</span></td>
-                    <td>
-                        <div class="d-flex flex-column">
-                            <span class="fw-bold">Sarah Connor</span>
-                            <small class="text-muted" style="font-size: 0.75rem;">EMP-102</small>
-                        </div>
-                    </td>
-                    <td>Peter Venkman</td>
-                    <td>OSHA</td>
-                    <td>OSHA 30-Hour Construction</td>
-                    <td><span class="fw-bold">Recertification</span></td>
-                    <td><span class="badge text-bg-success">Approved</span></td>
-                    <td>Oct 12, 2023</td>
-                    <td class="text-end">
-                        <a href="#" class="text-muted me-2" title="View details">
-                            <i data-lucide="eye" style="width: 16px;"></i>
-                        </a>
-                         <button class="btn btn-link p-0 text-muted disabled" style="opacity: 0.5;">
-                            <i data-lucide="pencil" style="width: 16px;"></i>
-                        </button>
-                    </td>
-                </tr>
-
-                 <!-- Mock Item 3 -->
-                <tr>
-                    <td><span class="text-muted fw-mono">REQ-0920</span></td>
-                    <td>
-                        <div class="d-flex flex-column">
-                            <span class="fw-bold">Robert Paulson</span>
-                            <small class="text-muted" style="font-size: 0.75rem;">EMP-001</small>
-                        </div>
-                    </td>
-                    <td>Tyler Durden</td>
-                    <td>WACEL</td>
-                    <td>Soils & Aggregate Compaction</td>
-                    <td><span class="fw-bold">Reciprocity</span></td>
-                    <td><span class="badge text-bg-danger">Rejected</span></td>
-                    <td>Sep 30, 2023</td>
-                    <td class="text-end">
-                        <a href="#" class="text-muted me-2" title="View details">
-                            <i data-lucide="eye" style="width: 16px;"></i>
-                        </a>
-                    </td>
-                </tr>
+            }
             </tbody>
         </table>
     </div>

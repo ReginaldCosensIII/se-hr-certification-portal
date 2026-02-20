@@ -1,11 +1,25 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace SeHrCertificationPortal.Pages.Admin
 {
     public class SettingsModel : PageModel
     {
-        public void OnGet()
-        {
-        }
+    private readonly SeHrCertificationPortal.Data.ApplicationDbContext _context;
+
+    public SettingsModel(SeHrCertificationPortal.Data.ApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public IList<SeHrCertificationPortal.Models.Agency> Agency { get;set; } = default!;
+
+    public async Task OnGetAsync()
+    {
+        Agency = await _context.Agencies
+            .Include(a => a.Certifications)
+            .OrderBy(a => a.Abbreviation)
+            .ToListAsync();
+    }
     }
 }
