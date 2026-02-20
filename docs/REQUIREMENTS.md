@@ -42,23 +42,66 @@
     - Search: Global search.
     - Actions: View, Edit, Remove.
 
-### Admin Settings
-- **Agency Management**: Add/Edit/Deactivate Agencies.
-- **Certification Management**: Add/Edit/Deactivate Certifications (Linked to Agencies).
-- **Data Seeding**: Pre-load data from `SpecializedEngineering-HR-Portal-Drop-Down-Lists.pdf`.
+### Admin Settings (System Management)
+- **Top Section**: Domain Management (Cards/Tables).
+    - **Agency Management**: List Agencies. Actions: Add New, Edit Name, Toggle Active status.
+    - **Certification Management**: List Certifications. Actions: Add New, Edit Name, Assign Agency, Set Validity Period (Years).
+- **Bottom Section**: General Configuration.
+    - **Admin Email**: Field to set the contact for system notifications (e.g., `hr@speceng.com`).
+    - **Application Name**: *Removed* (Hardcoded to brand).
+- **Future/Suggested Features**:
+    - **Audit Log**: View history of changes.
+    - **Data Seeding**: Button to "Reset to Default" for testing.
+    - **Notification Templates**: Edit email subject/body text.
 
-### Certifications Catalog (Global List)
-- View all certifications and which employees hold them.
-- Export options for reports.
+### Certifications Catalog (Employee Certifications)
+- **Table Name**: "Employee Certifications"
+- **Columns**: Employee Name, Agency, Certification, Status, Expiration Date.
+- **Filters**:
+    - Global Search Bar.
+    - Status Dropdown (Active, Expiring, Expired).
+    - Agency Dropdown (ACI, WACEL, VDEQ, etc.).
+- **Export**: "Generate Report" button (Action: Download CSV/PDF of active/expiring certs).
+- **Styling**: Must match Dashboard/Requests table styles exactly.
 
-## 3. Technical & Workflow Requirements
+### Employee Detail & Certification History View (Master-Detail)
+- **Trigger**: User clicks a row in the "Employee Certifications" table.
+- **Location**: Top of page (Collapsible/Accordion style), consistent with Requests page.
+- **Content**:
+    1.  **Employee Profile**: Name, ID, Manager, Role.
+    2.  **Selected Certification**: Details of the specific cert clicked (Agency, Issue Date, Expiration, PDF Copy link).
+    3.  **Certification History**: List of *other* certifications held by this employee.
+    4.  **Interaction**: Clicking a cert in the history list updates the "Selected Certification" view.
+- **Status**: UI Scaffolding only (Backend wiring in Phase 5).
+
+## 3. Global Reporting & Export Features (Future)
+- **Data Tables (Admin, Requests, Certifications)**: 
+    - All data tables must support **Export to CSV/Excel** and **Print View**.
+    - **Admin Page**: Specifically for "Agencies" and "Certifications" lists.
+- **Certification Request Form**:
+    - **Digital Export**: Ability to download a filled request as PDF.
+    - **Blank Form**: Feature to generate/print a **Blank Certification Request PDF** that matches the physical paper form (based on provided screenshots) for manual filling.
+    - *Note*: This requires a dedicated PDF generation service or template.
+
+## 4. Technical & Workflow Requirements
+- **Architecture Strategy**: **Frontend-First**.
+    1.  **UI Scaffolding**: Build all Razor Pages and visuals first.
+    2.  **Database**: Design schema and seed data *after* UI approval.
+    3.  **Wiring**: Connect UI to DB and implement backend logic last.
 - **Database**: PostgreSQL with Entity Framework Core.
+    - **Migration**: Use `pg_dump` for production schema promotion.
+    - **Seeding**: Realistic mock data required for dev/testing.
 - **Testing**: 100% Unit Test coverage for logic. Regression testing required.
 - **Deployment**: Local IIS on SpecEng network. No Authentication required (Internal only).
 - **Workflow**:
     - Feature Branches (`feat/name`).
     - Standardized Agent Skills for tasks.
-    - Database Seeding Strategy (PgDump for prod).
+
+## 4. Specific View Requirements
+### Dashboard Table ("Recent Requests")
+- **Columns**: Employee ID, Employee Name, Agency, Certification, Request Type, Status, Date.
+- **Actions**: New Request (Header), Edit/Delete (Row).
+- **Restrictions**: No "View All" or "Download" buttons on Dashboard (keep it simple).
 
 ## 4. Assets
 - **Logo**: `wwwroot/img/branding-assets/Specialized-Engineering-Logo-white.webp`

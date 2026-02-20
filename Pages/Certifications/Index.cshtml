@@ -4,41 +4,224 @@
     ViewData["Title"] = "Certifications";
 }
 
-<div class="card">
-    <div class="card-header">
-        <h3 class="card-title">Manage Certifications</h3>
+<!-- Page Header with Report Action -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <!-- Page Title is handled in Layout -->
     </div>
-    <div class="card-body">
-        <table class="table table-bordered">
-            <thead>
+    <div>
+        <button class="btn btn-brand d-flex align-items-center fw-bold">
+            <i data-lucide="file-down" class="me-2 text-white" style="width: 18px;"></i> Generate Report
+        </button>
+    </div>
+</div>
+
+<!-- Employee Detail View (Accordion Style) -->
+<div class="accordion mb-4 shadow-sm" id="employeeDetailAccordion">
+    <div class="accordion-item border-0" style="border-top: 4px solid var(--brand-primary) !important;">
+        <h2 class="accordion-header" id="headingDetail">
+            <button class="accordion-button collapsed text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetail" aria-expanded="false" aria-controls="collapseDetail">
+                <span class="fs-4 fw-bold">
+                    <i data-lucide="user" class="me-2 text-brand-primary" style="color: var(--brand-primary);"></i> Certification Details
+                </span>
+            </button>
+        </h2>
+        <div id="collapseDetail" class="accordion-collapse collapse" aria-labelledby="headingDetail" data-bs-parent="#employeeDetailAccordion">
+            <div class="accordion-body bg-light">
+                
+                <!-- Empty State Message -->
+                <div class="alert alert-warning border-0 d-flex align-items-center mb-3" role="alert">
+                    <i data-lucide="info" class="me-2"></i>
+                    <div>
+                        <strong>No Selection:</strong> Please select an employee from the table below to view details.
+                    </div>
+                </div>
+
+                <!-- Disabled / Empty Fields Representation -->
+                <div class="row g-4 opacity-50" style="pointer-events: none; user-select: none;">
+                    <!-- Left Col: Employee Info & Current Cert -->
+                    <div class="col-md-4 border-end">
+                        <h6 class="text-muted text-uppercase small fw-bold mb-3">Employee Profile</h6>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-white rounded-circle d-flex align-items-center justify-content-center me-3 border" style="width: 48px; height: 48px;">
+                                <span class="fw-bold text-muted">--</span>
+                            </div>
+                            <div>
+                                <div class="fw-bold text-muted">Select Employee</div>
+                                <div class="small text-muted">Role • ID: ---</div>
+                            </div>
+                        </div>
+                        
+                        <h6 class="text-muted text-uppercase small fw-bold mb-3 mt-4">Selected Certification</h6>
+                        <div class="p-3 bg-white rounded border">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="fw-bold text-muted">---</span>
+                                <span class="badge bg-secondary">---</span>
+                            </div>
+                            <div class="small text-muted mb-1">Agency: <span class="fw-bold text-muted">---</span></div>
+                            <div class="small text-muted mb-1">Issued: <span class="fw-bold text-muted">--/--/----</span></div>
+                            <div class="small text-muted mb-3">Expires: <span class="fw-bold text-muted">--/--/----</span></div>
+                            
+                            <button class="btn btn-sm btn-outline-secondary w-100" disabled>
+                                 <i data-lucide="download" class="me-1" style="width: 14px;"></i> Download Copy
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Col: Cert History -->
+                    <div class="col-md-8">
+                        <h6 class="text-muted text-uppercase small fw-bold mb-3">Certification History</h6>
+                        <div class="table-responsive">
+                             <table class="table table-sm align-middle text-muted">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Certification</th>
+                                        <th>Agency</th>
+                                        <th>Status</th>
+                                        <th>Expiration</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                 <tbody>
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4">
+                                            <em>No records requested</em>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header border-0 bg-transparent py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h3 class="card-title mb-0 fw-bold text-dark">Employee Certifications</h3>
+            
+            <div class="card-tools d-flex align-items-center gap-2">
+                <!-- Search & Filter -->
+                <form method="get" class="d-flex align-items-center gap-2">
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="SearchString" class="form-control" placeholder="Search..." style="max-width: 200px;">
+                         <button class="btn btn-brand" type="submit">
+                            <i data-lucide="search" class="text-white" style="width: 14px;"></i>
+                        </button>
+                    </div>
+                    
+                    <select name="Agency" class="form-select form-select-sm" style="width: 130px;">
+                        <option value="">All Agencies</option>
+                        <option value="ACI">ACI</option>
+                        <option value="WACEL">WACEL</option>
+                        <option value="VDEQ">VDEQ</option>
+                        <option value="OSHA">OSHA</option>
+                    </select>
+
+                    <select name="Status" class="form-select form-select-sm" style="width: 130px;">
+                        <option value="">All Status</option>
+                        <option value="Active">Active</option>
+                        <option value="Expiring">Expiring Soon</option>
+                        <option value="Expired">Expired</option>
+                    </select>
+                    
+                    <button type="submit" class="btn btn-brand btn-sm d-flex align-items-center">
+                        <i data-lucide="filter" class="me-1" style="width: 14px;"></i> Filter
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card-body p-0 table-responsive">
+        <table class="table table-striped table-hover align-middle mb-0">
+            <thead class="bg-light">
                 <tr>
-                    <th>ID</th>
-                    <th>Name</th>
+                    <th style="width: 100px;">Emp ID</th>
+                    <th>Employee Name</th>
                     <th>Agency</th>
-                    <th>Validity (Months)</th>
-                    <th>Actions</th>
+                    <th>Certification</th>
+                    <th>Status</th>
+                    <th>Expiration Date</th>
+                    <th class="text-end" style="min-width: 100px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
+                <!-- Mock Item 1: Active -->
                 <tr>
-                    <td>1</td>
-                    <td>AWS Solutions Architect</td>
-                    <td>Amazon</td>
-                    <td>36</td>
+                    <td><span class="text-muted fw-mono">EMP-056</span></td>
                     <td>
-                        <button class="btn btn-sm btn-primary">Edit</button>
+                        <span class="fw-bold">John Doe</span>
+                    </td>
+                    <td>ACI</td>
+                    <td>Concrete Field Testing Grade I</td>
+                    <td><span class="badge text-bg-success">Active</span></td>
+                    <td>Oct 25, 2025</td>
+                    <td class="text-end">
+                        <a href="#" class="text-muted me-2" title="View details">
+                            <i data-lucide="eye" style="width: 16px;"></i>
+                        </a>
+                        <a href="#" class="text-muted me-2" title="Edit certification">
+                            <i data-lucide="pencil" style="width: 16px;"></i>
+                        </a>
                     </td>
                 </tr>
+                
+                <!-- Mock Item 2: Expiring -->
                 <tr>
-                    <td>2</td>
-                    <td>PMP</td>
-                    <td>PMI</td>
-                    <td>36</td>
+                    <td><span class="text-muted fw-mono">EMP-102</span></td>
                     <td>
-                        <button class="btn btn-sm btn-primary">Edit</button>
+                        <span class="fw-bold">Sarah Connor</span>
+                    </td>
+                    <td>OSHA</td>
+                    <td>OSHA 30-Hour Construction</td>
+                    <td><span class="badge text-bg-warning">Expiring</span></td>
+                    <td>Nov 15, 2023</td>
+                    <td class="text-end">
+                        <a href="#" class="text-muted me-2" title="View details">
+                            <i data-lucide="eye" style="width: 16px;"></i>
+                        </a>
+                        <a href="#" class="text-muted me-2" title="Edit certification">
+                            <i data-lucide="pencil" style="width: 16px;"></i>
+                        </a>
+                    </td>
+                </tr>
+
+                 <!-- Mock Item 3: Expired -->
+                <tr>
+                    <td><span class="text-muted fw-mono">EMP-001</span></td>
+                    <td>
+                        <span class="fw-bold">Robert Paulson</span>
+                    </td>
+                    <td>WACEL</td>
+                    <td>Soils & Aggregate Compaction</td>
+                    <td><span class="badge text-bg-danger">Expired</span></td>
+                    <td>Sep 01, 2023</td>
+                    <td class="text-end">
+                        <a href="#" class="text-muted me-2" title="View details">
+                            <i data-lucide="eye" style="width: 16px;"></i>
+                        </a>
+                        <a href="#" class="text-muted me-2" title="Edit certification">
+                            <i data-lucide="pencil" style="width: 16px;"></i>
+                        </a>
                     </td>
                 </tr>
             </tbody>
         </table>
+    </div>
+    
+    <div class="card-footer bg-transparent border-top-0 py-3">
+        <!-- Pagination Mock -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination pagination-sm justify-content-end mb-0">
+                <li class="page-item disabled"><a class="page-link" href="#" aria-label="Previous">Previous</a></li>
+                <li class="page-item active"><a class="page-link shadow-sm" href="#">1</a></li>
+                <li class="page-item disabled"><a class="page-link text-muted" href="#">2</a></li>
+                <li class="page-item disabled"><a class="page-link" href="#" aria-label="Next">Next</a></li>
+            </ul>
+        </nav>
     </div>
 </div>

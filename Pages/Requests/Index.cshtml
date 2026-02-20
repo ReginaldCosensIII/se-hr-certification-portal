@@ -4,48 +4,264 @@
     ViewData["Title"] = "Certification Requests";
 }
 
-<div class="card mb-4">
-    <div class="card-header">
-        <h3 class="card-title">Recent Requests</h3>
-        <div class="card-tools">
-            <a href="#" class="btn btn-primary btn-sm">Create New Request</a>
+<!-- New Request Accordion Form -->
+<div class="accordion mb-4 shadow-sm" id="newRequestAccordion">
+    <div class="accordion-item border-0" style="border-top: 4px solid var(--brand-primary) !important;">
+        <h2 class="accordion-header" id="headingNewRequest">
+            <button class="accordion-button collapsed text-body" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNewRequest" aria-expanded="false" aria-controls="collapseNewRequest" style="background-color: #fff;">
+                <span class="fs-4 fw-bold"> <i data-lucide="plus-circle" class="me-2 text-brand-primary" style="color: var(--brand-primary);"></i> New Certification Request</span>
+            </button>
+        </h2>
+        <div id="collapseNewRequest" class="accordion-collapse collapse" aria-labelledby="headingNewRequest" data-bs-parent="#newRequestAccordion">
+            <div class="accordion-body bg-white">
+                <form>
+                    <div class="row g-3">
+                        <!-- Top Row: Employee, Date, Manager -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Employee Name</label>
+                            <input type="text" class="form-control" placeholder="Enter employee name">
+                        </div>
+                         <div class="col-md-3">
+                            <label class="form-label fw-bold">Request Date</label>
+                            <input type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")">
+                        </div>
+                        <div class="col-md-5">
+                             <label class="form-label fw-bold">Manager</label>
+                            <input type="text" class="form-control" placeholder="Enter manager name">
+                        </div>
+
+                        <!-- Second Row: Agency & Cert -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Certification Agency</label>
+                            <select class="form-select">
+                                <option selected>Select Agency...</option>
+                                <option value="1">ACI</option>
+                                <option value="2">WACEL</option>
+                                <option value="3">VDEQ</option>
+                            </select>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">Certification Desired</label>
+                             <select class="form-select">
+                                <option selected>Select Certification...</option>
+                                <option value="1">Concrete Field Testing Grade I</option>
+                                <option value="2">Soils & Aggregate Compaction</option>
+                            </select>
+                        </div>
+
+                        <!-- Radio Options (Request Type) -->
+                        <div class="col-12 mt-4">
+                            <label class="form-label fw-bold d-block mb-3">Request Type</label>
+                            <div class="d-flex flex-wrap gap-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="requestType" id="typeReview">
+                                    <label class="form-check-label" for="typeReview">Review Session</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="requestType" id="typeWritten">
+                                    <label class="form-check-label" for="typeWritten">Written Exam</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="requestType" id="typePractical">
+                                    <label class="form-check-label" for="typePractical">Practical Exam</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="requestType" id="typeReciprocity">
+                                    <label class="form-check-label" for="typeReciprocity">Reciprocity</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="requestType" id="typeRecert">
+                                    <label class="form-check-label" for="typeRecert">Recertification</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Actions -->
+                        <div class="col-12 mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                             <button type="button" class="btn btn-outline-brand">Reset</button>
+                             <button type="submit" class="btn btn-brand px-4 fw-bold">Submit Request</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-    <div class="card-body p-0">
-        <table class="table table-striped">
-            <thead>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header border-0 bg-transparent py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h3 class="card-title mb-0 fw-bold text-dark">Manage Requests</h3>
+            
+            <div class="card-tools d-flex align-items-center gap-2">
+                <!-- Search & Filter -->
+                <form method="get" class="d-flex align-items-center gap-2">
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="SearchString" class="form-control" placeholder="Search..." style="max-width: 200px;">
+                         <button class="btn btn-brand" type="submit">
+                            <i data-lucide="search" class="text-white" style="width: 14px;"></i>
+                        </button>
+                    </div>
+                    
+                    <select name="Status" class="form-select form-select-sm" style="width: 130px;">
+                        <option value="">All Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                    
+                    <button type="submit" class="btn btn-brand btn-sm d-flex align-items-center">
+                        <i data-lucide="filter" class="me-1" style="width: 14px;"></i> Filter
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card-body p-0 table-responsive">
+        <table class="table table-striped table-hover align-middle mb-0">
+            <thead class="bg-light">
                 <tr>
-                    <th style="width: 10px">#</th>
+                    <th style="width: 100px;">Req ID</th>
                     <th>Employee</th>
+                    <th>Manager</th>
+                    <th>Agency</th>
                     <th>Certification</th>
+                    <th>Type</th>
                     <th>Status</th>
-                    <th>Date</th>
-                    <th style="width: 150px">Actions</th>
+                    <th>Request Date</th>
+                    <th class="text-end" style="min-width: 100px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
+                <!-- Mock Item 1 -->
                 <tr>
-                    <td>1.</td>
-                    <td>John Doe</td>
-                    <td>AWS Certified Solutions Architect</td>
-                    <td><span class="badge text-bg-warning">Pending</span></td>
-                    <td>2023-10-01</td>
+                    <td><span class="text-muted fw-mono">REQ-1042</span></td>
                     <td>
-                        <a href="#" class="btn btn-sm btn-info">View</a>
-                        <a href="#" class="btn btn-sm btn-success">Approve</a>
+                        <div class="d-flex flex-column">
+                            <span class="fw-bold">John Doe</span>
+                            <small class="text-muted" style="font-size: 0.75rem;">EMP-056</small>
+                        </div>
+                    </td>
+                    <td>Michael Scott</td>
+                    <td>ACI</td>
+                    <td>Concrete Field Testing Grade I</td>
+                    <td><span class="fw-bold">Initial</span></td>
+                    <td><span class="badge text-bg-warning">Pending</span></td>
+                    <td>Oct 25, 2023</td>
+                    <td class="text-end">
+                        <a href="#" class="text-muted me-2" title="View details">
+                            <i data-lucide="eye" style="width: 16px;"></i>
+                        </a>
+                        <a href="#" class="text-muted me-2" title="Edit request">
+                            <i data-lucide="pencil" style="width: 16px;"></i>
+                        </a>
+                        <a href="#" class="text-danger" title="Delete request">
+                            <i data-lucide="trash-2" style="width: 16px;"></i>
+                        </a>
                     </td>
                 </tr>
+                
+                <!-- Mock Item 2 -->
                 <tr>
-                    <td>2.</td>
-                    <td>Jane Smith</td>
-                    <td>PMP Certification</td>
-                    <td><span class="badge text-bg-success">Approved</span></td>
-                    <td>2023-09-28</td>
+                    <td><span class="text-muted fw-mono">REQ-0985</span></td>
                     <td>
-                        <a href="#" class="btn btn-sm btn-info">View</a>
+                        <div class="d-flex flex-column">
+                            <span class="fw-bold">Sarah Connor</span>
+                            <small class="text-muted" style="font-size: 0.75rem;">EMP-102</small>
+                        </div>
+                    </td>
+                    <td>Peter Venkman</td>
+                    <td>OSHA</td>
+                    <td>OSHA 30-Hour Construction</td>
+                    <td><span class="fw-bold">Recertification</span></td>
+                    <td><span class="badge text-bg-success">Approved</span></td>
+                    <td>Oct 12, 2023</td>
+                    <td class="text-end">
+                        <a href="#" class="text-muted me-2" title="View details">
+                            <i data-lucide="eye" style="width: 16px;"></i>
+                        </a>
+                         <button class="btn btn-link p-0 text-muted disabled" style="opacity: 0.5;">
+                            <i data-lucide="pencil" style="width: 16px;"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                 <!-- Mock Item 3 -->
+                <tr>
+                    <td><span class="text-muted fw-mono">REQ-0920</span></td>
+                    <td>
+                        <div class="d-flex flex-column">
+                            <span class="fw-bold">Robert Paulson</span>
+                            <small class="text-muted" style="font-size: 0.75rem;">EMP-001</small>
+                        </div>
+                    </td>
+                    <td>Tyler Durden</td>
+                    <td>WACEL</td>
+                    <td>Soils & Aggregate Compaction</td>
+                    <td><span class="fw-bold">Reciprocity</span></td>
+                    <td><span class="badge text-bg-danger">Rejected</span></td>
+                    <td>Sep 30, 2023</td>
+                    <td class="text-end">
+                        <a href="#" class="text-muted me-2" title="View details">
+                            <i data-lucide="eye" style="width: 16px;"></i>
+                        </a>
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
+    
+
 </div>
+    <div class="card-footer bg-transparent border-top-0 py-3">
+        <!-- Pagination Mock -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination pagination-sm justify-content-end mb-0">
+                <li class="page-item disabled"><a class="page-link" href="#" aria-label="Previous">Previous</a></li>
+                <li class="page-item active"><a class="page-link shadow-sm" href="#">1</a></li>
+                <li class="page-item disabled"><a class="page-link text-muted" href="#">2</a></li>
+                <li class="page-item disabled"><a class="page-link text-muted" href="#">3</a></li>
+                <li class="page-item disabled"><a class="page-link" href="#" aria-label="Next">Next</a></li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const accordionId = 'newRequestAccordion';
+            const storageKey = 'accordionState_' + accordionId;
+            const collapseElement = document.getElementById('collapseNewRequest');
+            const toggleButton = document.querySelector('[data-bs-target="#collapseNewRequest"]');
+
+            // 1. Restore State on Load
+            const savedState = localStorage.getItem(storageKey);
+            
+            if (savedState === 'open') {
+                // Open it
+                collapseElement.classList.add('show');
+                toggleButton.classList.remove('collapsed');
+                toggleButton.setAttribute('aria-expanded', 'true');
+            } else {
+                // Ensure closed (default HTML might be open, so we enforce closed if not saved as open)
+                collapseElement.classList.remove('show');
+                toggleButton.classList.add('collapsed');
+                toggleButton.setAttribute('aria-expanded', 'false');
+            }
+            
+            // 2. Listen for Bootstrap Events to Save State
+            // Note: Bootstrap 5 toggle events bubble, but we target specific element
+            if (collapseElement) {
+                collapseElement.addEventListener('shown.bs.collapse', function () {
+                    localStorage.setItem(storageKey, 'open');
+                });
+
+                collapseElement.addEventListener('hidden.bs.collapse', function () {
+                    localStorage.setItem(storageKey, 'closed');
+                });
+            }
+        });
+    </script>
+}
