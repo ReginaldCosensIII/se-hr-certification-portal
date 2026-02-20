@@ -198,8 +198,7 @@ namespace SeHrCertificationPortal.Data
                     
                     employees.Add(new Employee 
                     { 
-                        DisplayName = $"{first} {last}", 
-                        Email = email 
+                        DisplayName = $"{first} {last}"
                     });
                 }
                 context.Employees.AddRange(employees);

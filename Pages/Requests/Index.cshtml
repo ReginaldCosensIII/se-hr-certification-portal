@@ -14,26 +14,29 @@
         </h2>
         <div id="collapseNewRequest" class="accordion-collapse collapse" aria-labelledby="headingNewRequest" data-bs-parent="#newRequestAccordion">
             <div class="accordion-body bg-white">
-                <form>
+                <form method="post">
                     <div class="row g-3">
                         <!-- Top Row: Employee, Date, Manager -->
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Employee Name</label>
-                            <input type="text" class="form-control" placeholder="Enter employee name">
+                            <input asp-for="EmployeeNameInput" list="employeeList" class="form-control" autocomplete="off" placeholder="Type a name..." />
+                            <datalist id="employeeList">
+                                @foreach(var emp in Model.Employees) { <option value="@emp.DisplayName"></option> }
+                            </datalist>
                         </div>
                          <div class="col-md-3">
                             <label class="form-label fw-bold">Request Date</label>
-                            <input type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")">
+                            <input type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" disabled>
                         </div>
                         <div class="col-md-5">
                              <label class="form-label fw-bold">Manager</label>
-                            <input type="text" class="form-control" placeholder="Enter manager name">
+                            <input asp-for="NewRequest.ManagerName" type="text" class="form-control" placeholder="Enter manager name">
                         </div>
 
                         <!-- Second Row: Agency & Cert -->
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Certification Agency</label>
-                            <select class="form-select" id="agencySelect">
+                            <select asp-for="NewRequest.AgencyId" class="form-select" id="agencySelect">
                                 <option value="" selected>Select Agency...</option>
                                 @foreach (var agency in Model.Agencies)
                                 {
@@ -43,7 +46,7 @@
                         </div>
                         <div class="col-md-8">
                             <label class="form-label fw-bold">Certification Desired</label>
-                             <select class="form-select" id="certificationSelect">
+                             <select asp-for="NewRequest.CertificationId" class="form-select" id="certificationSelect">
                                 <option value="" selected>-- Select an Agency First --</option>
                             </select>
                         </div>
@@ -53,23 +56,23 @@
                             <label class="form-label fw-bold d-block mb-3">Request Type</label>
                             <div class="d-flex flex-wrap gap-4">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="requestType" id="typeReview">
+                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="ReviewSession" id="typeReview">
                                     <label class="form-check-label" for="typeReview">Review Session</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="requestType" id="typeWritten">
+                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="WrittenExam" id="typeWritten">
                                     <label class="form-check-label" for="typeWritten">Written Exam</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="requestType" id="typePractical">
+                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="PracticalExam" id="typePractical">
                                     <label class="form-check-label" for="typePractical">Practical Exam</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="requestType" id="typeReciprocity">
+                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="Reciprocity" id="typeReciprocity">
                                     <label class="form-check-label" for="typeReciprocity">Reciprocity</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="requestType" id="typeRecert">
+                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="Recertification" id="typeRecert">
                                     <label class="form-check-label" for="typeRecert">Recertification</label>
                                 </div>
                             </div>
@@ -139,7 +142,6 @@
                     <td>
                         <div class="d-flex flex-column">
                             <span class="fw-bold">@item.Employee?.DisplayName</span>
-                            <small class="text-muted" style="font-size: 0.75rem;">@(item.Employee?.Email ?? "No Email")</small>
                         </div>
                     </td>
                     <td>@(item.ManagerName ?? "N/A")</td>

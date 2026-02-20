@@ -26,7 +26,6 @@ namespace SeHrCertificationPortal.Models
     {
         public int Id { get; set; }
         public required string DisplayName { get; set; }
-        public required string Email { get; set; }
         public ICollection<CertificationRequest> CertificationRequests { get; set; } = new List<CertificationRequest>();
     }
 
@@ -34,8 +33,8 @@ namespace SeHrCertificationPortal.Models
     {
         public int Id { get; set; }
         public DateTime RequestDate { get; set; } = DateTime.UtcNow;
-        public required string ManagerName { get; set; }
-        public RequestType RequestType { get; set; }
+        public string? ManagerName { get; set; }
+        public RequestType? RequestType { get; set; }
         public RequestStatus Status { get; set; } = RequestStatus.Pending;
         public string? CustomAgencyName { get; set; }
         public string? CustomCertificationName { get; set; }

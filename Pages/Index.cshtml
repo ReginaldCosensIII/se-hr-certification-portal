@@ -120,8 +120,6 @@
                     <td><span class="text-muted">REQ-@item.Id</span></td>
                     <td>
                         <span class="fw-bold">@item.Employee?.DisplayName</span>
-                        <br/>
-                        <small class="text-muted" style="font-size: 0.75rem;">@(item.Employee?.Email ?? "No Email")</small>
                     </td>
                     <td>@(item.ManagerName ?? "N/A")</td>
                     <td>@(item.Agency?.Abbreviation ?? item.CustomAgencyName ?? "Custom")</td>
