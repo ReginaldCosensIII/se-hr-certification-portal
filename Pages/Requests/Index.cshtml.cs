@@ -27,11 +27,17 @@ namespace SeHrCertificationPortal.Pages.Requests
     public int CurrentPage { get; set; } = 1;
     public int TotalPages { get; set; }
     public int TotalRecords { get; set; }
-    public const int PageSize = 25;
+    
+    [BindProperty(SupportsGet = true)]
+    public int PageSize { get; set; } = 25;
 
-    public async Task OnGetAsync(int p = 1)
+    public async Task OnGetAsync(int p = 1, int? pageSize = null)
     {
         CurrentPage = p < 1 ? 1 : p;
+        
+        // Restrict PageSize to valid options, default to 25
+        int[] validSizes = { 10, 15, 20, 25, 50 };
+        PageSize = pageSize.HasValue && validSizes.Contains(pageSize.Value) ? pageSize.Value : 25;
 
         var query = _context.CertificationRequests
             .Include(c => c.Agency)
