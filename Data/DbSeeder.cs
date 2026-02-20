@@ -7,7 +7,9 @@ namespace SeHrCertificationPortal.Data
     {
         public static async Task SeedAsync(ApplicationDbContext context)
         {
-            if (await context.Agencies.AnyAsync()) return;
+            // 1. Seed Agencies & Certifications
+            if (!await context.Agencies.AnyAsync())
+            {
 
             // 1. Seed Agencies
             var agencies = new List<Agency>
@@ -174,7 +176,49 @@ namespace SeHrCertificationPortal.Data
             }).ToList();
 
             context.Certifications.AddRange(certifications);
-            await context.SaveChangesAsync();
+                await context.SaveChangesAsync();
+            }
+
+            // 3. Seed Mock Employees & Requests (For UI Testing)
+            if (!await context.Employees.AnyAsync())
+            {
+                var alice = new Employee { DisplayName = "Alice Smith", Email = "alice@speceng.com" };
+                var bob = new Employee { DisplayName = "Bob Jones", Email = "bob@speceng.com" };
+                var charlie = new Employee { DisplayName = "Charlie Davis", Email = "charlie@speceng.com" };
+
+                var employees = new[] { alice, bob, charlie };
+                context.Employees.AddRange(employees);
+                await context.SaveChangesAsync(); // Generate Ids
+
+                // Fetch IDs for associations
+                var aci = await context.Agencies.FirstOrDefaultAsync(a => a.Abbreviation == "ACI");
+                var wacel = await context.Agencies.FirstOrDefaultAsync(a => a.Abbreviation == "WACEL");
+                var vdot = await context.Agencies.FirstOrDefaultAsync(a => a.Abbreviation == "VDOT");
+
+                var aciCert = await context.Certifications.FirstOrDefaultAsync(c => c.Name.Contains("Concrete Field Technician Grade I"));
+                var wacelCert = await context.Certifications.FirstOrDefaultAsync(c => c.Name.Contains("Structural Concrete"));
+                var vdotCert = await context.Certifications.FirstOrDefaultAsync(c => c.Name.Contains("Surface Treatment"));
+
+                var requests = new List<CertificationRequest>
+                {
+                    // Alice
+                    new CertificationRequest { EmployeeId = alice.Id, AgencyId = aci.Id, CertificationId = aciCert.Id, ManagerName = "Sarah Connor", RequestType = RequestType.WrittenExam, Status = RequestStatus.Approved, RequestDate = DateTime.UtcNow.AddDays(-20) },
+                    new CertificationRequest { EmployeeId = alice.Id, AgencyId = wacel.Id, CertificationId = wacelCert.Id, ManagerName = "Sarah Connor", RequestType = RequestType.PracticalExam, Status = RequestStatus.Pending, RequestDate = DateTime.UtcNow.AddDays(-1) },
+                    new CertificationRequest { EmployeeId = alice.Id, AgencyId = vdot.Id, CertificationId = vdotCert.Id, ManagerName = "Sarah Connor", RequestType = RequestType.Recertification, Status = RequestStatus.Pending, RequestDate = DateTime.UtcNow },
+
+                    // Bob
+                    new CertificationRequest { EmployeeId = bob.Id, AgencyId = vdot.Id, CertificationId = vdotCert.Id, ManagerName = "Kyle Reese", RequestType = RequestType.ReviewSession, Status = RequestStatus.Rejected, RequestDate = DateTime.UtcNow.AddDays(-5) },
+                    new CertificationRequest { EmployeeId = bob.Id, AgencyId = aci.Id, CertificationId = aciCert.Id, ManagerName = "Kyle Reese", RequestType = RequestType.WrittenExam, Status = RequestStatus.Approved, RequestDate = DateTime.UtcNow.AddDays(-50) },
+                    new CertificationRequest { EmployeeId = bob.Id, AgencyId = wacel.Id, CertificationId = wacelCert.Id, ManagerName = "Kyle Reese", RequestType = RequestType.Other, Status = RequestStatus.Pending, RequestDate = DateTime.UtcNow.AddDays(-2) },
+
+                    // Charlie (Custom)
+                    new CertificationRequest { EmployeeId = charlie.Id, CustomAgencyName = "Random Agency", CustomCertificationName = "Underwater Welding", ManagerName = "John Doe", RequestType = RequestType.Other, Status = RequestStatus.Pending, RequestDate = DateTime.UtcNow.AddDays(-0.5) },
+                    new CertificationRequest { EmployeeId = charlie.Id, AgencyId = aci.Id, CertificationId = aciCert.Id, ManagerName = "John Doe", RequestType = RequestType.Recertification, Status = RequestStatus.Approved, RequestDate = DateTime.UtcNow.AddDays(-100) }
+                };
+
+                context.CertificationRequests.AddRange(requests);
+                await context.SaveChangesAsync();
+            }
         }
 
         private static int DetermineAgencyId(string certName, Dictionary<string, int> agencyMap)
