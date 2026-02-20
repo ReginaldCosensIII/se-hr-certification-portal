@@ -24,13 +24,28 @@ namespace SeHrCertificationPortal.Pages.Requests
 
     public IList<SeHrCertificationPortal.Models.Employee> Employees { get; set; } = default!;
 
-    public async Task OnGetAsync()
+    public int CurrentPage { get; set; } = 1;
+    public int TotalPages { get; set; }
+    public int TotalRecords { get; set; }
+    public const int PageSize = 25;
+
+    public async Task OnGetAsync(int p = 1)
     {
-        CertificationRequest = await _context.CertificationRequests
+        CurrentPage = p < 1 ? 1 : p;
+
+        var query = _context.CertificationRequests
             .Include(c => c.Agency)
             .Include(c => c.Certification)
-            .Include(c => c.Employee)
+            .Include(c => c.Employee);
+
+        TotalRecords = await query.CountAsync();
+        TotalPages = (int)Math.Ceiling(TotalRecords / (double)PageSize);
+
+        CertificationRequest = await query
             .OrderByDescending(c => c.RequestDate)
+            .Skip((CurrentPage - 1) * PageSize)
+            .Take(PageSize)
+            .AsNoTracking()
             .ToListAsync();
 
         Agencies = await _context.Agencies
