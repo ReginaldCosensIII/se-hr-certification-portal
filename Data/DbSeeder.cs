@@ -179,42 +179,141 @@ namespace SeHrCertificationPortal.Data
                 await context.SaveChangesAsync();
             }
 
-            // 3. Seed Mock Employees & Requests (For UI Testing)
+            // 3. Seed Enterprise Mock Data (35 Employees, ~750 Requests)
             if (!await context.Employees.AnyAsync())
             {
-                var alice = new Employee { DisplayName = "Alice Smith", Email = "alice@speceng.com" };
-                var bob = new Employee { DisplayName = "Bob Jones", Email = "bob@speceng.com" };
-                var charlie = new Employee { DisplayName = "Charlie Davis", Email = "charlie@speceng.com" };
+                var random = new Random();
 
-                var employees = new[] { alice, bob, charlie };
-                context.Employees.AddRange(employees);
-                await context.SaveChangesAsync(); // Generate Ids
+                // --- Generate Employees ---
+                var firstNames = new[] { "James", "Mary", "Robert", "Patricia", "John", "Jennifer", "Michael", "Linda", "David", "Elizabeth", "William", "Barbara", "Richard", "Susan", "Joseph", "Jessica", "Thomas", "Sarah", "Charles", "Karen" };
+                var lastNames = new[] { "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin" };
 
-                // Fetch IDs for associations
-                var aci = await context.Agencies.FirstOrDefaultAsync(a => a.Abbreviation == "ACI");
-                var wacel = await context.Agencies.FirstOrDefaultAsync(a => a.Abbreviation == "WACEL");
-                var vdot = await context.Agencies.FirstOrDefaultAsync(a => a.Abbreviation == "VDOT");
-
-                var aciCert = await context.Certifications.FirstOrDefaultAsync(c => c.Name.Contains("Concrete Field Technician Grade I"));
-                var wacelCert = await context.Certifications.FirstOrDefaultAsync(c => c.Name.Contains("Structural Concrete"));
-                var vdotCert = await context.Certifications.FirstOrDefaultAsync(c => c.Name.Contains("Surface Treatment"));
-
-                var requests = new List<CertificationRequest>
+                var employees = new List<Employee>();
+                for (int i = 0; i < 35; i++)
                 {
-                    // Alice
-                    new CertificationRequest { EmployeeId = alice.Id, AgencyId = aci.Id, CertificationId = aciCert.Id, ManagerName = "Sarah Connor", RequestType = RequestType.WrittenExam, Status = RequestStatus.Approved, RequestDate = DateTime.UtcNow.AddDays(-20) },
-                    new CertificationRequest { EmployeeId = alice.Id, AgencyId = wacel.Id, CertificationId = wacelCert.Id, ManagerName = "Sarah Connor", RequestType = RequestType.PracticalExam, Status = RequestStatus.Pending, RequestDate = DateTime.UtcNow.AddDays(-1) },
-                    new CertificationRequest { EmployeeId = alice.Id, AgencyId = vdot.Id, CertificationId = vdotCert.Id, ManagerName = "Sarah Connor", RequestType = RequestType.Recertification, Status = RequestStatus.Pending, RequestDate = DateTime.UtcNow },
+                    var first = firstNames[random.Next(firstNames.Length)];
+                    var last = lastNames[random.Next(lastNames.Length)];
+                    // Ensure unique emails roughly
+                    var email = $"{first.ToLower()}.{last.ToLower()}{random.Next(10,99)}@specializedengineering.com";
+                    
+                    employees.Add(new Employee 
+                    { 
+                        DisplayName = $"{first} {last}", 
+                        Email = email 
+                    });
+                }
+                context.Employees.AddRange(employees);
+                await context.SaveChangesAsync(); // IDs generated
 
-                    // Bob
-                    new CertificationRequest { EmployeeId = bob.Id, AgencyId = vdot.Id, CertificationId = vdotCert.Id, ManagerName = "Kyle Reese", RequestType = RequestType.ReviewSession, Status = RequestStatus.Rejected, RequestDate = DateTime.UtcNow.AddDays(-5) },
-                    new CertificationRequest { EmployeeId = bob.Id, AgencyId = aci.Id, CertificationId = aciCert.Id, ManagerName = "Kyle Reese", RequestType = RequestType.WrittenExam, Status = RequestStatus.Approved, RequestDate = DateTime.UtcNow.AddDays(-50) },
-                    new CertificationRequest { EmployeeId = bob.Id, AgencyId = wacel.Id, CertificationId = wacelCert.Id, ManagerName = "Kyle Reese", RequestType = RequestType.Other, Status = RequestStatus.Pending, RequestDate = DateTime.UtcNow.AddDays(-2) },
+                // --- Fetch Catalog for Reference ---
+                var agencyIds = await context.Agencies.Select(a => a.Id).ToListAsync();
+                var certIds = await context.Certifications.Select(c => c.Id).ToListAsync();
+                var employeeIds = await context.Employees.Select(e => e.Id).ToListAsync();
 
-                    // Charlie (Custom)
-                    new CertificationRequest { EmployeeId = charlie.Id, CustomAgencyName = "Random Agency", CustomCertificationName = "Underwater Welding", ManagerName = "John Doe", RequestType = RequestType.Other, Status = RequestStatus.Pending, RequestDate = DateTime.UtcNow.AddDays(-0.5) },
-                    new CertificationRequest { EmployeeId = charlie.Id, AgencyId = aci.Id, CertificationId = aciCert.Id, ManagerName = "John Doe", RequestType = RequestType.Recertification, Status = RequestStatus.Approved, RequestDate = DateTime.UtcNow.AddDays(-100) }
-                };
+                var managers = new[] { "Sarah Connor", "Kyle Reese", "John Doe", "Ellen Ripley", "Carter Burke" };
+                var requests = new List<CertificationRequest>();
+
+                // --- Generate 750 Certification Requests ---
+                for (int i = 0; i < 750; i++)
+                {
+                    // Random Date (Last 10 years)
+                    var daysBack = random.Next(0, 3650);
+                    var requestDate = DateTime.UtcNow.AddDays(-daysBack);
+
+                    // Employee & Manager
+                    var empId = employeeIds[random.Next(employeeIds.Count)];
+                    var manager = managers[random.Next(managers.Length)];
+
+                    // Request Data
+                    int? agencyId = null;
+                    int? certId = null;
+                    string? customAgency = null;
+                    string? customCert = null;
+
+                    // 10% Custom, 90% Catalog
+                    if (random.NextDouble() < 0.10) 
+                    {
+                        var customAgencies = new[] { "Maryland Dept of Environment", "Hagerstown Community College", "FEMA", "Red Cross" };
+                        var customCerts = new[] { "Advanced Safety", "Water Quality", "First Aid", "Drone Pilot" };
+                        customAgency = customAgencies[random.Next(customAgencies.Length)];
+                        customCert = customCerts[random.Next(customCerts.Length)];
+                    }
+                    else
+                    {
+                        if (agencyIds.Any()) agencyId = agencyIds[random.Next(agencyIds.Count)];
+                        // Ideally pick a cert that matches the agency, but for stress testing random is okay 
+                        // or we can fetch the map. Let's filter certs by agency to be realistic if possible.
+                        // For speed in seeder, we'll just pick a random cert, and assume the agency link 
+                        // in the certification table is the source of truth, but here we set both.
+                        // Let's improve: Pick a random CertID, then look up its AgencyID? 
+                        // That requires loading the whole map. 
+                        // Simplified approach for speed as per prompt "randomly pick a valid AgencyId and CertificationId":
+                        // To be "valid", let's load Cert objects with AgencyId.
+                    }
+
+                    // Re-fetching Certs with AgencyId to ensure consistency
+                    // (Done efficiently outside loop below)
+                }
+                
+                // Optimized Loop with correct relational data
+                var certsWithAgency = await context.Certifications.Select(c => new { c.Id, c.AgencyId }).ToListAsync();
+
+                requests.Clear(); // Restart loop with better data
+                for (int i = 0; i < 750; i++)
+                {
+                     // Random Date (Last 10 years)
+                    var daysBack = random.Next(0, 3650);
+                    var requestDate = DateTime.UtcNow.AddDays(-daysBack);
+
+                     // Status Logic
+                    RequestStatus status;
+                    bool isOlderThan60Days = daysBack > 60;
+                    if (isOlderThan60Days)
+                    {
+                        // 90% Approved, 10% Rejected
+                        status = random.NextDouble() < 0.90 ? RequestStatus.Approved : RequestStatus.Rejected;
+                    }
+                    else
+                    {
+                        // Recent: Mix of Pending, Approved, Rejected
+                        var roll = random.Next(3);
+                        status = roll == 0 ? RequestStatus.Pending : (roll == 1 ? RequestStatus.Approved : RequestStatus.Rejected);
+                    }
+
+                    // Request Type
+                    var requestType = (RequestType)random.Next(0, 6); // Enum has ~6 values
+
+                    var empId = employeeIds[random.Next(employeeIds.Count)];
+                    var manager = managers[random.Next(managers.Length)];
+
+                    var req = new CertificationRequest
+                    {
+                        EmployeeId = empId,
+                        ManagerName = manager,
+                        RequestDate = requestDate,
+                        Status = status,
+                        RequestType = requestType
+                    };
+
+                    // 10% Custom
+                    if (random.NextDouble() < 0.10)
+                    {
+                        req.CustomAgencyName = "External Training Provider"; 
+                        req.CustomCertificationName = "Specialized Workshop";
+                         // Add varitey
+                        var customAgencies = new[] { "Maryland Dept of Environment", "Hagerstown Community College", "FEMA", "Red Cross" };
+                        req.CustomAgencyName = customAgencies[random.Next(customAgencies.Length)];
+                    }
+                    else if (certsWithAgency.Any())
+                    {
+                        // Pick random valid cert
+                        var certData = certsWithAgency[random.Next(certsWithAgency.Count)];
+                        req.CertificationId = certData.Id;
+                        req.AgencyId = certData.AgencyId;
+                    }
+
+                    requests.Add(req);
+                }
 
                 context.CertificationRequests.AddRange(requests);
                 await context.SaveChangesAsync();
