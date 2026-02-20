@@ -33,8 +33,8 @@
                         <!-- Second Row: Agency & Cert -->
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Certification Agency</label>
-                            <select class="form-select">
-                                <option selected>Select Agency...</option>
+                            <select class="form-select" id="agencySelect">
+                                <option value="" selected>Select Agency...</option>
                                 @foreach (var agency in Model.Agencies)
                                 {
                                     <option value="@agency.Id">@agency.Abbreviation</option>
@@ -43,10 +43,8 @@
                         </div>
                         <div class="col-md-8">
                             <label class="form-label fw-bold">Certification Desired</label>
-                             <select class="form-select">
-                                <option selected>Select Certification...</option>
-                                <option value="1">Concrete Field Testing Grade I</option>
-                                <option value="2">Soils & Aggregate Compaction</option>
+                             <select class="form-select" id="certificationSelect">
+                                <option value="" selected>-- Select an Agency First --</option>
                             </select>
                         </div>
 
@@ -231,5 +229,62 @@
                 });
             }
         });
+
+        // 3. Handle AJAX Cascading Dropdown for Certifications
+        const agencySelect = document.getElementById('agencySelect');
+        const certSelect = document.getElementById('certificationSelect');
+
+        if (agencySelect && certSelect) {
+            agencySelect.addEventListener('change', function () {
+                const agencyId = this.value;
+
+                // Clear current options
+                certSelect.innerHTML = '';
+
+                if (!agencyId) {
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = '-- Select an Agency First --';
+                    certSelect.appendChild(defaultOption);
+                    return;
+                }
+
+                // Show loading state
+                const loadingOption = document.createElement('option');
+                loadingOption.value = '';
+                loadingOption.textContent = 'Loading certifications...';
+                certSelect.appendChild(loadingOption);
+
+                // Fetch new certifications
+                fetch(`?handler=CertificationsByAgency&agencyId=${agencyId}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.json();
+                    })
+                    .then(data => {
+                        certSelect.innerHTML = ''; // Clear loading
+                        
+                        const defaultOption = document.createElement('option');
+                        defaultOption.value = '';
+                        defaultOption.textContent = 'Select Certification...';
+                        certSelect.appendChild(defaultOption);
+
+                        data.forEach(cert => {
+                            const option = document.createElement('option');
+                            option.value = cert.id;
+                            option.textContent = cert.name;
+                            certSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching certifications:', error);
+                        certSelect.innerHTML = '';
+                        const errorOption = document.createElement('option');
+                        errorOption.value = '';
+                        errorOption.textContent = '-- Error loading certifications --';
+                        certSelect.appendChild(errorOption);
+                    });
+            });
+        }
     </script>
 }

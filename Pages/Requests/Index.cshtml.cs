@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,6 +29,16 @@ namespace SeHrCertificationPortal.Pages.Requests
             .Where(a => a.IsActive)
             .OrderBy(a => a.Abbreviation)
             .ToListAsync();
+    }
+
+    public IActionResult OnGetCertificationsByAgency(int agencyId)
+    {
+        var certs = _context.Certifications
+            .Where(c => c.AgencyId == agencyId && c.IsActive)
+            .OrderBy(c => c.Name)
+            .Select(c => new { id = c.Id, name = c.Name })
+            .ToList();
+        return new JsonResult(certs);
     }
     }
 }
