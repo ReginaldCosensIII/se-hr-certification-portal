@@ -250,11 +250,9 @@
             <div class="modal-dialog" role="document">
                 <form method="post" asp-page-handler="MarkPassed">
                     <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Confirm Certification Passed</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true"><i data-lucide="x"></i></span>
-                            </button>
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title fw-bold">Confirm Certification Passed</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <input type="hidden" name="id" value="@item.Id" />
@@ -303,9 +301,7 @@
                     <div class="modal-content">
                         <div class="modal-header border-0 pb-0">
                             <h5 class="modal-title fw-bold" id="editModalLabel-@item.Id">Edit Request: @item.Employee?.DisplayName</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true"><i data-lucide="x"></i></span>
-                            </button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <input type="hidden" name="id" value="@item.Id" />
