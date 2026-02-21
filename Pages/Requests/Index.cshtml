@@ -136,7 +136,7 @@
                     <th>Type</th>
                     <th>Status</th>
                     <th>Request Date</th>
-                    <th class="text-end" style="min-width: 100px;">Actions</th>
+                    <th class="text-center" style="min-width: 100px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -175,7 +175,7 @@
                         }
                     </td>
                     <td>@item.RequestDate.ToString("MMM dd, yyyy")</td>
-                    <td class="text-end border-start">
+                    <td class="text-center border-start">
                         <form method="post" asp-page-handler="UpdateStatus" class="d-inline">
                             <input type="hidden" name="id" value="@item.Id" />
                             <input type="hidden" name="p" value="@Model.CurrentPage" />
@@ -199,42 +199,6 @@
                                 </button>
                             }
                         </form>
-
-                        <!-- Pass Modal -->
-                        <div class="modal fade text-start" id="passModal-@item.Id" tabindex="-1" role="dialog" aria-labelledby="passModalLabel-@item.Id" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <form method="post" asp-page-handler="MarkPassed">
-                                    <div class="modal-content">
-                                        <div class="modal-header border-0 pb-0">
-                                            <h5 class="modal-title fw-bold" id="passModalLabel-@item.Id">Confirm Certification Passed</h5>
-                                            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <input type="hidden" name="id" value="@item.Id" />
-                                            <input type="hidden" name="p" value="@Model.CurrentPage" />
-                                            <input type="hidden" name="pageSize" value="@Model.PageSize" />
-                                            <p class="text-muted mb-4">Set the expiration date for <strong>@item.Employee?.DisplayName</strong>'s <strong>@(item.Certification?.Name ?? item.CustomCertificationName)</strong> certification.</p>
-                                            <div class="mb-3">
-                                                <label class="form-label fw-bold">Expiration Date</label>
-                                                @{
-                                                    int validityMonths = item.Certification?.ValidityPeriodMonths ?? 36;
-                                                    string defaultExpDateStr = validityMonths > 0 ? DateTime.Today.AddMonths(validityMonths).ToString("yyyy-MM-dd") : "";
-                                                }
-                                                <input type="date" name="expirationDate" class="form-control" value="@defaultExpDateStr" @(validityMonths > 0 ? "required" : "") />
-                                                @if (validityMonths == 0)
-                                                {
-                                                    <div class="form-text text-muted">This certification is marked as permanent. You may leave the date blank.</div>
-                                                }
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer border-0 pt-0">
-                                            <button type="button" class="btn btn-light fw-bold" data-dismiss="modal">Cancel</button>
-                                            <button type="submit" class="btn btn-success text-white fw-bold">Save & Mark Passed</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
                     </td>
                 </tr>
             }
@@ -273,6 +237,48 @@
         </nav>
     </div>
 </div>
+
+@foreach (var item in Model.CertificationRequest)
+{
+    if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Approved)
+    {
+        <!-- Pass Modal -->
+        <div class="modal fade text-start" id="passModal-@item.Id" tabindex="-1" role="dialog" aria-labelledby="passModalLabel-@item.Id" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <form method="post" asp-page-handler="MarkPassed">
+                    <div class="modal-content">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title fw-bold" id="passModalLabel-@item.Id">Confirm Certification Passed</h5>
+                            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="hidden" name="p" value="@Model.CurrentPage" />
+                            <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                            <p class="text-muted mb-4">Set the expiration date for <strong>@item.Employee?.DisplayName</strong>'s <strong>@(item.Certification?.Name ?? item.CustomCertificationName)</strong> certification.</p>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Expiration Date</label>
+                                @{
+                                    int validityMonths = item.Certification?.ValidityPeriodMonths ?? 36;
+                                    string defaultExpDateStr = validityMonths > 0 ? DateTime.Today.AddMonths(validityMonths).ToString("yyyy-MM-dd") : "";
+                                }
+                                <input type="date" name="expirationDate" class="form-control" value="@defaultExpDateStr" @(validityMonths > 0 ? "required" : "") />
+                                @if (validityMonths == 0)
+                                {
+                                    <div class="form-text text-muted">This certification is marked as permanent. You may leave the date blank.</div>
+                                }
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-light fw-bold" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-success text-white fw-bold">Save & Mark Passed</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+}
 
 @section Scripts {
     <!-- Select2 JS Dependencies -->
