@@ -159,7 +159,15 @@
                         }
                         else if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Approved)
                         {
-                            <span class="badge text-bg-success">Approved</span>
+                            <span class="badge text-bg-info text-white">Approved</span>
+                        }
+                        else if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Passed)
+                        {
+                            <span class="badge text-bg-success">Passed</span>
+                        }
+                        else if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Failed)
+                        {
+                            <span class="badge text-bg-dark">Failed</span>
                         }
                         else
                         {
@@ -167,16 +175,28 @@
                         }
                     </td>
                     <td>@item.RequestDate.ToString("MMM dd, yyyy")</td>
-                    <td class="text-end">
-                        <a href="#" class="text-muted me-2" title="View details">
-                            <i data-lucide="eye" style="width: 16px;"></i>
-                        </a>
-                        <a href="#" class="text-muted me-2" title="Edit request">
-                            <i data-lucide="pencil" style="width: 16px;"></i>
-                        </a>
-                        <a href="#" class="text-danger" title="Delete request">
-                            <i data-lucide="trash-2" style="width: 16px;"></i>
-                        </a>
+                    <td class="text-end border-start">
+                        <form method="post" asp-page-handler="UpdateStatus" class="d-inline">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            @if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Pending)
+                            {
+                                <button type="submit" name="newStatus" value="@SeHrCertificationPortal.Models.RequestStatus.Approved" class="btn btn-sm btn-link text-success p-0 me-2" title="Approve Request">
+                                    <i data-lucide="check" style="width: 18px;"></i>
+                                </button>
+                                <button type="submit" name="newStatus" value="@SeHrCertificationPortal.Models.RequestStatus.Rejected" class="btn btn-sm btn-link text-danger p-0" title="Reject Request">
+                                    <i data-lucide="x" style="width: 18px;"></i>
+                                </button>
+                            }
+                            else if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Approved)
+                            {
+                                <button type="submit" name="newStatus" value="@SeHrCertificationPortal.Models.RequestStatus.Passed" class="btn btn-sm btn-link text-success p-0 me-2" title="Mark as Passed">
+                                    <i data-lucide="award" style="width: 18px;"></i>
+                                </button>
+                                <button type="submit" name="newStatus" value="@SeHrCertificationPortal.Models.RequestStatus.Failed" class="btn btn-sm btn-link text-warning p-0" title="Mark as Failed">
+                                    <i data-lucide="user-x" style="width: 18px;"></i>
+                                </button>
+                            }
+                        </form>
                     </td>
                 </tr>
             }

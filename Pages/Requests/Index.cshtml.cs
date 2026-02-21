@@ -74,6 +74,17 @@ namespace SeHrCertificationPortal.Pages.Requests
         return new JsonResult(certs);
     }
 
+    public async Task<IActionResult> OnPostUpdateStatusAsync(int id, SeHrCertificationPortal.Models.RequestStatus newStatus)
+    {
+        var request = await _context.CertificationRequests.FindAsync(id);
+        if (request == null) return NotFound();
+
+        request.Status = newStatus;
+        await _context.SaveChangesAsync();
+
+        return RedirectToPage(new { p = CurrentPage, pageSize = PageSize });
+    }
+
     public async Task<IActionResult> OnPostAsync()
     {
         if (string.IsNullOrWhiteSpace(EmployeeNameInput)) return RedirectToPage();

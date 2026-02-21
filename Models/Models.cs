@@ -1,7 +1,7 @@
 namespace SeHrCertificationPortal.Models
 {
     public enum RequestType { ReviewSession, WrittenExam, PracticalExam, Reciprocity, Recertification, Other }
-    public enum RequestStatus { Pending, Approved, Rejected }
+    public enum RequestStatus { Pending, Approved, Rejected, Passed, Failed }
 
     public class Agency
     {
@@ -36,6 +36,7 @@ namespace SeHrCertificationPortal.Models
         public string? ManagerName { get; set; }
         public RequestType? RequestType { get; set; }
         public RequestStatus Status { get; set; } = RequestStatus.Pending;
+        public DateTime? ExpirationDate { get; set; }
         public string? CustomAgencyName { get; set; }
         public string? CustomCertificationName { get; set; }
         public int EmployeeId { get; set; }
