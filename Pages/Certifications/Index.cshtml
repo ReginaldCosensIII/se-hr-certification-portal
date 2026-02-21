@@ -150,25 +150,24 @@
                 </tr>
             </thead>
             <tbody>
-            @foreach (var item in Model.Certification) {
+            @foreach (var item in Model.ActiveCertifications) {
                 <tr>
-                    <td><span class="text-muted fw-mono">#(ID:@item.Id)</span></td>
+                    <td><span class="text-muted fw-mono">#(ID:@item.Employee?.Id)</span></td>
                     <td>
-                        <span class="fw-bold">--</span> <!-- Cert List doesn't link to Employee usually, it's a catalog -->
+                        <span class="fw-bold">@item.Employee?.DisplayName</span>
                     </td>
-                    <td>@item.Agency?.Abbreviation</td>
-                    <td>@item.Name</td>
+                    <td>@(item.Certification?.Agency?.Abbreviation ?? item.CustomAgencyName)</td>
+                    <td>@(item.Certification?.Name ?? item.CustomCertificationName)</td>
                     <td>
-                        @if (item.IsActive)
-                        {
-                            <span class="badge text-bg-success">Active</span>
-                        }
-                        else
-                        {
-                            <span class="badge text-bg-danger">Inactive</span>
+                        <span class="badge text-bg-success">Active</span>
+                    </td>
+                    <td>
+                        @if(item.ExpirationDate.HasValue) {
+                            <text>@item.ExpirationDate.Value.ToString("MMM dd, yyyy")</text>
+                        } else {
+                            <text>Permanent</text>
                         }
                     </td>
-                    <td>@(item.ValidityPeriodMonths) Months</td>
                     <td class="text-end">
                         <a href="#" class="text-muted me-2" title="View details">
                             <i data-lucide="eye" style="width: 16px;"></i>

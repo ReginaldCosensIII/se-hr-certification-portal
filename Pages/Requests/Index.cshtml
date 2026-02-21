@@ -178,6 +178,8 @@
                     <td class="text-end border-start">
                         <form method="post" asp-page-handler="UpdateStatus" class="d-inline">
                             <input type="hidden" name="id" value="@item.Id" />
+                            <input type="hidden" name="p" value="@Model.CurrentPage" />
+                            <input type="hidden" name="pageSize" value="@Model.PageSize" />
                             @if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Pending)
                             {
                                 <button type="submit" name="newStatus" value="@SeHrCertificationPortal.Models.RequestStatus.Approved" class="btn btn-sm btn-link text-success p-0 me-2" title="Approve Request">
@@ -189,7 +191,7 @@
                             }
                             else if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Approved)
                             {
-                                <button type="submit" name="newStatus" value="@SeHrCertificationPortal.Models.RequestStatus.Passed" class="btn btn-sm btn-link text-success p-0 me-2" title="Mark as Passed">
+                                <button type="button" class="btn btn-sm btn-link text-success p-0 me-2" data-toggle="modal" data-target="#passModal-@item.Id" title="Mark as Passed">
                                     <i data-lucide="award" style="width: 18px;"></i>
                                 </button>
                                 <button type="submit" name="newStatus" value="@SeHrCertificationPortal.Models.RequestStatus.Failed" class="btn btn-sm btn-link text-warning p-0" title="Mark as Failed">
@@ -197,6 +199,42 @@
                                 </button>
                             }
                         </form>
+
+                        <!-- Pass Modal -->
+                        <div class="modal fade text-start" id="passModal-@item.Id" tabindex="-1" role="dialog" aria-labelledby="passModalLabel-@item.Id" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <form method="post" asp-page-handler="MarkPassed">
+                                    <div class="modal-content">
+                                        <div class="modal-header border-0 pb-0">
+                                            <h5 class="modal-title fw-bold" id="passModalLabel-@item.Id">Confirm Certification Passed</h5>
+                                            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <input type="hidden" name="p" value="@Model.CurrentPage" />
+                                            <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                                            <p class="text-muted mb-4">Set the expiration date for <strong>@item.Employee?.DisplayName</strong>'s <strong>@(item.Certification?.Name ?? item.CustomCertificationName)</strong> certification.</p>
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">Expiration Date</label>
+                                                @{
+                                                    int validityMonths = item.Certification?.ValidityPeriodMonths ?? 36;
+                                                    string defaultExpDateStr = validityMonths > 0 ? DateTime.Today.AddMonths(validityMonths).ToString("yyyy-MM-dd") : "";
+                                                }
+                                                <input type="date" name="expirationDate" class="form-control" value="@defaultExpDateStr" @(validityMonths > 0 ? "required" : "") />
+                                                @if (validityMonths == 0)
+                                                {
+                                                    <div class="form-text text-muted">This certification is marked as permanent. You may leave the date blank.</div>
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer border-0 pt-0">
+                                            <button type="button" class="btn btn-light fw-bold" data-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-success text-white fw-bold">Save & Mark Passed</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </td>
                 </tr>
             }
