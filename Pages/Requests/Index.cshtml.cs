@@ -114,7 +114,7 @@ namespace SeHrCertificationPortal.Pages.Requests
 
         // 2. Map and Save Request
         NewRequest.EmployeeId = employee.Id;
-        NewRequest.RequestDate = DateTime.UtcNow;
+        NewRequest.RequestDate = DateTime.SpecifyKind(NewRequest.RequestDate, DateTimeKind.Utc);
         NewRequest.Status = SeHrCertificationPortal.Models.RequestStatus.Pending;
 
         // Clean custom fields if standard agency is selected
@@ -128,6 +128,21 @@ namespace SeHrCertificationPortal.Pages.Requests
         await _context.SaveChangesAsync();
 
         return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostEditRequestAsync(int id, string managerName, SeHrCertificationPortal.Models.RequestType requestType, DateTime requestDate, int agencyId, int certificationId, int p = 1, int pageSize = 25)
+    {
+        var request = await _context.CertificationRequests.FindAsync(id);
+        if (request != null)
+        {
+            request.ManagerName = managerName;
+            request.RequestType = requestType;
+            request.RequestDate = DateTime.SpecifyKind(requestDate, DateTimeKind.Utc);
+            request.AgencyId = agencyId;
+            request.CertificationId = certificationId;
+            await _context.SaveChangesAsync();
+        }
+        return RedirectToPage(new { p, pageSize });
     }
     }
 }

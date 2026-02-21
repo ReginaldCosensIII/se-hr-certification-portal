@@ -29,8 +29,8 @@
                             </select>
                         </div>
                          <div class="col-md-3">
-                            <label class="form-label fw-bold">Request Date</label>
-                            <input type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" disabled>
+                             <label class="form-label fw-bold">Request Date</label>
+                            <input type="date" asp-for="NewRequest.RequestDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
                         </div>
                         <div class="col-md-5">
                              <label class="form-label fw-bold">Manager</label>
@@ -197,6 +197,9 @@
                                 <button type="submit" name="newStatus" value="@SeHrCertificationPortal.Models.RequestStatus.Failed" class="btn btn-sm btn-link text-warning p-0" title="Mark as Failed">
                                     <i data-lucide="user-x" style="width: 18px;"></i>
                                 </button>
+                                <button type="button" class="btn btn-xs btn-primary ms-2" onclick="$('#editModal-@item.Id').modal('show');" title="Edit Request">
+                                    <i data-lucide="edit-2" style="width: 14px;"></i>
+                                </button>
                             }
                         </form>
                     </td>
@@ -249,8 +252,8 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title">Confirm Certification Passed</h5>
-                            <button type="button" class="close" onclick="$(this).closest('.modal').modal('hide');" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
+                            <button type="button" class="close ml-auto" onclick="$(this).closest('.modal').modal('hide');" aria-label="Close">
+                                <i data-lucide="x"></i>
                             </button>
                         </div>
                         <div class="modal-body">
@@ -292,6 +295,65 @@
             </div>
         </div>
     }
+
+    <!-- Edit Modal -->
+        <div class="modal fade text-start" id="editModal-@item.Id" tabindex="-1" role="dialog" aria-labelledby="editModalLabel-@item.Id" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <form method="post" asp-page-handler="EditRequest">
+                    <div class="modal-content">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title fw-bold" id="editModalLabel-@item.Id">Edit Request: @item.Employee?.DisplayName</h5>
+                            <button type="button" class="close ml-auto" onclick="$(this).closest('.modal').modal('hide');" aria-label="Close">
+                                <i data-lucide="x"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="hidden" name="p" value="@Model.CurrentPage" />
+                            <input type="hidden" name="pageSize" value="@Model.PageSize" />
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Manager Name</label>
+                                <input type="text" name="managerName" class="form-control" value="@item.ManagerName" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Request Type</label>
+                                <select name="requestType" class="form-control" asp-items="@Html.GetEnumSelectList<SeHrCertificationPortal.Models.RequestType>()">
+                                    <option value="@((int)(item.RequestType ?? SeHrCertificationPortal.Models.RequestType.Other))" selected>@item.RequestType</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Request Date</label>
+                                <input type="date" name="requestDate" class="form-control" value="@item.RequestDate.ToString("yyyy-MM-dd")" required />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Agency</label>
+                                <select name="agencyId" class="form-control edit-agency-select" required>
+                                    @foreach(var agency in Model.Agencies) {
+                                        if(agency.Id == item.AgencyId) {
+                                            <option value="@agency.Id" selected>@agency.Abbreviation</option>
+                                        } else {
+                                            <option value="@agency.Id">@agency.Abbreviation</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Certification</label>
+                                <!-- The scoped javascript will target this edit-cert-select dynamically -->
+                                <select name="certificationId" class="form-control edit-cert-select" required>
+                                    <option value="@item.CertificationId" selected>@item.Certification?.Name</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-light fw-bold" onclick="$(this).closest('.modal').modal('hide');">Cancel</button>
+                            <button type="submit" class="btn btn-primary text-white fw-bold">Save Changes</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
 }
 
 @section Scripts {
@@ -392,6 +454,28 @@
 
                 targetExp.val(yyyy + '-' + mm + '-' + dd);
             }
+        });
+
+        $('.edit-agency-select').on('change', function () {
+            var agencyId = $(this).val();
+            var certSelect = $(this).closest('.modal-body').find('.edit-cert-select');
+
+            certSelect.empty().append('<option value="">Loading...</option>');
+
+            if (!agencyId) return;
+
+            fetch('?handler=CertificationsByAgency&agencyId=' + agencyId)
+                .then(response => response.json())
+                .then(data => {
+                    certSelect.empty().append('<option value="">-- Select a Certification --</option>');
+                    data.forEach(function (cert) {
+                        certSelect.append(new Option(cert.name, cert.id));
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    certSelect.empty().append('<option value="">-- Error --</option>');
+                });
         });
     </script>
 }
