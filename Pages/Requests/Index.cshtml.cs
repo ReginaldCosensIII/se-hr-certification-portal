@@ -91,7 +91,7 @@ namespace SeHrCertificationPortal.Pages.Requests
         if (request != null)
         {
             request.Status = SeHrCertificationPortal.Models.RequestStatus.Passed;
-            request.ExpirationDate = expirationDate;
+            request.ExpirationDate = DateTime.SpecifyKind(expirationDate, DateTimeKind.Utc);
             await _context.SaveChangesAsync();
         }
         return RedirectToPage(new { p, pageSize });
