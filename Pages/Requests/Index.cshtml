@@ -252,8 +252,8 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title">Confirm Certification Passed</h5>
-                            <button type="button" class="close" onclick="$(this).closest('.modal').modal('hide');" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true"><i data-lucide="x"></i></span>
                             </button>
                         </div>
                         <div class="modal-body">
@@ -303,8 +303,8 @@
                     <div class="modal-content">
                         <div class="modal-header border-0 pb-0">
                             <h5 class="modal-title fw-bold" id="editModalLabel-@item.Id">Edit Request: @item.Employee?.DisplayName</h5>
-                            <button type="button" class="close" onclick="$(this).closest('.modal').modal('hide');" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true"><i data-lucide="x"></i></span>
                             </button>
                         </div>
                         <div class="modal-body">
