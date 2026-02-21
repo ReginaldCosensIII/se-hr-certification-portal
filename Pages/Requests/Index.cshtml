@@ -84,7 +84,7 @@
                         
                         <!-- Submit Actions -->
                         <div class="col-12 mt-4 pt-3 border-top d-flex justify-content-end gap-2">
-                             <button type="button" class="btn btn-outline-brand">Reset</button>
+                             <button type="reset" class="btn btn-outline-brand" onclick="$('.select2').val(null).trigger('change');">Reset</button>
                              <button type="submit" class="btn btn-brand px-4 fw-bold">Submit Request</button>
                         </div>
                     </div>
@@ -102,23 +102,29 @@
             <div class="card-tools d-flex align-items-center gap-2">
                 <!-- Search & Filter -->
                 <form method="get" class="d-flex align-items-center gap-2">
+                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                    
                     <div class="input-group input-group-sm">
-                        <input type="text" name="SearchString" class="form-control" placeholder="Search..." style="max-width: 200px;">
+                        <input type="text" asp-for="SearchString" class="form-control" placeholder="Search..." style="max-width: 200px;">
                          <button class="btn btn-brand" type="submit">
                             <i data-lucide="search" class="text-white" style="width: 14px;"></i>
                         </button>
                     </div>
                     
-                    <select name="Status" class="form-select form-select-sm" style="width: 130px;">
+                    <select asp-for="StatusFilter" class="form-select form-select-sm" style="width: 130px;" asp-items="@Html.GetEnumSelectList<SeHrCertificationPortal.Models.RequestStatus>()">
                         <option value="">All Status</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Approved">Approved</option>
-                        <option value="Rejected">Rejected</option>
                     </select>
                     
                     <button type="submit" class="btn btn-brand btn-sm d-flex align-items-center">
                         <i data-lucide="filter" class="me-1" style="width: 14px;"></i> Filter
                     </button>
+
+                    @if (!string.IsNullOrEmpty(Model.SearchString) || Model.StatusFilter.HasValue)
+                    {
+                        <a asp-page="./Index" class="btn btn-outline-secondary btn-sm d-flex align-items-center" title="Clear Filters">
+                            <i data-lucide="x" style="width: 14px;"></i>
+                        </a>
+                    }
                 </form>
             </div>
         </div>
@@ -212,7 +218,7 @@
         <nav aria-label="Page navigation" class="d-flex justify-content-end align-items-center gap-3">
             <label class="mb-0 text-muted small">
                 Show 
-                <select class="form-select form-select-sm d-inline-block w-auto mx-1 shadow-sm" onchange="window.location.href='?p=1&pageSize=' + this.value">
+                <select class="form-select form-select-sm d-inline-block w-auto mx-1 shadow-sm" onchange="window.location.href='?p=1&pageSize=' + this.value + '&SearchString=@Model.SearchString&StatusFilter=@Model.StatusFilter'">
                     @foreach(var size in new[] { 10, 15, 20, 25, 50 })
                     {
                         if (size == Model.PageSize)
@@ -228,13 +234,13 @@
             </label>
             <ul class="pagination pagination-sm mb-0">
                 <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
-                    <a class="page-link shadow-sm" asp-page="./Index" asp-route-p="@(Model.CurrentPage - 1)" asp-route-pageSize="@Model.PageSize">&laquo;</a>
+                    <a class="page-link shadow-sm" asp-page="./Index" asp-route-p="@(Model.CurrentPage - 1)" asp-route-pageSize="@Model.PageSize" asp-route-SearchString="@Model.SearchString" asp-route-StatusFilter="@Model.StatusFilter">&laquo;</a>
                 </li>
                 <li class="page-item active">
                     <span class="page-link shadow-sm border-brand bg-brand text-white">@Model.CurrentPage / @Math.Max(1, Model.TotalPages)</span>
                 </li>
                 <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
-                    <a class="page-link shadow-sm" asp-page="./Index" asp-route-p="@(Model.CurrentPage + 1)" asp-route-pageSize="@Model.PageSize">&raquo;</a>
+                    <a class="page-link shadow-sm" asp-page="./Index" asp-route-p="@(Model.CurrentPage + 1)" asp-route-pageSize="@Model.PageSize" asp-route-SearchString="@Model.SearchString" asp-route-StatusFilter="@Model.StatusFilter">&raquo;</a>
                 </li>
             </ul>
         </nav>

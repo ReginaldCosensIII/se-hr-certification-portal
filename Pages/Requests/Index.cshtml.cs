@@ -31,6 +31,12 @@ namespace SeHrCertificationPortal.Pages.Requests
     [BindProperty(SupportsGet = true)]
     public int PageSize { get; set; } = 25;
 
+    [BindProperty(SupportsGet = true)]
+    public string? SearchString { get; set; }
+
+    [BindProperty(SupportsGet = true)]
+    public SeHrCertificationPortal.Models.RequestStatus? StatusFilter { get; set; }
+
     public async Task OnGetAsync(int p = 1, int? pageSize = null)
     {
         CurrentPage = p < 1 ? 1 : p;
@@ -42,7 +48,22 @@ namespace SeHrCertificationPortal.Pages.Requests
         var query = _context.CertificationRequests
             .Include(c => c.Agency)
             .Include(c => c.Certification)
-            .Include(c => c.Employee);
+            .Include(c => c.Employee)
+            .AsQueryable();
+
+        if (StatusFilter.HasValue)
+        {
+            query = query.Where(c => c.Status == StatusFilter.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(SearchString))
+        {
+            var searchLower = SearchString.ToLower();
+            query = query.Where(c => 
+                (c.Employee != null && c.Employee.DisplayName.ToLower().Contains(searchLower)) ||
+                (c.ManagerName != null && c.ManagerName.ToLower().Contains(searchLower)) ||
+                c.Id.ToString() == searchLower);
+        }
 
         TotalRecords = await query.CountAsync();
         TotalPages = (int)Math.Ceiling(TotalRecords / (double)PageSize);
