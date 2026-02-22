@@ -107,5 +107,26 @@ namespace SeHrCertificationPortal.Pages.Certifications
                 .AsNoTracking()
                 .ToListAsync();
         }
+
+        public async Task<IActionResult> OnGetEmployeeHistoryAsync(int employeeId)
+        {
+            var query = _context.CertificationRequests
+                .Where(c => c.EmployeeId == employeeId && c.Status == RequestStatus.Passed)
+                .Include(c => c.Agency)
+                .Include(c => c.Certification)
+                .AsNoTracking();
+
+            var rawData = await query.ToListAsync(); // Materialize to memory first
+
+            var history = rawData.Select(r => new { // Apply C# formatting safely
+                agency = r.Agency != null ? r.Agency.Abbreviation : r.CustomAgencyName,
+                certification = r.Certification != null ? r.Certification.Name : r.CustomCertificationName,
+                datePassed = r.RequestDate.ToString("MMM dd, yyyy"),
+                expirationDate = r.ExpirationDate.HasValue ? r.ExpirationDate.Value.ToString("MMM dd, yyyy") : "Permanent",
+                status = GetComputedStatus(r.ExpirationDate).ToString()
+            }).ToList();
+
+            return new JsonResult(history);
+        }
     }
 }

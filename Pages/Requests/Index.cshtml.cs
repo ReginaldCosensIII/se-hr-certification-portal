@@ -70,6 +70,7 @@ namespace SeHrCertificationPortal.Pages.Requests
 
         CertificationRequest = await query
             .OrderByDescending(c => c.RequestDate)
+            .ThenByDescending(c => c.Id)
             .Skip((CurrentPage - 1) * PageSize)
             .Take(PageSize)
             .AsNoTracking()
