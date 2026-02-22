@@ -284,10 +284,7 @@
                                     string defaultExpDateStr = validityMonths > 0 ? DateTime.Today.AddMonths(validityMonths).ToString("yyyy-MM-dd") : "";
                                 }
                                 <input type="date" name="expirationDate" class="form-control target-expiration" value="@defaultExpDateStr" @(validityMonths > 0 ? "required" : "") />
-                                @if (validityMonths == 0)
-                                {
-                                    <div class="form-text text-muted">This certification is marked as permanent. You may leave the date blank.</div>
-                                }
+                                <div class="form-text text-info fw-bold permanent-indicator d-none"><i data-lucide="infinity" class="me-1" style="width: 14px;"></i> Permanent / Lifetime Certification (No Expiration)</div>
                             </div>
                         </div>
                         <div class="modal-footer border-0 pt-0">
@@ -441,20 +438,31 @@
             // Scope the calculation to the specific modal that is currently open
             var modalBody = $(this).closest('.modal-body');
             var datePassedVal = modalBody.find('.date-passed').val();
-            var durationMonths = parseInt(modalBody.find('.duration-months').val()) || 0;
+            var durationMonths = parseInt(modalBody.find('.duration-months').val());
             var targetExp = modalBody.find('.target-expiration');
+            var indicator = modalBody.find('.permanent-indicator');
 
-            if (datePassedVal) {
-                var passedDate = new Date(datePassedVal);
-                // Add the months. JavaScript Date handles year rollovers automatically.
-                passedDate.setUTCMonth(passedDate.getUTCMonth() + durationMonths);
+            if (isNaN(durationMonths) || durationMonths === 0) {
+                targetExp.val('');
+                targetExp.removeAttr('required');
+                indicator.removeClass('d-none');
+                if(window.lucide) { window.lucide.createIcons(); }
+            } else {
+                targetExp.attr('required', true);
+                indicator.addClass('d-none');
+                
+                if (datePassedVal) {
+                    var passedDate = new Date(datePassedVal);
+                    // Add the months. JavaScript Date handles year rollovers automatically.
+                    passedDate.setUTCMonth(passedDate.getUTCMonth() + durationMonths);
 
-                // Format back to yyyy-MM-dd for the HTML input
-                var yyyy = passedDate.getUTCFullYear();
-                var mm = String(passedDate.getUTCMonth() + 1).padStart(2, '0');
-                var dd = String(passedDate.getUTCDate()).padStart(2, '0');
+                    // Format back to yyyy-MM-dd for the HTML input
+                    var yyyy = passedDate.getUTCFullYear();
+                    var mm = String(passedDate.getUTCMonth() + 1).padStart(2, '0');
+                    var dd = String(passedDate.getUTCDate()).padStart(2, '0');
 
-                targetExp.val(yyyy + '-' + mm + '-' + dd);
+                    targetExp.val(yyyy + '-' + mm + '-' + dd);
+                }
             }
         });
 
