@@ -6,3 +6,7 @@
 *.user
 *.suo
 *.lock.json
+
+# Agent and AI IDE specific files
+.agent/
+skills/
