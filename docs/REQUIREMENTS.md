@@ -118,3 +118,6 @@
 * **Description:** Implement a dynamic sorting capability across all data tables in the portal.
 * **Use Case:** Users need to sort Requests by Date, Employees by Name, or Certifications by Expiration Date.
 * **Implementation Notes:** Instead of writing custom sorting logic for every Razor Page, build a global service/helper class (e.g., passing `sortOrder` query parameters mapped to reflection/LINQ expressions) that can be easily plugged into any index page alongside the existing pagination logic.
+
+### 3. Expiring Soon Status Logic
+* **Description:** QA identified that certifications expiring on the current day still show as 'Active'. In the upcoming Notifications/Certifications phase, implement a global threshold calculation (e.g., < 30 days) to accurately apply an 'Expiring Soon' badge and status instead of just 'Active'.

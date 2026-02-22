@@ -121,7 +121,7 @@
 
                     @if (!string.IsNullOrEmpty(Model.SearchString) || Model.StatusFilter.HasValue)
                     {
-                        <a asp-page="./Index" class="btn btn-outline-secondary btn-sm d-flex align-items-center" title="Clear Filters">
+                        <a asp-page="./Index" class="btn btn-outline-brand btn-sm d-flex align-items-center" title="Clear Filters">
                             <i data-lucide="x" style="width: 14px;"></i>
                         </a>
                     }
@@ -203,10 +203,10 @@
                                 <button type="submit" name="newStatus" value="@SeHrCertificationPortal.Models.RequestStatus.Failed" class="btn btn-sm btn-link text-warning p-0" title="Mark as Failed">
                                     <i data-lucide="user-x" style="width: 18px;"></i>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-link text-primary p-0 ml-2" onclick="$('#editModal-@item.Id').modal('show');" title="Edit Request">
-                                    <i data-lucide="edit-2" style="width: 18px; height: 18px;"></i>
-                                </button>
                             }
+                            <button type="button" class="btn btn-sm btn-link text-primary p-0 ml-2" onclick="$('#editModal-@item.Id').modal('show');" title="Edit Request">
+                                <i data-lucide="edit-2" style="width: 18px; height: 18px;"></i>
+                            </button>
                         </form>
                     </td>
                 </tr>
