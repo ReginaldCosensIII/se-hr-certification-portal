@@ -186,6 +186,8 @@
                             <input type="hidden" name="id" value="@item.Id" />
                             <input type="hidden" name="p" value="@Model.CurrentPage" />
                             <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                            <input type="hidden" name="searchString" value="@Model.SearchString" />
+                            <input type="hidden" name="statusFilter" value="@Model.StatusFilter" />
                             @if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Pending)
                             {
                                 <button type="submit" name="newStatus" value="@SeHrCertificationPortal.Models.RequestStatus.Approved" class="btn btn-sm btn-link text-success p-0 me-2" title="Approve Request">
@@ -264,6 +266,8 @@
                             <input type="hidden" name="id" value="@item.Id" />
                             <input type="hidden" name="p" value="@Model.CurrentPage" />
                             <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                            <input type="hidden" name="searchString" value="@Model.SearchString" />
+                            <input type="hidden" name="statusFilter" value="@Model.StatusFilter" />
                             <p class="text-muted mb-4">Set the certification details for <strong>@item.Employee?.DisplayName</strong>'s <strong>@(item.Certification?.Name ?? item.CustomCertificationName)</strong> certification.</p>
                             
                             <div class="row">
@@ -310,6 +314,8 @@
                             <input type="hidden" name="id" value="@item.Id" />
                             <input type="hidden" name="p" value="@Model.CurrentPage" />
                             <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                            <input type="hidden" name="searchString" value="@Model.SearchString" />
+                            <input type="hidden" name="statusFilter" value="@Model.StatusFilter" />
 
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Manager Name</label>

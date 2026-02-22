@@ -26,7 +26,7 @@ namespace SeHrCertificationPortal.Pages.Admin
     public int ExpiringSoonThresholdDays { get; set; }
 
     [BindProperty]
-    public string AdminEmail { get; set; }
+    public string AdminEmail { get; set; } = string.Empty;
 
     public async Task OnGetAsync()
     {
