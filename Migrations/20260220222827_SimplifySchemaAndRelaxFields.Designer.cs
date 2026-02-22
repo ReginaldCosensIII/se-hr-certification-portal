@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SeHrCertificationPortal.Data;
@@ -11,9 +12,11 @@ using SeHrCertificationPortal.Data;
 namespace SeHrCertificationPortal.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260220222827_SimplifySchemaAndRelaxFields")]
+    partial class SimplifySchemaAndRelaxFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -96,9 +99,6 @@ namespace SeHrCertificationPortal.Migrations
 
                     b.Property<int>("EmployeeId")
                         .HasColumnType("integer");
-
-                    b.Property<DateTime?>("ExpirationDate")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ManagerName")
                         .HasColumnType("text");

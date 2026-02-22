@@ -3,10 +3,9 @@
 @{
     ViewData["Title"] = "Dashboard";
     
-    // Mock Data for Conditional Logic Visualization
-    int pendingCount = 53; 
-    int expiringCount = 10;
-    // Set these to 0 to test "Tan" state
+    // Live Data from Model
+    int pendingCount = Model.PendingCount; 
+    int expiringCount = Model.ExpiringCount;
 }
 
 <div class="row mb-4">
@@ -14,7 +13,7 @@
     <div class="col-lg-3 col-6">
         <div class="small-box">
             <div class="inner">
-                <h3>150</h3>
+                <h3>@Model.TotalRequests</h3>
                 <p>Total Requests</p>
             </div>
             <div class="icon">
@@ -30,7 +29,7 @@
     <div class="col-lg-3 col-6">
         <div class="small-box">
             <div class="inner">
-                <h3>1,200</h3>
+                <h3>@Model.ActiveCertifications.ToString("N0")</h3>
                 <p>Active Certifications</p>
             </div>
             <div class="icon">
@@ -115,56 +114,42 @@
             </tr>
             </thead>
             <tbody>
-            <tr>
-                <td><span class="text-muted">REQ-1042</span></td>
-                <td>
-                    <span class="fw-bold">John Doe</span>
-                    <br/>
-                    <small class="text-muted" style="font-size: 0.75rem;">EMP-056</small>
-                </td>
-                <td>Michael Scott</td> <!-- Added Manager -->
-                <td>ACI</td>
-                <td>Concrete Field Testing Grade I</td>
-                <td><span class="fw-bold">Initial</span></td>
-                <td><span class="badge text-bg-warning">Pending</span></td>
-                <td>2023-10-25</td>
-                <td>
-                    <a href="#" class="text-muted me-2" title="View">
-                        <i data-lucide="search" style="width: 16px; height: 16px;"></i>
-                    </a>
-                    <a href="#" class="text-muted me-2" title="Edit">
-                        <i data-lucide="pencil" style="width: 16px; height: 16px;"></i>
-                    </a>
-                     <a href="#" class="text-danger" title="Delete">
-                        <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
-                    </a>
-                </td>
-            </tr>
-            <tr>
-                <td><span class="text-muted">REQ-0981</span></td>
-                <td>
-                    <span class="fw-bold">Jane Smith</span>
-                    <br/>
-                    <small class="text-muted" style="font-size: 0.75rem;">EMP-102</small>
-                </td>
-                <td>Peter Venkman</td> <!-- Added Manager -->
-                <td>WACEL</td>
-                <td>Soils & Aggregate Compaction</td>
-                <td><span class="fw-bold">Recertification</span></td>
-                <td><span class="badge text-bg-success">Approved</span></td>
-                <td>2023-10-24</td>
-                <td>
-                    <a href="#" class="text-muted me-2">
-                        <i data-lucide="search" style="width: 16px; height: 16px;"></i>
-                    </a>
-                    <a href="#" class="text-muted me-2">
-                        <i data-lucide="pencil" style="width: 16px; height: 16px;"></i>
-                    </a>
-                     <a href="#" class="text-danger">
-                        <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
-                    </a>
-                </td>
-            </tr>
+            @foreach (var item in Model.RecentRequests)
+            {
+                <tr>
+                    <td><span class="text-muted">REQ-@item.Id</span></td>
+                    <td>
+                        <span class="fw-bold">@item.Employee?.DisplayName</span>
+                    </td>
+                    <td>@(item.ManagerName ?? "N/A")</td>
+                    <td>@(item.Agency?.Abbreviation ?? item.CustomAgencyName ?? "Custom")</td>
+                    <td>@(item.Certification?.Name ?? item.CustomCertificationName ?? "Custom")</td>
+                    <td><span class="fw-bold">@item.RequestType</span></td>
+                    <td>
+                        @if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Pending)
+                        {
+                            <span class="badge text-bg-warning">Pending</span>
+                        }
+                        else if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Approved)
+                        {
+                            <span class="badge text-bg-success">Approved</span>
+                        }
+                        else
+                        {
+                            <span class="badge text-bg-danger">Rejected</span>
+                        }
+                    </td>
+                    <td>@item.RequestDate.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        <a href="#" class="text-muted me-2" title="View">
+                            <i data-lucide="search" style="width: 16px; height: 16px;"></i>
+                        </a>
+                        <a href="#" class="text-muted me-2" title="Edit">
+                            <i data-lucide="pencil" style="width: 16px; height: 16px;"></i>
+                        </a>
+                    </td>
+                </tr>
+            }
             </tbody>
         </table>
     </div>

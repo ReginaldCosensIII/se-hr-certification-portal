@@ -150,16 +150,24 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Mock Item 1: Active -->
+            @foreach (var item in Model.ActiveCertifications) {
                 <tr>
-                    <td><span class="text-muted fw-mono">EMP-056</span></td>
+                    <td><span class="text-muted fw-mono">#(ID:@item.Employee?.Id)</span></td>
                     <td>
-                        <span class="fw-bold">John Doe</span>
+                        <span class="fw-bold">@item.Employee?.DisplayName</span>
                     </td>
-                    <td>ACI</td>
-                    <td>Concrete Field Testing Grade I</td>
-                    <td><span class="badge text-bg-success">Active</span></td>
-                    <td>Oct 25, 2025</td>
+                    <td>@(item.Certification?.Agency?.Abbreviation ?? item.CustomAgencyName)</td>
+                    <td>@(item.Certification?.Name ?? item.CustomCertificationName)</td>
+                    <td>
+                        <span class="badge text-bg-success">Active</span>
+                    </td>
+                    <td>
+                        @if(item.ExpirationDate.HasValue) {
+                            <text>@item.ExpirationDate.Value.ToString("MMM dd, yyyy")</text>
+                        } else {
+                            <text>Permanent</text>
+                        }
+                    </td>
                     <td class="text-end">
                         <a href="#" class="text-muted me-2" title="View details">
                             <i data-lucide="eye" style="width: 16px;"></i>
@@ -169,46 +177,7 @@
                         </a>
                     </td>
                 </tr>
-                
-                <!-- Mock Item 2: Expiring -->
-                <tr>
-                    <td><span class="text-muted fw-mono">EMP-102</span></td>
-                    <td>
-                        <span class="fw-bold">Sarah Connor</span>
-                    </td>
-                    <td>OSHA</td>
-                    <td>OSHA 30-Hour Construction</td>
-                    <td><span class="badge text-bg-warning">Expiring</span></td>
-                    <td>Nov 15, 2023</td>
-                    <td class="text-end">
-                        <a href="#" class="text-muted me-2" title="View details">
-                            <i data-lucide="eye" style="width: 16px;"></i>
-                        </a>
-                        <a href="#" class="text-muted me-2" title="Edit certification">
-                            <i data-lucide="pencil" style="width: 16px;"></i>
-                        </a>
-                    </td>
-                </tr>
-
-                 <!-- Mock Item 3: Expired -->
-                <tr>
-                    <td><span class="text-muted fw-mono">EMP-001</span></td>
-                    <td>
-                        <span class="fw-bold">Robert Paulson</span>
-                    </td>
-                    <td>WACEL</td>
-                    <td>Soils & Aggregate Compaction</td>
-                    <td><span class="badge text-bg-danger">Expired</span></td>
-                    <td>Sep 01, 2023</td>
-                    <td class="text-end">
-                        <a href="#" class="text-muted me-2" title="View details">
-                            <i data-lucide="eye" style="width: 16px;"></i>
-                        </a>
-                        <a href="#" class="text-muted me-2" title="Edit certification">
-                            <i data-lucide="pencil" style="width: 16px;"></i>
-                        </a>
-                    </td>
-                </tr>
+            }
             </tbody>
         </table>
     </div>

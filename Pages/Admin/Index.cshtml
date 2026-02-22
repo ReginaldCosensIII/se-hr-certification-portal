@@ -30,7 +30,7 @@
                     <button class="btn btn-sm btn-outline-brand fw-bold">
                         <i data-lucide="download" class="me-1" style="width: 14px;"></i> Export List
                     </button>
-                    <button class="btn btn-sm btn-brand fw-bold text-white">
+                    <button class="btn btn-sm btn-brand fw-bold text-white" data-bs-toggle="modal" data-bs-target="#addAgencyModal">
                         <i data-lucide="plus" class="me-1" style="width: 14px;"></i> Add Agency
                     </button>
                 </div>
@@ -48,42 +48,17 @@
                             </tr>
                         </thead>
                         <tbody>
+                        @foreach (var item in Model.Agency) {
                             <tr>
-                                <td class="ps-3 text-muted">1</td>
-                                <td class="fw-bold">ACI (American Concrete Institute)</td>
-                                <td class="text-center text-muted">-</td>
+                                <td class="ps-3 text-muted">@item.Id</td>
+                                <td class="fw-bold">@item.FullName (@item.Abbreviation)</td>
+                                <td class="text-center text-muted">@(item.Certifications.Count) Certifications</td>
                                 <td class="text-center"><span class="badge text-bg-success">Active</span></td>
                                 <td class="text-end pe-3">
                                     <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="more-horizontal" style="width: 16px;"></i></button>
                                 </td>
                             </tr>
-                            <tr>
-                                <td class="ps-3 text-muted">2</td>
-                                <td class="fw-bold">WACEL</td>
-                                <td class="text-center text-muted fw-bold">Sarah Jenkins</td>
-                                <td class="text-center"><span class="badge text-bg-success">Active</span></td>
-                                <td class="text-end pe-3">
-                                    <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="more-horizontal" style="width: 16px;"></i></button>
-                                </td>
-                            </tr>
-                             <tr>
-                                <td class="ps-3 text-muted">3</td>
-                                <td class="fw-bold">OSHA</td>
-                                <td class="text-center text-muted">-</td>
-                                <td class="text-center"><span class="badge text-bg-success">Active</span></td>
-                                <td class="text-end pe-3">
-                                    <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="more-horizontal" style="width: 16px;"></i></button>
-                                </td>
-                            </tr>
-                             <tr>
-                                <td class="ps-3 text-muted">4</td>
-                                <td class="fw-bold">VDEQ (Virginia Dept of Environmental Quality)</td>
-                                <td class="text-center text-muted">-</td>
-                                <td class="text-center"><span class="badge text-bg-success">Active</span></td>
-                                <td class="text-end pe-3">
-                                    <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="more-horizontal" style="width: 16px;"></i></button>
-                                </td>
-                            </tr>
+                        }
                         </tbody>
                     </table>
                 </div>
@@ -102,7 +77,7 @@
                     <button class="btn btn-sm btn-outline-brand fw-bold">
                         <i data-lucide="download" class="me-1" style="width: 14px;"></i> Export List
                     </button>
-                    <button class="btn btn-sm btn-brand fw-bold text-white">
+                    <button class="btn btn-sm btn-brand fw-bold text-white" data-bs-toggle="modal" data-bs-target="#addCertificationModal">
                         <i data-lucide="plus" class="me-1" style="width: 14px;"></i> Add Certification
                     </button>
                 </div>
@@ -120,42 +95,31 @@
                             </tr>
                         </thead>
                         <tbody>
+                        @foreach (var cert in Model.Certifications) {
                             <tr>
-                                <td class="ps-3 fw-bold">Concrete Field Testing Grade I</td>
-                                <td>ACI</td>
-                                <td>5 Years</td>
-                                <td><i data-lucide="check" class="text-success" style="width: 16px;"></i> Yes</td>
+                                <td class="ps-3 fw-bold">@cert.Name</td>
+                                <td>@(cert.Agency?.Abbreviation ?? "Unknown")</td>
+                                <td>
+                                    @if (cert.ValidityPeriodMonths == 0) {
+                                        <text>Permanent</text>
+                                    } else if (cert.ValidityPeriodMonths % 12 == 0) {
+                                        <text>@(cert.ValidityPeriodMonths / 12) Years</text>
+                                    } else {
+                                        <text>@cert.ValidityPeriodMonths Months</text>
+                                    }
+                                </td>
+                                <td>
+                                    @if (cert.ValidityPeriodMonths > 0) {
+                                        <i data-lucide="check" class="text-success" style="width: 16px;"></i> <text>Yes</text>
+                                    } else {
+                                        <i data-lucide="x" class="text-muted" style="width: 16px;"></i> <text>No</text>
+                                    }
+                                </td>
                                 <td class="text-end pe-3">
                                     <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="edit-2" style="width: 16px;"></i></button>
                                 </td>
                             </tr>
-                            <tr>
-                                <td class="ps-3 fw-bold">Soils & Aggregate Compaction</td>
-                                <td>WACEL</td>
-                                <td>3 Years</td>
-                                <td><i data-lucide="check" class="text-success" style="width: 16px;"></i> Yes</td>
-                                <td class="text-end pe-3">
-                                    <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="edit-2" style="width: 16px;"></i></button>
-                                </td>
-                            </tr>
-                             <tr>
-                                <td class="ps-3 fw-bold">Concrete Strength Testing</td>
-                                <td>ACI</td>
-                                <td>5 Years</td>
-                                <td><i data-lucide="check" class="text-success" style="width: 16px;"></i> Yes</td>
-                                <td class="text-end pe-3">
-                                    <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="edit-2" style="width: 16px;"></i></button>
-                                </td>
-                            </tr>
-                             <tr>
-                                <td class="ps-3 fw-bold">OSHA 10-Hour Construction</td>
-                                <td>OSHA</td>
-                                <td>Permanent</td>
-                                <td><i data-lucide="x" class="text-muted" style="width: 16px;"></i> No</td>
-                                <td class="text-end pe-3">
-                                    <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="edit-2" style="width: 16px;"></i></button>
-                                </td>
-                            </tr>
+                        }
                         </tbody>
                     </table>
                 </div>
@@ -187,6 +151,75 @@
                    <button class="btn btn-brand fw-bold px-4">Save</button>
                </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+
+<!-- Add Agency Modal -->
+<div class="modal fade" id="addAgencyModal" tabindex="-1" aria-labelledby="addAgencyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="AddAgency">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="addAgencyModalLabel">Add New Agency</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label asp-for="NewAgency.Abbreviation" class="form-label fw-bold">Abbreviation/Acronym <span class="text-danger">*</span></label>
+                        <input asp-for="NewAgency.Abbreviation" class="form-control" placeholder="e.g. WSSC" required />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="NewAgency.FullName" class="form-label fw-bold">Full Name (Optional)</label>
+                        <input asp-for="NewAgency.FullName" class="form-control" placeholder="e.g. Washington Suburban Sanitary Commission" />
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-brand text-white fw-bold">Save Agency</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Certification Modal -->
+<div class="modal fade" id="addCertificationModal" tabindex="-1" aria-labelledby="addCertificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="AddCertification">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="addCertificationModalLabel">Add New Certification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label asp-for="NewCertification.AgencyId" class="form-label fw-bold">Issuing Agency <span class="text-danger">*</span></label>
+                        <select asp-for="NewCertification.AgencyId" class="form-select" required>
+                            <option value="">-- Select an Agency --</option>
+                            @foreach (var agency in Model.Agency)
+                            {
+                                <option value="@agency.Id">@agency.Abbreviation</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="NewCertification.Name" class="form-label fw-bold">Certification Name <span class="text-danger">*</span></label>
+                        <input asp-for="NewCertification.Name" class="form-control" placeholder="e.g. Concrete Technician I" required />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="NewCertification.ValidityPeriodMonths" class="form-label fw-bold">Validity Period (Months)</label>
+                        <input asp-for="NewCertification.ValidityPeriodMonths" type="number" class="form-control" value="0" min="0" />
+                        <div class="form-text">Enter 0 for permanent certifications. Examples: 12 (1 Yr), 36 (3 Yrs).</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-brand text-white fw-bold">Save Certification</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

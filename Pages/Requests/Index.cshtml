@@ -4,6 +4,10 @@
     ViewData["Title"] = "Certification Requests";
 }
 
+<!-- Select2 Dependencies -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css" />
+
 <!-- New Request Accordion Form -->
 <div class="accordion mb-4 shadow-sm" id="newRequestAccordion">
     <div class="accordion-item border-0" style="border-top: 4px solid var(--brand-primary) !important;">
@@ -14,38 +18,40 @@
         </h2>
         <div id="collapseNewRequest" class="accordion-collapse collapse" aria-labelledby="headingNewRequest" data-bs-parent="#newRequestAccordion">
             <div class="accordion-body bg-white">
-                <form>
+                <form method="post">
                     <div class="row g-3">
                         <!-- Top Row: Employee, Date, Manager -->
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Employee Name</label>
-                            <input type="text" class="form-control" placeholder="Enter employee name">
+                            <select asp-for="EmployeeNameInput" id="employeeSelect" class="form-control select2" style="width: 100%;">
+                                <option value=""></option>
+                                @foreach(var emp in Model.Employees) { <option value="@emp.DisplayName">@emp.DisplayName</option> }
+                            </select>
                         </div>
                          <div class="col-md-3">
-                            <label class="form-label fw-bold">Request Date</label>
-                            <input type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")">
+                             <label class="form-label fw-bold">Request Date</label>
+                            <input type="date" asp-for="NewRequest.RequestDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
                         </div>
                         <div class="col-md-5">
                              <label class="form-label fw-bold">Manager</label>
-                            <input type="text" class="form-control" placeholder="Enter manager name">
+                            <input asp-for="NewRequest.ManagerName" type="text" class="form-control" placeholder="Enter manager name">
                         </div>
 
                         <!-- Second Row: Agency & Cert -->
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Certification Agency</label>
-                            <select class="form-select">
-                                <option selected>Select Agency...</option>
-                                <option value="1">ACI</option>
-                                <option value="2">WACEL</option>
-                                <option value="3">VDEQ</option>
+                            <select asp-for="NewRequest.AgencyId" class="form-select select2" id="agencySelect" style="width: 100%;">
+                                <option value="" selected>Select Agency...</option>
+                                @foreach (var agency in Model.Agencies)
+                                {
+                                    <option value="@agency.Id">@agency.Abbreviation</option>
+                                }
                             </select>
                         </div>
                         <div class="col-md-8">
                             <label class="form-label fw-bold">Certification Desired</label>
-                             <select class="form-select">
-                                <option selected>Select Certification...</option>
-                                <option value="1">Concrete Field Testing Grade I</option>
-                                <option value="2">Soils & Aggregate Compaction</option>
+                             <select asp-for="NewRequest.CertificationId" class="form-select select2" id="certificationSelect" style="width: 100%;">
+                                <option value="" selected>-- Select an Agency First --</option>
                             </select>
                         </div>
 
@@ -54,23 +60,23 @@
                             <label class="form-label fw-bold d-block mb-3">Request Type</label>
                             <div class="d-flex flex-wrap gap-4">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="requestType" id="typeReview">
+                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="ReviewSession" id="typeReview">
                                     <label class="form-check-label" for="typeReview">Review Session</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="requestType" id="typeWritten">
+                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="WrittenExam" id="typeWritten">
                                     <label class="form-check-label" for="typeWritten">Written Exam</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="requestType" id="typePractical">
+                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="PracticalExam" id="typePractical">
                                     <label class="form-check-label" for="typePractical">Practical Exam</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="requestType" id="typeReciprocity">
+                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="Reciprocity" id="typeReciprocity">
                                     <label class="form-check-label" for="typeReciprocity">Reciprocity</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="requestType" id="typeRecert">
+                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="Recertification" id="typeRecert">
                                     <label class="form-check-label" for="typeRecert">Recertification</label>
                                 </div>
                             </div>
@@ -78,7 +84,7 @@
                         
                         <!-- Submit Actions -->
                         <div class="col-12 mt-4 pt-3 border-top d-flex justify-content-end gap-2">
-                             <button type="button" class="btn btn-outline-brand">Reset</button>
+                             <button type="reset" class="btn btn-outline-brand" onclick="$('.select2').val(null).trigger('change');">Reset</button>
                              <button type="submit" class="btn btn-brand px-4 fw-bold">Submit Request</button>
                         </div>
                     </div>
@@ -96,23 +102,29 @@
             <div class="card-tools d-flex align-items-center gap-2">
                 <!-- Search & Filter -->
                 <form method="get" class="d-flex align-items-center gap-2">
+                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                    
                     <div class="input-group input-group-sm">
-                        <input type="text" name="SearchString" class="form-control" placeholder="Search..." style="max-width: 200px;">
+                        <input type="text" asp-for="SearchString" class="form-control" placeholder="Search..." style="max-width: 200px;">
                          <button class="btn btn-brand" type="submit">
                             <i data-lucide="search" class="text-white" style="width: 14px;"></i>
                         </button>
                     </div>
                     
-                    <select name="Status" class="form-select form-select-sm" style="width: 130px;">
+                    <select asp-for="StatusFilter" class="form-select form-select-sm" style="width: 130px;" asp-items="@Html.GetEnumSelectList<SeHrCertificationPortal.Models.RequestStatus>()">
                         <option value="">All Status</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Approved">Approved</option>
-                        <option value="Rejected">Rejected</option>
                     </select>
                     
                     <button type="submit" class="btn btn-brand btn-sm d-flex align-items-center">
                         <i data-lucide="filter" class="me-1" style="width: 14px;"></i> Filter
                     </button>
+
+                    @if (!string.IsNullOrEmpty(Model.SearchString) || Model.StatusFilter.HasValue)
+                    {
+                        <a asp-page="./Index" class="btn btn-outline-brand btn-sm d-flex align-items-center" title="Clear Filters">
+                            <i data-lucide="x" style="width: 14px;"></i>
+                        </a>
+                    }
                 </form>
             </div>
         </div>
@@ -130,107 +142,237 @@
                     <th>Type</th>
                     <th>Status</th>
                     <th>Request Date</th>
-                    <th class="text-end" style="min-width: 100px;">Actions</th>
+                    <th class="text-center" style="min-width: 100px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Mock Item 1 -->
+            @foreach (var item in Model.CertificationRequest) {
                 <tr>
-                    <td><span class="text-muted fw-mono">REQ-1042</span></td>
+                    <td><span class="text-muted fw-mono">REQ-@item.Id</span></td>
                     <td>
                         <div class="d-flex flex-column">
-                            <span class="fw-bold">John Doe</span>
-                            <small class="text-muted" style="font-size: 0.75rem;">EMP-056</small>
+                            <span class="fw-bold">@item.Employee?.DisplayName</span>
                         </div>
                     </td>
-                    <td>Michael Scott</td>
-                    <td>ACI</td>
-                    <td>Concrete Field Testing Grade I</td>
-                    <td><span class="fw-bold">Initial</span></td>
-                    <td><span class="badge text-bg-warning">Pending</span></td>
-                    <td>Oct 25, 2023</td>
-                    <td class="text-end">
-                        <a href="#" class="text-muted me-2" title="View details">
-                            <i data-lucide="eye" style="width: 16px;"></i>
-                        </a>
-                        <a href="#" class="text-muted me-2" title="Edit request">
-                            <i data-lucide="pencil" style="width: 16px;"></i>
-                        </a>
-                        <a href="#" class="text-danger" title="Delete request">
-                            <i data-lucide="trash-2" style="width: 16px;"></i>
-                        </a>
-                    </td>
-                </tr>
-                
-                <!-- Mock Item 2 -->
-                <tr>
-                    <td><span class="text-muted fw-mono">REQ-0985</span></td>
+                    <td>@(item.ManagerName ?? "N/A")</td>
+                    <td>@(item.Agency?.Abbreviation ?? item.CustomAgencyName ?? "Custom")</td>
+                    <td>@(item.Certification?.Name ?? item.CustomCertificationName ?? "Custom")</td>
+                    <td><span class="fw-bold">@item.RequestType</span></td>
                     <td>
-                        <div class="d-flex flex-column">
-                            <span class="fw-bold">Sarah Connor</span>
-                            <small class="text-muted" style="font-size: 0.75rem;">EMP-102</small>
-                        </div>
+                        @if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Pending)
+                        {
+                            <span class="badge text-bg-warning">Pending</span>
+                        }
+                        else if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Approved)
+                        {
+                            <span class="badge text-bg-info text-white">Approved</span>
+                        }
+                        else if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Passed)
+                        {
+                            <span class="badge text-bg-success">Passed</span>
+                        }
+                        else if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Failed)
+                        {
+                            <span class="badge text-bg-dark">Failed</span>
+                        }
+                        else
+                        {
+                            <span class="badge text-bg-danger">Rejected</span>
+                        }
                     </td>
-                    <td>Peter Venkman</td>
-                    <td>OSHA</td>
-                    <td>OSHA 30-Hour Construction</td>
-                    <td><span class="fw-bold">Recertification</span></td>
-                    <td><span class="badge text-bg-success">Approved</span></td>
-                    <td>Oct 12, 2023</td>
-                    <td class="text-end">
-                        <a href="#" class="text-muted me-2" title="View details">
-                            <i data-lucide="eye" style="width: 16px;"></i>
-                        </a>
-                         <button class="btn btn-link p-0 text-muted disabled" style="opacity: 0.5;">
-                            <i data-lucide="pencil" style="width: 16px;"></i>
-                        </button>
+                    <td>@item.RequestDate.ToString("MMM dd, yyyy")</td>
+                    <td class="text-center border-start">
+                        <form method="post" asp-page-handler="UpdateStatus" class="d-inline">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="hidden" name="p" value="@Model.CurrentPage" />
+                            <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                            @if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Pending)
+                            {
+                                <button type="submit" name="newStatus" value="@SeHrCertificationPortal.Models.RequestStatus.Approved" class="btn btn-sm btn-link text-success p-0 me-2" title="Approve Request">
+                                    <i data-lucide="check" style="width: 18px;"></i>
+                                </button>
+                                <button type="submit" name="newStatus" value="@SeHrCertificationPortal.Models.RequestStatus.Rejected" class="btn btn-sm btn-link text-danger p-0" title="Reject Request">
+                                    <i data-lucide="x" style="width: 18px;"></i>
+                                </button>
+                            }
+                            else if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Approved)
+                            {
+                                <button type="button" class="btn btn-sm btn-link text-success p-0 me-2" onclick="$('#passModal-@item.Id').modal('show');" title="Mark as Passed">
+                                    <i data-lucide="award" style="width: 18px;"></i>
+                                </button>
+                                <button type="submit" name="newStatus" value="@SeHrCertificationPortal.Models.RequestStatus.Failed" class="btn btn-sm btn-link text-warning p-0" title="Mark as Failed">
+                                    <i data-lucide="user-x" style="width: 18px;"></i>
+                                </button>
+                            }
+                            <button type="button" class="btn btn-sm btn-link text-primary p-0 ml-2" onclick="$('#editModal-@item.Id').modal('show');" title="Edit Request">
+                                <i data-lucide="edit-2" style="width: 18px; height: 18px;"></i>
+                            </button>
+                        </form>
                     </td>
                 </tr>
-
-                 <!-- Mock Item 3 -->
-                <tr>
-                    <td><span class="text-muted fw-mono">REQ-0920</span></td>
-                    <td>
-                        <div class="d-flex flex-column">
-                            <span class="fw-bold">Robert Paulson</span>
-                            <small class="text-muted" style="font-size: 0.75rem;">EMP-001</small>
-                        </div>
-                    </td>
-                    <td>Tyler Durden</td>
-                    <td>WACEL</td>
-                    <td>Soils & Aggregate Compaction</td>
-                    <td><span class="fw-bold">Reciprocity</span></td>
-                    <td><span class="badge text-bg-danger">Rejected</span></td>
-                    <td>Sep 30, 2023</td>
-                    <td class="text-end">
-                        <a href="#" class="text-muted me-2" title="View details">
-                            <i data-lucide="eye" style="width: 16px;"></i>
-                        </a>
-                    </td>
-                </tr>
+            }
             </tbody>
         </table>
     </div>
-    
-
-</div>
     <div class="card-footer bg-transparent border-top-0 py-3">
-        <!-- Pagination Mock -->
-        <nav aria-label="Page navigation">
-            <ul class="pagination pagination-sm justify-content-end mb-0">
-                <li class="page-item disabled"><a class="page-link" href="#" aria-label="Previous">Previous</a></li>
-                <li class="page-item active"><a class="page-link shadow-sm" href="#">1</a></li>
-                <li class="page-item disabled"><a class="page-link text-muted" href="#">2</a></li>
-                <li class="page-item disabled"><a class="page-link text-muted" href="#">3</a></li>
-                <li class="page-item disabled"><a class="page-link" href="#" aria-label="Next">Next</a></li>
+        <nav aria-label="Page navigation" class="d-flex justify-content-end align-items-center gap-3">
+            <label class="mb-0 text-muted small">
+                Show 
+                <select class="form-select form-select-sm d-inline-block w-auto mx-1 shadow-sm" onchange="window.location.href='?p=1&pageSize=' + this.value + '&SearchString=@Model.SearchString&StatusFilter=@Model.StatusFilter'">
+                    @foreach(var size in new[] { 10, 15, 20, 25, 50 })
+                    {
+                        if (size == Model.PageSize)
+                        {
+                            <option value="@size" selected>@size</option>
+                        }
+                        else
+                        {
+                            <option value="@size">@size</option>
+                        }
+                    }
+                </select> entries
+            </label>
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                    <a class="page-link shadow-sm" asp-page="./Index" asp-route-p="@(Model.CurrentPage - 1)" asp-route-pageSize="@Model.PageSize" asp-route-SearchString="@Model.SearchString" asp-route-StatusFilter="@Model.StatusFilter">&laquo;</a>
+                </li>
+                <li class="page-item active">
+                    <span class="page-link shadow-sm border-brand bg-brand text-white">@Model.CurrentPage / @Math.Max(1, Model.TotalPages)</span>
+                </li>
+                <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link shadow-sm" asp-page="./Index" asp-route-p="@(Model.CurrentPage + 1)" asp-route-pageSize="@Model.PageSize" asp-route-SearchString="@Model.SearchString" asp-route-StatusFilter="@Model.StatusFilter">&raquo;</a>
+                </li>
             </ul>
         </nav>
     </div>
 </div>
 
+@foreach (var item in Model.CertificationRequest)
+{
+    if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Approved)
+    {
+        <!-- Pass Modal -->
+        <div class="modal fade text-start" id="passModal-@item.Id" tabindex="-1" role="dialog" aria-labelledby="passModalLabel-@item.Id" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <form method="post" asp-page-handler="MarkPassed">
+                    <div class="modal-content">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title fw-bold">Confirm Certification Passed</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="hidden" name="p" value="@Model.CurrentPage" />
+                            <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                            <p class="text-muted mb-4">Set the certification details for <strong>@item.Employee?.DisplayName</strong>'s <strong>@(item.Certification?.Name ?? item.CustomCertificationName)</strong> certification.</p>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Date Passed</label>
+                                    <input type="date" class="form-control calc-trigger date-passed" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Duration (Months)</label>
+                                    <input type="number" class="form-control calc-trigger duration-months" value="@(item.Certification?.ValidityPeriodMonths ?? 36)" />
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Calculated Expiration Date</label>
+                                @{
+                                    int validityMonths = item.Certification?.ValidityPeriodMonths ?? 36;
+                                    string defaultExpDateStr = validityMonths > 0 ? DateTime.Today.AddMonths(validityMonths).ToString("yyyy-MM-dd") : "";
+                                }
+                                <input type="date" name="expirationDate" class="form-control target-expiration" value="@defaultExpDateStr" @(validityMonths > 0 ? "required" : "") />
+                                @if (validityMonths == 0)
+                                {
+                                    <div class="form-text text-muted">This certification is marked as permanent. You may leave the date blank.</div>
+                                }
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-light fw-bold" onclick="$(this).closest('.modal').modal('hide');">Cancel</button>
+                            <button type="submit" class="btn btn-success text-white fw-bold">Save & Mark Passed</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+
+    <!-- Edit Modal -->
+        <div class="modal fade text-start" id="editModal-@item.Id" tabindex="-1" role="dialog" aria-labelledby="editModalLabel-@item.Id" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <form method="post" asp-page-handler="EditRequest">
+                    <div class="modal-content">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title fw-bold" id="editModalLabel-@item.Id">Edit Request: @item.Employee?.DisplayName</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="hidden" name="p" value="@Model.CurrentPage" />
+                            <input type="hidden" name="pageSize" value="@Model.PageSize" />
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Manager Name</label>
+                                <input type="text" name="managerName" class="form-control" value="@item.ManagerName" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Request Type</label>
+                                <select name="requestType" class="form-control" asp-items="@Html.GetEnumSelectList<SeHrCertificationPortal.Models.RequestType>()">
+                                    <option value="@((int)(item.RequestType ?? SeHrCertificationPortal.Models.RequestType.Other))" selected>@item.RequestType</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Request Date</label>
+                                <input type="date" name="requestDate" class="form-control" value="@item.RequestDate.ToString("yyyy-MM-dd")" required />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Agency</label>
+                                <select name="agencyId" class="form-control edit-agency-select" required>
+                                    @foreach(var agency in Model.Agencies) {
+                                        if(agency.Id == item.AgencyId) {
+                                            <option value="@agency.Id" selected>@agency.Abbreviation</option>
+                                        } else {
+                                            <option value="@agency.Id">@agency.Abbreviation</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Certification</label>
+                                <!-- The scoped javascript will target this edit-cert-select dynamically -->
+                                <select name="certificationId" class="form-control edit-cert-select" required>
+                                    <option value="@item.CertificationId" selected>@item.Certification?.Name</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-light fw-bold" onclick="$(this).closest('.modal').modal('hide');">Cancel</button>
+                            <button type="submit" class="btn btn-primary text-white fw-bold">Save Changes</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+}
+
 @section Scripts {
+    <!-- Select2 JS Dependencies -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // Initialize Select2 Components
+            $('.select2').select2({ theme: 'bootstrap4' });
+
+            $('#employeeSelect').select2({
+                theme: 'bootstrap4',
+                tags: true, 
+                placeholder: "Type or select a name..."
+            });
             const accordionId = 'newRequestAccordion';
             const storageKey = 'accordionState_' + accordionId;
             const collapseElement = document.getElementById('collapseNewRequest');
@@ -262,6 +404,80 @@
                     localStorage.setItem(storageKey, 'closed');
                 });
             }
+        });
+
+        // 3. Handle AJAX Cascading Dropdown for Certifications
+        $('#agencySelect').on('change', function () {
+            var agencyId = $(this).val();
+            var certSelect = $('#certificationSelect');
+
+            // Clear and set to loading state
+            certSelect.empty().append('<option value="">Loading...</option>').trigger('change');
+
+            if (!agencyId) {
+                certSelect.empty().append('<option value="">-- Select an Agency First --</option>').trigger('change');
+                return;
+            }
+
+            // Fetch new data
+            fetch('?handler=CertificationsByAgency&agencyId=' + agencyId)
+                .then(response => response.json())
+                .then(data => {
+                    certSelect.empty().append('<option value="">-- Select a Certification --</option>');
+                    data.forEach(function (cert) {
+                        certSelect.append(new Option(cert.name, cert.id));
+                    });
+                    // CRITICAL: Tell Select2 the underlying HTML has changed so it updates the UI
+                    certSelect.trigger('change'); 
+                })
+                .catch(error => {
+                    console.error('Error fetching certifications:', error);
+                    certSelect.empty().append('<option value="">-- Error loading data --</option>').trigger('change');
+                });
+        });
+
+        // Auto-calculate expiration date in the Mark Passed modal
+        $('.calc-trigger').on('change keyup', function () {
+            // Scope the calculation to the specific modal that is currently open
+            var modalBody = $(this).closest('.modal-body');
+            var datePassedVal = modalBody.find('.date-passed').val();
+            var durationMonths = parseInt(modalBody.find('.duration-months').val()) || 0;
+            var targetExp = modalBody.find('.target-expiration');
+
+            if (datePassedVal) {
+                var passedDate = new Date(datePassedVal);
+                // Add the months. JavaScript Date handles year rollovers automatically.
+                passedDate.setUTCMonth(passedDate.getUTCMonth() + durationMonths);
+
+                // Format back to yyyy-MM-dd for the HTML input
+                var yyyy = passedDate.getUTCFullYear();
+                var mm = String(passedDate.getUTCMonth() + 1).padStart(2, '0');
+                var dd = String(passedDate.getUTCDate()).padStart(2, '0');
+
+                targetExp.val(yyyy + '-' + mm + '-' + dd);
+            }
+        });
+
+        $('.edit-agency-select').on('change', function () {
+            var agencyId = $(this).val();
+            var certSelect = $(this).closest('.modal-body').find('.edit-cert-select');
+
+            certSelect.empty().append('<option value="">Loading...</option>');
+
+            if (!agencyId) return;
+
+            fetch('?handler=CertificationsByAgency&agencyId=' + agencyId)
+                .then(response => response.json())
+                .then(data => {
+                    certSelect.empty().append('<option value="">-- Select a Certification --</option>');
+                    data.forEach(function (cert) {
+                        certSelect.append(new Option(cert.name, cert.id));
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    certSelect.empty().append('<option value="">-- Error --</option>');
+                });
         });
     </script>
 }

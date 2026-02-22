@@ -1,11 +1,57 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace SeHrCertificationPortal.Pages.Admin
 {
     public class SettingsModel : PageModel
     {
-        public void OnGet()
-        {
-        }
+    private readonly SeHrCertificationPortal.Data.ApplicationDbContext _context;
+
+    public SettingsModel(SeHrCertificationPortal.Data.ApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public IList<SeHrCertificationPortal.Models.Agency> Agency { get;set; } = default!;
+    public IList<SeHrCertificationPortal.Models.Certification> Certifications { get; set; } = default!;
+
+    [BindProperty]
+    public SeHrCertificationPortal.Models.Agency NewAgency { get; set; } = new() { Abbreviation = "", FullName = "" };
+
+    [BindProperty]
+    public SeHrCertificationPortal.Models.Certification NewCertification { get; set; } = new() { Name = "" };
+
+    public async Task OnGetAsync()
+    {
+        Agency = await _context.Agencies
+            .Include(a => a.Certifications)
+            .OrderBy(a => a.Abbreviation)
+            .ToListAsync();
+
+        Certifications = await _context.Certifications
+            .Include(c => c.Agency)
+            .OrderBy(c => c.Agency!.Abbreviation)
+            .ThenBy(c => c.Name)
+            .ToListAsync();
+    }
+
+    public async Task<IActionResult> OnPostAddAgencyAsync()
+    {
+        if (string.IsNullOrWhiteSpace(NewAgency.Abbreviation)) return RedirectToPage();
+        NewAgency.IsActive = true;
+        _context.Agencies.Add(NewAgency);
+        await _context.SaveChangesAsync();
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostAddCertificationAsync()
+    {
+        if (string.IsNullOrWhiteSpace(NewCertification.Name) || NewCertification.AgencyId == 0) return RedirectToPage();
+        NewCertification.IsActive = true;
+        _context.Certifications.Add(NewCertification);
+        await _context.SaveChangesAsync();
+        return RedirectToPage();
+    }
     }
 }
