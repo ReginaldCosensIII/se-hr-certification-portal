@@ -1,102 +1,8 @@
 @page
 @model SeHrCertificationPortal.Pages.Certifications.IndexModel
 @{
-    ViewData["Title"] = "Certifications";
+    ViewData["Title"] = "Employee Certifications Tracker";
 }
-
-<!-- Page Header with Report Action -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <!-- Page Title is handled in Layout -->
-    </div>
-    <div>
-        <button class="btn btn-brand d-flex align-items-center fw-bold">
-            <i data-lucide="file-down" class="me-2 text-white" style="width: 18px;"></i> Generate Report
-        </button>
-    </div>
-</div>
-
-<!-- Employee Detail View (Accordion Style) -->
-<div class="accordion mb-4 shadow-sm" id="employeeDetailAccordion">
-    <div class="accordion-item border-0" style="border-top: 4px solid var(--brand-primary) !important;">
-        <h2 class="accordion-header" id="headingDetail">
-            <button class="accordion-button collapsed text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetail" aria-expanded="false" aria-controls="collapseDetail">
-                <span class="fs-4 fw-bold">
-                    <i data-lucide="user" class="me-2 text-brand-primary" style="color: var(--brand-primary);"></i> Certification Details
-                </span>
-            </button>
-        </h2>
-        <div id="collapseDetail" class="accordion-collapse collapse" aria-labelledby="headingDetail" data-bs-parent="#employeeDetailAccordion">
-            <div class="accordion-body bg-light">
-                
-                <!-- Empty State Message -->
-                <div class="alert alert-warning border-0 d-flex align-items-center mb-3" role="alert">
-                    <i data-lucide="info" class="me-2"></i>
-                    <div>
-                        <strong>No Selection:</strong> Please select an employee from the table below to view details.
-                    </div>
-                </div>
-
-                <!-- Disabled / Empty Fields Representation -->
-                <div class="row g-4 opacity-50" style="pointer-events: none; user-select: none;">
-                    <!-- Left Col: Employee Info & Current Cert -->
-                    <div class="col-md-4 border-end">
-                        <h6 class="text-muted text-uppercase small fw-bold mb-3">Employee Profile</h6>
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="bg-white rounded-circle d-flex align-items-center justify-content-center me-3 border" style="width: 48px; height: 48px;">
-                                <span class="fw-bold text-muted">--</span>
-                            </div>
-                            <div>
-                                <div class="fw-bold text-muted">Select Employee</div>
-                                <div class="small text-muted">Role • ID: ---</div>
-                            </div>
-                        </div>
-                        
-                        <h6 class="text-muted text-uppercase small fw-bold mb-3 mt-4">Selected Certification</h6>
-                        <div class="p-3 bg-white rounded border">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="fw-bold text-muted">---</span>
-                                <span class="badge bg-secondary">---</span>
-                            </div>
-                            <div class="small text-muted mb-1">Agency: <span class="fw-bold text-muted">---</span></div>
-                            <div class="small text-muted mb-1">Issued: <span class="fw-bold text-muted">--/--/----</span></div>
-                            <div class="small text-muted mb-3">Expires: <span class="fw-bold text-muted">--/--/----</span></div>
-                            
-                            <button class="btn btn-sm btn-outline-secondary w-100" disabled>
-                                 <i data-lucide="download" class="me-1" style="width: 14px;"></i> Download Copy
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Right Col: Cert History -->
-                    <div class="col-md-8">
-                        <h6 class="text-muted text-uppercase small fw-bold mb-3">Certification History</h6>
-                        <div class="table-responsive">
-                             <table class="table table-sm align-middle text-muted">
-                                <thead class="bg-light">
-                                    <tr>
-                                        <th>Certification</th>
-                                        <th>Agency</th>
-                                        <th>Status</th>
-                                        <th>Expiration</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                 <tbody>
-                                    <tr>
-                                        <td colspan="5" class="text-center py-4">
-                                            <em>No records requested</em>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <div class="card shadow-sm">
     <div class="card-header border-0 bg-transparent py-3">
@@ -104,33 +10,34 @@
             <h3 class="card-title mb-0 fw-bold text-dark">Employee Certifications</h3>
             
             <div class="card-tools d-flex align-items-center gap-2">
-                <!-- Search & Filter -->
                 <form method="get" class="d-flex align-items-center gap-2">
-                    <div class="input-group input-group-sm">
-                        <input type="text" name="SearchString" class="form-control" placeholder="Search..." style="max-width: 200px;">
-                         <button class="btn btn-brand" type="submit">
+                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                    
+                    <div class="input-group input-group-sm mb-0">
+                        <input type="text" asp-for="SearchString" class="form-control" placeholder="Search employee..." style="max-width: 200px;">
+                        <button class="btn btn-brand" type="submit">
                             <i data-lucide="search" class="text-white" style="width: 14px;"></i>
                         </button>
                     </div>
                     
-                    <select name="Agency" class="form-select form-select-sm" style="width: 130px;">
+                    <select asp-for="AgencyFilter" class="form-select form-select-sm" style="width: 200px;" asp-items="Model.AgencyOptions">
                         <option value="">All Agencies</option>
-                        <option value="ACI">ACI</option>
-                        <option value="WACEL">WACEL</option>
-                        <option value="VDEQ">VDEQ</option>
-                        <option value="OSHA">OSHA</option>
                     </select>
 
-                    <select name="Status" class="form-select form-select-sm" style="width: 130px;">
-                        <option value="">All Status</option>
-                        <option value="Active">Active</option>
-                        <option value="Expiring">Expiring Soon</option>
-                        <option value="Expired">Expired</option>
+                    <select asp-for="StatusFilter" class="form-select form-select-sm" style="width: 150px;" asp-items="Html.GetEnumSelectList<SeHrCertificationPortal.Models.TrackerStatus>()">
+                        <option value="">All Statuses</option>
                     </select>
                     
                     <button type="submit" class="btn btn-brand btn-sm d-flex align-items-center">
                         <i data-lucide="filter" class="me-1" style="width: 14px;"></i> Filter
                     </button>
+
+                    @if (!string.IsNullOrEmpty(Model.SearchString) || Model.AgencyFilter.HasValue || Model.StatusFilter.HasValue)
+                    {
+                        <a asp-page="./Index" class="btn btn-outline-brand btn-sm d-flex align-items-center" title="Clear Filters">
+                            <i data-lucide="x" style="width: 14px;"></i>
+                        </a>
+                    }
                 </form>
             </div>
         </div>
@@ -140,56 +47,92 @@
         <table class="table table-striped table-hover align-middle mb-0">
             <thead class="bg-light">
                 <tr>
-                    <th style="width: 100px;">Emp ID</th>
-                    <th>Employee Name</th>
-                    <th>Agency</th>
+                    <th>Employee</th>
+                    <th>Agency / Board</th>
                     <th>Certification</th>
-                    <th>Status</th>
+                    <th>Date Passed</th>
                     <th>Expiration Date</th>
-                    <th class="text-end" style="min-width: 100px;">Actions</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
-            @foreach (var item in Model.ActiveCertifications) {
-                <tr>
-                    <td><span class="text-muted fw-mono">#(ID:@item.Employee?.Id)</span></td>
-                    <td>
-                        <span class="fw-bold">@item.Employee?.DisplayName</span>
-                    </td>
-                    <td>@(item.Certification?.Agency?.Abbreviation ?? item.CustomAgencyName)</td>
-                    <td>@(item.Certification?.Name ?? item.CustomCertificationName)</td>
-                    <td>
-                        <span class="badge text-bg-success">Active</span>
-                    </td>
-                    <td>
-                        @if(item.ExpirationDate.HasValue) {
-                            <text>@item.ExpirationDate.Value.ToString("MMM dd, yyyy")</text>
-                        } else {
-                            <text>Permanent</text>
-                        }
-                    </td>
-                    <td class="text-end">
-                        <a href="#" class="text-muted me-2" title="View details">
-                            <i data-lucide="eye" style="width: 16px;"></i>
-                        </a>
-                        <a href="#" class="text-muted me-2" title="Edit certification">
-                            <i data-lucide="pencil" style="width: 16px;"></i>
-                        </a>
-                    </td>
-                </tr>
-            }
+                @foreach (var item in Model.PassedCertifications)
+                {
+                    <tr>
+                        <td class="fw-bold">@item.Employee?.DisplayName</td>
+                        <td>@(item.Agency?.Abbreviation ?? item.CustomAgencyName ?? "Custom")</td>
+                        <td>@(item.Certification?.Name ?? item.CustomCertificationName ?? "Custom")</td>
+                        <td>
+                            @{
+                                // By domain definition, passing date is basically RequestDate when it was passed. You can modify if needed.
+                                // It could also be inferred from ExpirationDate minus duration, but for now we'll display RequestDate.
+                            }
+                            @item.RequestDate.ToString("MMM dd, yyyy") 
+                        </td>
+                        <td>
+                            @if (item.ExpirationDate.HasValue)
+                            {
+                                @item.ExpirationDate.Value.ToString("MMM dd, yyyy")
+                            }
+                            else
+                            {
+                                <span class="text-muted fst-italic">None</span>
+                            }
+                        </td>
+                        <td>
+                            @{
+                                var status = Model.GetComputedStatus(item.ExpirationDate);
+                                switch (status)
+                                {
+                                    case SeHrCertificationPortal.Models.TrackerStatus.Expired:
+                                        <span class="badge text-bg-danger"><i data-lucide="alert-triangle" class="me-1" style="width: 12px;"></i>Expired</span>
+                                        break;
+                                    case SeHrCertificationPortal.Models.TrackerStatus.ExpiringSoon:
+                                        <span class="badge text-bg-warning"><i data-lucide="clock" class="me-1" style="width: 12px;"></i>Expiring Soon</span>
+                                        break;
+                                    case SeHrCertificationPortal.Models.TrackerStatus.Active:
+                                        <span class="badge text-bg-success"><i data-lucide="check-circle" class="me-1" style="width: 12px;"></i>Active</span>
+                                        break;
+                                    case SeHrCertificationPortal.Models.TrackerStatus.Permanent:
+                                        <span class="badge text-bg-info text-white"><i data-lucide="infinity" class="me-1" style="width: 12px;"></i>Permanent</span>
+                                        break;
+                                }
+                            }
+                        </td>
+                    </tr>
+                }
             </tbody>
         </table>
     </div>
-    
+
     <div class="card-footer bg-transparent border-top-0 py-3">
-        <!-- Pagination Mock -->
-        <nav aria-label="Page navigation">
-            <ul class="pagination pagination-sm justify-content-end mb-0">
-                <li class="page-item disabled"><a class="page-link" href="#" aria-label="Previous">Previous</a></li>
-                <li class="page-item active"><a class="page-link shadow-sm" href="#">1</a></li>
-                <li class="page-item disabled"><a class="page-link text-muted" href="#">2</a></li>
-                <li class="page-item disabled"><a class="page-link" href="#" aria-label="Next">Next</a></li>
+        <nav aria-label="Page navigation" class="d-flex justify-content-end align-items-center gap-3">
+            <label class="mb-0 text-muted small">
+                Show 
+                <select class="form-select form-select-sm d-inline-block w-auto mx-1 shadow-sm" onchange="window.location.href='?p=1&pageSize=' + this.value + '&SearchString=@Model.SearchString&AgencyFilter=@Model.AgencyFilter&StatusFilter=@Model.StatusFilter'">
+                    @foreach(var size in new[] { 10, 15, 20, 25, 50 })
+                    {
+                         if (size == Model.PageSize)
+                        {
+                            <option value="@size" selected>@size</option>
+                        }
+                        else
+                        {
+                            <option value="@size">@size</option>
+                        }
+                    }
+                </select> entries
+            </label>
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                    <a class="page-link shadow-sm" asp-page="./Index" asp-route-p="@(Model.CurrentPage - 1)" asp-route-pageSize="@Model.PageSize" asp-route-SearchString="@Model.SearchString" asp-route-AgencyFilter="@Model.AgencyFilter" asp-route-StatusFilter="@Model.StatusFilter">&laquo;</a>
+                </li>
+                <li class="page-item active">
+                    <span class="page-link shadow-sm border-brand bg-brand text-white">@Model.CurrentPage / @Math.Max(1, Model.TotalPages)</span>
+                </li>
+                <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link shadow-sm" asp-page="./Index" asp-route-p="@(Model.CurrentPage + 1)" asp-route-pageSize="@Model.PageSize" asp-route-SearchString="@Model.SearchString" asp-route-AgencyFilter="@Model.AgencyFilter" asp-route-StatusFilter="@Model.StatusFilter">&raquo;</a>
+                </li>
             </ul>
         </nav>
     </div>
