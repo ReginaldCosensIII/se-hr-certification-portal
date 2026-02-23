@@ -166,7 +166,14 @@
                             }
                         </td>
                         <td class="text-end">
-                            <button type="button" class="btn btn-sm btn-light actions-btn"><i data-lucide="eye" class="text-secondary" style="width: 16px;"></i></button>
+                            <div class="d-flex justify-content-end gap-3">
+                                <a href="javascript:void(0)" class="text-primary action-btn edit-cert-btn" data-request-id="@item.Id" title="Edit Certification">
+                                    <i data-lucide="edit" style="width: 18px; height: 18px;"></i>
+                                </a>
+                                <a href="javascript:void(0)" class="text-danger action-btn remove-cert-btn" data-request-id="@item.Id" title="Revoke/Remove Certification">
+                                    <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 }
@@ -331,12 +338,13 @@
             });
 
             // Prevent modal open when clicking action buttons
-            var actionBtns = document.querySelectorAll('.actions-btn');
+            var actionBtns = document.querySelectorAll('.action-btn');
             actionBtns.forEach(function(btn) {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
                 });
             });
+            if(window.lucide) { window.lucide.createIcons(); }
         });
     </script>
 }
