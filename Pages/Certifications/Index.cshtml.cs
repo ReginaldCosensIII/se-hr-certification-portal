@@ -31,6 +31,15 @@ namespace SeHrCertificationPortal.Pages.Certifications
         [BindProperty(SupportsGet = true)]
         public TrackerStatus? StatusFilter { get; set; }
 
+        [BindProperty] 
+        public int TargetCertId { get; set; }
+        
+        [BindProperty] 
+        public DateTime EditDatePassed { get; set; }
+        
+        [BindProperty] 
+        public DateTime? EditExpiration { get; set; }
+
         public IList<CertificationRequest> PassedCertifications { get; set; } = default!;
         public SelectList AgencyOptions { get; set; } = default!;
 
@@ -166,6 +175,29 @@ namespace SeHrCertificationPortal.Pages.Certifications
             }).ToList();
 
             return new JsonResult(history);
+        }
+
+        public async Task<IActionResult> OnPostEditCertAsync(int p = 1, int pageSize = 25, string? searchString = null, int? agencyFilter = null, string? statusFilter = null, bool filterAnalytics = true)
+        {
+            var record = await _context.CertificationRequests.FindAsync(TargetCertId);
+            if (record != null)
+            {
+                record.RequestDate = EditDatePassed;
+                record.ExpirationDate = EditExpiration;
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToPage(new { p, pageSize, SearchString = searchString, AgencyFilter = agencyFilter, StatusFilter = statusFilter, FilterAnalytics = filterAnalytics });
+        }
+
+        public async Task<IActionResult> OnPostRevokeCertAsync(int p = 1, int pageSize = 25, string? searchString = null, int? agencyFilter = null, string? statusFilter = null, bool filterAnalytics = true)
+        {
+            var record = await _context.CertificationRequests.FindAsync(TargetCertId);
+            if (record != null)
+            {
+                _context.CertificationRequests.Remove(record);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToPage(new { p, pageSize, SearchString = searchString, AgencyFilter = agencyFilter, StatusFilter = statusFilter, FilterAnalytics = filterAnalytics });
         }
     }
 }
