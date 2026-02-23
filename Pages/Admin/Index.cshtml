@@ -446,200 +446,199 @@
 
 @section Scripts {
     <script>
-class ClientSideDataGrid {
-class ClientSideDataGrid {
-    constructor(containerId, defaultRowsPerPage = 25) {
-        this.container = document.getElementById(containerId);
-        if (!this.container) return;
+        // 1. REUSABLE DATA GRID CLASS
+        class ClientSideDataGrid {
+            constructor(containerId, defaultRowsPerPage = 25) {
+                this.container = document.getElementById(containerId);
+                if (!this.container) return;
 
-        this.searchInput = this.container.querySelector('.grid-search-input');
-        this.searchBtn = this.container.querySelector('.grid-search-btn');
-        this.filterSelect = this.container.querySelector('.grid-filter-select');
-        this.clearBtn = this.container.querySelector('.grid-clear-btn');
-        this.perPageSelect = this.container.querySelector('.grid-per-page');
-        this.tableBody = this.container.querySelector('table tbody');
-        this.rows = Array.from(this.tableBody.querySelectorAll('tr'));
-        this.paginationContainer = this.container.querySelector('.grid-pagination');
-        
-        this.rowsPerPage = defaultRowsPerPage;
-        this.currentPage = 1;
-        this.filteredRows = [...this.rows];
+                this.searchInput = this.container.querySelector('.grid-search-input');
+                this.searchBtn = this.container.querySelector('.grid-search-btn');
+                this.filterSelect = this.container.querySelector('.grid-filter-select');
+                this.clearBtn = this.container.querySelector('.grid-clear-btn');
+                this.perPageSelect = this.container.querySelector('.grid-per-page');
+                this.tableBody = this.container.querySelector('table tbody');
+                this.rows = Array.from(this.tableBody.querySelectorAll('tr'));
+                this.paginationContainer = this.container.querySelector('.grid-pagination');
+                
+                this.rowsPerPage = defaultRowsPerPage;
+                this.currentPage = 1;
+                this.filteredRows = [...this.rows];
 
-        this.activeSearchTerm = '';
-        this.activeFilterVal = '';
+                this.activeSearchTerm = '';
+                this.activeFilterVal = '';
 
-        if(this.perPageSelect) this.perPageSelect.value = this.rowsPerPage;
+                if(this.perPageSelect) this.perPageSelect.value = this.rowsPerPage;
 
-        this.init();
-    }
+                this.init();
+            }
 
-    init() {
-        if (this.searchBtn && this.searchInput) {
-            this.searchBtn.addEventListener('click', () => this.applyFilters());
-            this.searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    this.applyFilters();
+            init() {
+                if (this.searchBtn && this.searchInput) {
+                    this.searchBtn.addEventListener('click', () => this.applyFilters());
+                    this.searchInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            this.applyFilters();
+                        }
+                    });
                 }
-            });
-        }
 
-        if (this.filterSelect) {
-            this.filterSelect.addEventListener('change', () => this.applyFilters());
-        }
+                if (this.filterSelect) {
+                    this.filterSelect.addEventListener('change', () => this.applyFilters());
+                }
 
-        if (this.clearBtn) {
-            this.clearBtn.addEventListener('click', () => this.clearFilters());
-        }
+                if (this.clearBtn) {
+                    this.clearBtn.addEventListener('click', () => this.clearFilters());
+                }
 
-        if (this.perPageSelect) {
-            this.perPageSelect.addEventListener('change', (e) => {
-                this.rowsPerPage = parseInt(e.target.value);
+                if (this.perPageSelect) {
+                    this.perPageSelect.addEventListener('change', (e) => {
+                        this.rowsPerPage = parseInt(e.target.value);
+                        this.currentPage = 1;
+                        this.render();
+                    });
+                }
+                this.render();
+            }
+
+            applyFilters() {
+                this.activeSearchTerm = this.searchInput ? this.searchInput.value.toLowerCase().trim() : '';
+                this.activeFilterVal = this.filterSelect ? this.filterSelect.value.toLowerCase() : '';
+                this.executeFilter();
+            }
+
+            clearFilters() {
+                if (this.searchInput) this.searchInput.value = '';
+                if (this.filterSelect) this.filterSelect.value = '';
+                this.activeSearchTerm = '';
+                this.activeFilterVal = '';
+                this.executeFilter();
+            }
+
+            executeFilter() {
+                this.filteredRows = this.rows.filter(row => {
+                    const text = row.innerText.toLowerCase();
+                    const matchesSearch = this.activeSearchTerm === '' || text.includes(this.activeSearchTerm);
+                    const matchesFilter = this.activeFilterVal === '' || text.includes(this.activeFilterVal);
+                    return matchesSearch && matchesFilter;
+                });
+
+                if (this.clearBtn) {
+                    if (this.activeSearchTerm !== '' || this.activeFilterVal !== '') {
+                        this.clearBtn.classList.remove('d-none');
+                    } else {
+                        this.clearBtn.classList.add('d-none');
+                    }
+                }
+
                 this.currentPage = 1;
                 this.render();
-            });
-        }
-        this.render();
-    }
+            }
 
-    applyFilters() {
-        this.activeSearchTerm = this.searchInput ? this.searchInput.value.toLowerCase().trim() : '';
-        this.activeFilterVal = this.filterSelect ? this.filterSelect.value.toLowerCase() : '';
-        this.executeFilter();
-    }
+            render() {
+                this.rows.forEach(row => row.style.display = 'none');
+                const totalPages = Math.ceil(this.filteredRows.length / this.rowsPerPage) || 1;
+                if (this.currentPage > totalPages) this.currentPage = totalPages;
+                const start = (this.currentPage - 1) * this.rowsPerPage;
+                const end = start + this.rowsPerPage;
+                const pageRows = this.filteredRows.slice(start, end);
+                pageRows.forEach(row => row.style.display = '');
+                this.renderPagination(totalPages);
+                if(window.lucide) { window.lucide.createIcons(); } 
+            }
 
-    clearFilters() {
-        if (this.searchInput) this.searchInput.value = '';
-        if (this.filterSelect) this.filterSelect.value = '';
-        this.activeSearchTerm = '';
-        this.activeFilterVal = '';
-        this.executeFilter();
-    }
-
-    executeFilter() {
-        this.filteredRows = this.rows.filter(row => {
-            const text = row.innerText.toLowerCase();
-            const matchesSearch = this.activeSearchTerm === '' || text.includes(this.activeSearchTerm);
-            const matchesFilter = this.activeFilterVal === '' || text.includes(this.activeFilterVal);
-            return matchesSearch && matchesFilter;
-        });
-
-        if (this.clearBtn) {
-            if (this.activeSearchTerm !== '' || this.activeFilterVal !== '') {
-                this.clearBtn.classList.remove('d-none');
-            } else {
-                this.clearBtn.classList.add('d-none');
+            renderPagination(totalPages) {
+                if(!this.paginationContainer) return;
+                let html = '';
+                html += `<li class="page-item ${this.currentPage === 1 ? 'disabled' : ''}">
+                            <a class="page-link shadow-sm" href="javascript:void(0)" data-page="${this.currentPage - 1}">&laquo;</a>
+                         </li>`;
+                html += `<li class="page-item active">
+                            <span class="page-link shadow-sm border-brand bg-brand text-white" style="pointer-events: none;">${this.currentPage} / ${totalPages}</span>
+                         </li>`;
+                html += `<li class="page-item ${this.currentPage === totalPages ? 'disabled' : ''}">
+                            <a class="page-link shadow-sm" href="javascript:void(0)" data-page="${this.currentPage + 1}">&raquo;</a>
+                         </li>`;
+                this.paginationContainer.innerHTML = html;
+                this.paginationContainer.querySelectorAll('a.page-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const parentLi = e.target.closest('.page-item');
+                        if (!parentLi.classList.contains('disabled')) {
+                            this.currentPage = parseInt(e.target.getAttribute('data-page'));
+                            this.render();
+                        }
+                    });
+                });
             }
         }
 
-        this.currentPage = 1;
-        this.render();
-    }
+        // 2. PAGE INITIALIZATION
+        document.addEventListener('DOMContentLoaded', function() {
+            // Instantiate reusable grids
+            new ClientSideDataGrid('agencyGridContainer', 25);
+            new ClientSideDataGrid('certGridContainer', 25);
 
-    render() {
-        this.rows.forEach(row => row.style.display = 'none');
-        const totalPages = Math.ceil(this.filteredRows.length / this.rowsPerPage) || 1;
-        if (this.currentPage > totalPages) this.currentPage = totalPages;
-        const start = (this.currentPage - 1) * this.rowsPerPage;
-        const end = start + this.rowsPerPage;
-        const pageRows = this.filteredRows.slice(start, end);
-        pageRows.forEach(row => row.style.display = '');
-        this.renderPagination(totalPages);
-        if(window.lucide) { window.lucide.createIcons(); } // Refresh icons if DOM changes
-    }
-
-    renderPagination(totalPages) {
-        if(!this.paginationContainer) return;
-        let html = '';
-        html += `<li class="page-item ${this.currentPage === 1 ? 'disabled' : ''}">
-                    <a class="page-link shadow-sm" href="javascript:void(0)" data-page="${this.currentPage - 1}">&laquo;</a>
-                 </li>`;
-        html += `<li class="page-item active">
-                    <span class="page-link shadow-sm border-brand bg-brand text-white" style="pointer-events: none;">${this.currentPage} / ${totalPages}</span>
-                 </li>`;
-        html += `<li class="page-item ${this.currentPage === totalPages ? 'disabled' : ''}">
-                    <a class="page-link shadow-sm" href="javascript:void(0)" data-page="${this.currentPage + 1}">&raquo;</a>
-                 </li>`;
-        this.paginationContainer.innerHTML = html;
-        this.paginationContainer.querySelectorAll('a.page-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const parentLi = e.target.closest('.page-item');
-                if (!parentLi.classList.contains('disabled')) {
-                    this.currentPage = parseInt(e.target.getAttribute('data-page'));
-                    this.render();
-                }
+            // Tab State Retention
+            var tabElements = document.querySelectorAll('button[data-bs-toggle="tab"]');
+            tabElements.forEach(function(tabEl) {
+                tabEl.addEventListener('shown.bs.tab', function (event) {
+                    localStorage.setItem('activeAdminTab', event.target.getAttribute('data-bs-target'));
+                });
             });
+
+            var activeTabTarget = localStorage.getItem('activeAdminTab');
+            if (activeTabTarget) {
+                var tabToActivate = document.querySelector('button[data-bs-target="' + activeTabTarget + '"]');
+                if (tabToActivate) {
+                    new bootstrap.Tab(tabToActivate).show();
+                }
+            }
         });
-    }
-}
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Instantiate reusable grids
-    new ClientSideDataGrid('agencyGridContainer', 25);
-    new ClientSideDataGrid('certGridContainer', 25);
+        // 3. MASTER ACTION MODALS EVENT DELEGATION
+        document.addEventListener('click', function(e) {
+            // Agency Actions
+            var editAgencyBtn = e.target.closest('.edit-agency-btn');
+            if (editAgencyBtn) {
+                e.preventDefault();
+                document.getElementById('editAgencyId').value = editAgencyBtn.getAttribute('data-id');
+                document.getElementById('editAgencyName').value = editAgencyBtn.getAttribute('data-name');
+                document.getElementById('editAgencyAbbreviation').value = editAgencyBtn.getAttribute('data-abbreviation');
+                new bootstrap.Modal(document.getElementById('editAgencyModal')).show();
+                return;
+            }
 
-    // Agency Action Event Delegation
-    document.addEventListener('click', function(e) {
-        // Edit Agency Trigger
-        var editBtn = e.target.closest('.edit-agency-btn');
-        if (editBtn) {
-            e.preventDefault();
-            document.getElementById('editAgencyId').value = editBtn.getAttribute('data-id');
-            document.getElementById('editAgencyName').value = editBtn.getAttribute('data-name');
-            document.getElementById('editAgencyAbbreviation').value = editBtn.getAttribute('data-abbreviation');
-            new bootstrap.Modal(document.getElementById('editAgencyModal')).show();
-            return;
-        }
+            var deactivateAgencyBtn = e.target.closest('.deactivate-agency-btn');
+            if (deactivateAgencyBtn) {
+                e.preventDefault();
+                document.getElementById('deactivateAgencyId').value = deactivateAgencyBtn.getAttribute('data-id');
+                document.getElementById('deactivateAgencyNameDisplay').textContent = deactivateAgencyBtn.getAttribute('data-name');
+                new bootstrap.Modal(document.getElementById('deactivateAgencyModal')).show();
+                return;
+            }
 
-        // Deactivate Agency Trigger
-        var deactivateBtn = e.target.closest('.deactivate-agency-btn');
-        if (deactivateBtn) {
-            e.preventDefault();
-            document.getElementById('deactivateAgencyId').value = deactivateBtn.getAttribute('data-id');
-            document.getElementById('deactivateAgencyNameDisplay').textContent = deactivateBtn.getAttribute('data-name');
-            new bootstrap.Modal(document.getElementById('deactivateAgencyModal')).show();
-            return;
-        }
+            // Certification Actions
+            var editCertBtn = e.target.closest('.edit-cert-btn');
+            if (editCertBtn) {
+                e.preventDefault();
+                document.getElementById('editCertId').value = editCertBtn.getAttribute('data-id');
+                document.getElementById('editCertName').value = editCertBtn.getAttribute('data-name');
+                document.getElementById('editCertAgency').value = editCertBtn.getAttribute('data-agency');
+                document.getElementById('editCertValidity').value = editCertBtn.getAttribute('data-validity');
+                new bootstrap.Modal(document.getElementById('editCertModal')).show();
+                return;
+            }
 
-        // Edit Cert Trigger
-        var editCertBtn = e.target.closest('.edit-cert-btn');
-        if (editCertBtn) {
-            e.preventDefault();
-            document.getElementById('editCertId').value = editCertBtn.getAttribute('data-id');
-            document.getElementById('editCertName').value = editCertBtn.getAttribute('data-name');
-            document.getElementById('editCertAgency').value = editCertBtn.getAttribute('data-agency');
-            document.getElementById('editCertValidity').value = editCertBtn.getAttribute('data-validity');
-            new bootstrap.Modal(document.getElementById('editCertModal')).show();
-            return;
-        }
-
-        // Deactivate Cert Trigger
-        var deactivateCertBtn = e.target.closest('.deactivate-cert-btn');
-        if (deactivateCertBtn) {
-            e.preventDefault();
-            document.getElementById('deactivateCertId').value = deactivateCertBtn.getAttribute('data-id');
-            document.getElementById('deactivateCertNameDisplay').textContent = deactivateCertBtn.getAttribute('data-name');
-            new bootstrap.Modal(document.getElementById('deactivateCertModal')).show();
-            return;
-        }
-    });
-
-    // Tab State Retention
-    var tabElements = document.querySelectorAll('button[data-bs-toggle="tab"]');
-    tabElements.forEach(function(tabEl) {
-        tabEl.addEventListener('shown.bs.tab', function (event) {
-            localStorage.setItem('activeAdminTab', event.target.getAttribute('data-bs-target'));
+            var deactivateCertBtn = e.target.closest('.deactivate-cert-btn');
+            if (deactivateCertBtn) {
+                e.preventDefault();
+                document.getElementById('deactivateCertId').value = deactivateCertBtn.getAttribute('data-id');
+                document.getElementById('deactivateCertNameDisplay').textContent = deactivateCertBtn.getAttribute('data-name');
+                new bootstrap.Modal(document.getElementById('deactivateCertModal')).show();
+                return;
+            }
         });
-    });
-
-    var activeTabTarget = localStorage.getItem('activeAdminTab');
-    if (activeTabTarget) {
-        var tabToActivate = document.querySelector('button[data-bs-target="' + activeTabTarget + '"]');
-        if (tabToActivate) {
-            new bootstrap.Tab(tabToActivate).show();
-        }
-    }
-});
-</script>
+    </script>
 }
