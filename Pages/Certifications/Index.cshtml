@@ -11,12 +11,20 @@
     </div>
     <div>
         <button class="btn btn-brand d-flex align-items-center fw-bold">
-            <i data-lucide="file-down" class="me-2 text-white" style="width: 18px;"></i> Generate Report
+            <i data-lucide="file-down" class="me-2 text-white" style="width: 18px;"></i> Download Report
         </button>
+    </div>
     </div>
 </div>
 
 <!-- ANALYTICS DASHBOARD -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0 fw-bold text-secondary">Compliance & Coverage Analytics</h5>
+    <div class="form-check form-switch fs-5">
+        <input class="form-check-input" type="checkbox" role="switch" id="analyticsVisualToggle" @(Model.FilterAnalytics ? "checked" : "")>
+        <label class="form-check-label fs-6 text-muted mt-1" for="analyticsVisualToggle">Table Filters Affect Visuals</label>
+    </div>
+</div>
 <div class="row mb-4">
     <div class="col-md-4">
         <div class="card bg-success text-white shadow-sm h-100">
@@ -66,11 +74,12 @@
             <h3 class="card-title mb-0 fw-bold text-dark">Employee Certifications</h3>
             
             <div class="card-tools d-flex align-items-center gap-2">
-                <form method="get" class="d-flex align-items-center gap-2">
+                <form method="get" id="filterForm" class="d-flex align-items-center gap-2">
                     <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                    <input type="hidden" name="FilterAnalytics" id="hiddenFilterAnalytics" value="@Model.FilterAnalytics.ToString().ToLower()" />
                     
-                    <div class="input-group input-group-sm mb-0">
-                        <input type="text" asp-for="SearchString" class="form-control" placeholder="Search employee..." style="max-width: 200px;">
+                    <div class="input-group input-group-sm mb-0 me-2" style="max-width: 250px;">
+                        <input type="text" asp-for="SearchString" class="form-control" placeholder="Search employee...">
                         <button class="btn btn-brand" type="submit">
                             <i data-lucide="search" class="text-white" style="width: 14px;"></i>
                         </button>
@@ -109,6 +118,7 @@
                     <th>Date Passed</th>
                     <th>Expiration Date</th>
                     <th>Status</th>
+                    <th class="text-end">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -154,6 +164,9 @@
                                         break;
                                 }
                             }
+                        </td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-light actions-btn"><i data-lucide="eye" class="text-secondary" style="width: 16px;"></i></button>
                         </td>
                     </tr>
                 }
@@ -221,7 +234,7 @@
                 </div>
             </div>
             <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -249,6 +262,12 @@
                     datasets: [{ label: 'Active Employees', data: @Html.Raw(Model.CertChartData), backgroundColor: '#0d6efd' }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }
+            });
+
+            // Handle Analytics Toggle
+            document.getElementById('analyticsVisualToggle').addEventListener('change', function() {
+                document.getElementById('hiddenFilterAnalytics').value = this.checked.toString().toLowerCase();
+                document.getElementById('filterForm').submit();
             });
 
             var rows = document.querySelectorAll('.clickable-row');
@@ -308,6 +327,14 @@
                         .catch(error => {
                             console.error('Fetch caught an error:', error);
                         });
+                });
+            });
+
+            // Prevent modal open when clicking action buttons
+            var actionBtns = document.querySelectorAll('.actions-btn');
+            actionBtns.forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
                 });
             });
         });

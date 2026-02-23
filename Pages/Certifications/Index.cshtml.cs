@@ -23,6 +23,9 @@ namespace SeHrCertificationPortal.Pages.Certifications
         public string? SearchString { get; set; }
 
         [BindProperty(SupportsGet = true)]
+        public bool FilterAnalytics { get; set; } = true;
+
+        [BindProperty(SupportsGet = true)]
         public int? AgencyFilter { get; set; }
 
         [BindProperty(SupportsGet = true)]
@@ -106,7 +109,15 @@ namespace SeHrCertificationPortal.Pages.Certifications
             }
 
             // --- ANALYTICS ENGINE ---
-            var analyticsRaw = await query.Select(c => new {
+            // If true, use 'query' (URL filters applied). If false, use global DB dataset.
+            var analyticsBaseQuery = FilterAnalytics 
+                ? query 
+                : _context.CertificationRequests
+                    .Include(c => c.Agency)
+                    .Include(c => c.Certification)
+                    .Where(c => c.Status == RequestStatus.Passed);
+
+            var analyticsRaw = await analyticsBaseQuery.Select(c => new {
                 AgencyName = c.Agency != null ? c.Agency.Abbreviation : (c.CustomAgencyName ?? "Unknown"),
                 CertName = c.Certification != null ? c.Certification.Name : (c.CustomCertificationName ?? "Unknown"),
                 ExpDate = c.ExpirationDate
