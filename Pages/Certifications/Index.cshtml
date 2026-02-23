@@ -16,88 +16,6 @@
     </div>
 </div>
 
-<!-- Employee Detail View (Accordion Style) -->
-<div class="accordion mb-4 shadow-sm" id="employeeDetailAccordion">
-    <div class="accordion-item border-0" style="border-top: 4px solid var(--brand-primary) !important;">
-        <h2 class="accordion-header" id="headingDetail">
-            <button class="accordion-button collapsed text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetail" aria-expanded="false" aria-controls="collapseDetail">
-                <span class="fs-4 fw-bold">
-                    <i data-lucide="user" class="me-2 text-brand-primary" style="color: var(--brand-primary);"></i> Certification Details
-                </span>
-            </button>
-        </h2>
-        <div id="collapseDetail" class="accordion-collapse collapse" aria-labelledby="headingDetail" data-bs-parent="#employeeDetailAccordion">
-            <div class="accordion-body bg-light">
-                
-                <!-- Empty State Message -->
-                <div class="alert alert-warning border-0 d-flex align-items-center mb-3" role="alert">
-                    <i data-lucide="info" class="me-2"></i>
-                    <div>
-                        <strong>No Selection:</strong> Please select an employee from the table below to view details.
-                    </div>
-                </div>
-
-                <!-- Disabled / Empty Fields Representation -->
-                <div class="row g-4 opacity-50" style="pointer-events: none; user-select: none;">
-                    <!-- Left Col: Employee Info & Current Cert -->
-                    <div class="col-md-4 border-end">
-                        <h6 class="text-muted text-uppercase small fw-bold mb-3">Employee Profile</h6>
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="bg-white rounded-circle d-flex align-items-center justify-content-center me-3 border" style="width: 48px; height: 48px;">
-                                <span class="fw-bold text-muted">--</span>
-                            </div>
-                            <div>
-                                <div class="fw-bold text-muted">Select Employee</div>
-                                <div class="small text-muted">Role • ID: ---</div>
-                            </div>
-                        </div>
-                        
-                        <h6 class="text-muted text-uppercase small fw-bold mb-3 mt-4">Selected Certification</h6>
-                        <div class="p-3 bg-white rounded border">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="fw-bold text-muted">---</span>
-                                <span class="badge bg-secondary">---</span>
-                            </div>
-                            <div class="small text-muted mb-1">Agency: <span class="fw-bold text-muted">---</span></div>
-                            <div class="small text-muted mb-1">Issued: <span class="fw-bold text-muted">--/--/----</span></div>
-                            <div class="small text-muted mb-3">Expires: <span class="fw-bold text-muted">--/--/----</span></div>
-                            
-                            <button class="btn btn-sm btn-outline-secondary w-100" disabled>
-                                 <i data-lucide="download" class="me-1" style="width: 14px;"></i> Download Copy
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Right Col: Cert History -->
-                    <div class="col-md-8">
-                        <h6 class="text-muted text-uppercase small fw-bold mb-3">Certification History</h6>
-                        <div class="table-responsive">
-                             <table class="table table-sm align-middle text-muted">
-                                <thead class="bg-light">
-                                    <tr>
-                                        <th>Certification</th>
-                                        <th>Agency</th>
-                                        <th>Status</th>
-                                        <th>Expiration</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                 <tbody>
-                                    <tr>
-                                        <td colspan="5" class="text-center py-4">
-                                            <em>No records requested</em>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="card shadow-sm">
     <div class="card-header border-0 bg-transparent py-3">
         <div class="d-flex justify-content-between align-items-center">
@@ -232,6 +150,39 @@
     </div>
 </div>
 
+<div class="modal fade" id="employeeHistoryModal" tabindex="-1" aria-labelledby="employeeHistoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title" id="employeeHistoryModalLabel">
+                    <i data-lucide="user" class="me-2"></i><span id="modalEmployeeName">Employee History</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle mb-0" id="modalHistoryTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Agency</th>
+                                <th>Certification</th>
+                                <th>Date Passed</th>
+                                <th>Expiration</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalHistoryBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -254,13 +205,40 @@
                         .then(data => {
                             console.log('JSON Data received successfully:', data);
                             
-                            // Safely locate and open the accordion using Vanilla JS
-                            var accordionCollapse = document.querySelector('.accordion-collapse');
-                            console.log('Accordion element found:', accordionCollapse !== null);
-                            
-                            if (accordionCollapse) {
-                                new bootstrap.Collapse(accordionCollapse, { toggle: false }).show();
+                            // 1. Get the employee name from the clicked row to set the modal title
+                            var employeeName = this.textContent.trim(); // Fallback if needed
+                            var nameCell = this.querySelector('td:first-child');
+                            if (nameCell) employeeName = nameCell.textContent.trim();
+                            document.getElementById('modalEmployeeName').textContent = employeeName + "'s Certifications";
+
+                            // 2. Build the table rows from the JSON array
+                            var tbodyHtml = '';
+                            if (data.length === 0) {
+                                tbodyHtml = '<tr><td colspan="5" class="text-center text-muted fst-italic py-4">No certification history found.</td></tr>';
+                            } else {
+                                data.forEach(function(item) {
+                                    // Determine badge class
+                                    var badgeClass = 'bg-secondary';
+                                    if (item.status === 'Active') badgeClass = 'bg-success';
+                                    else if (item.status === 'ExpiringSoon') badgeClass = 'bg-warning text-dark';
+                                    else if (item.status === 'Expired') badgeClass = 'bg-danger';
+                                    else if (item.status === 'Permanent') badgeClass = 'bg-info text-dark';
+
+                                    tbodyHtml += `<tr>
+                                        <td>${item.agency}</td>
+                                        <td>${item.certification}</td>
+                                        <td>${item.datePassed}</td>
+                                        <td>${item.expirationDate}</td>
+                                        <td><span class="badge ${badgeClass}">${item.status}</span></td>
+                                    </tr>`;
+                                });
                             }
+
+                            // 3. Inject HTML and open the modal
+                            document.getElementById('modalHistoryBody').innerHTML = tbodyHtml;
+                            if(window.lucide) { window.lucide.createIcons(); } // Re-render icons if needed
+                            var historyModal = new bootstrap.Modal(document.getElementById('employeeHistoryModal'));
+                            historyModal.show();
                         })
                         .catch(error => {
                             console.error('Fetch caught an error:', error);
