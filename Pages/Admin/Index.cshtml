@@ -4,6 +4,8 @@
     ViewData["Title"] = "Admin Management";
 }
 
+<link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
+
 <!-- Admin Management Tabs -->
 <ul class="nav nav-tabs admin-tabs" id="adminTabs" role="tablist">
     <li class="nav-item" role="presentation">
@@ -37,7 +39,7 @@
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-striped table-hover align-middle mb-0">
+                    <table class="table table-striped table-hover align-middle mb-0" id="agencyTable">
                         <thead class="bg-light">
                             <tr>
                                 <th class="ps-3" style="width: 60px;">ID</th>
@@ -84,7 +86,7 @@
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-striped table-hover align-middle mb-0">
+                    <table class="table table-striped table-hover align-middle mb-0" id="certTable">
                         <thead class="bg-light">
                             <tr>
                                 <th class="ps-3">Certification Name</th>
@@ -237,3 +239,46 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Initialize Client-Side Data Grids
+    if (document.getElementById('agencyTable')) {
+        new simpleDatatables.DataTable("#agencyTable", {
+            searchable: true,
+            fixedHeight: true,
+            perPage: 10
+        });
+    }
+    
+    if (document.getElementById('certTable')) {
+        new simpleDatatables.DataTable("#certTable", {
+            searchable: true,
+            fixedHeight: true,
+            perPage: 10
+        });
+    }
+
+    // 2. Tab State Retention
+    // Listen for tab changes and save the active target ID to localStorage
+    var tabElements = document.querySelectorAll('button[data-bs-toggle="tab"]');
+    tabElements.forEach(function(tabEl) {
+        tabEl.addEventListener('shown.bs.tab', function (event) {
+            localStorage.setItem('activeAdminTab', event.target.getAttribute('data-bs-target'));
+        });
+    });
+
+    // On page load, check localStorage and open the saved tab
+    var activeTabTarget = localStorage.getItem('activeAdminTab');
+    if (activeTabTarget) {
+        var tabToActivate = document.querySelector('button[data-bs-target="' + activeTabTarget + '"]');
+        if (tabToActivate) {
+            var tab = new bootstrap.Tab(tabToActivate);
+            tab.show();
+        }
+    }
+});
+</script>
+}
