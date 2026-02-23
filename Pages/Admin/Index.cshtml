@@ -4,8 +4,6 @@
     ViewData["Title"] = "Admin Management";
 }
 
-<link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
-
 <!-- Admin Management Tabs -->
 <ul class="nav nav-tabs admin-tabs" id="adminTabs" role="tablist">
     <li class="nav-item" role="presentation">
@@ -37,32 +35,49 @@
                     </button>
                 </div>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover align-middle mb-0" id="agencyTable">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="ps-3" style="width: 60px;">ID</th>
-                                <th>Name</th>
-                                <th class="text-center" style="width: 120px;">Contact Person</th>
-                                <th class="text-center" style="width: 100px;">Status</th>
-                                <th class="text-end pe-3" style="width: 100px;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        @foreach (var item in Model.Agency) {
-                            <tr>
-                                <td class="ps-3 text-muted">@item.Id</td>
-                                <td class="fw-bold">@item.FullName (@item.Abbreviation)</td>
-                                <td class="text-center text-muted">@(item.Certifications.Count) Certifications</td>
-                                <td class="text-center"><span class="badge text-bg-success">Active</span></td>
-                                <td class="text-end pe-3">
-                                    <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="more-horizontal" style="width: 16px;"></i></button>
-                                </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
+            <div class="card-body p-3">
+                <div class="custom-data-grid" id="agencyGridContainer">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <input type="text" class="form-control grid-search-input" placeholder="Search...">
+                                <button class="btn btn-outline-secondary" type="button"><i data-lucide="search" style="width: 16px;"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle mb-0" id="agencyTable">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-3" style="width: 60px;">ID</th>
+                                    <th>Name</th>
+                                    <th class="text-center" style="width: 170px;">Active Certifications</th>
+                                    <th class="text-center" style="width: 100px;">Status</th>
+                                    <th class="text-end pe-3" style="width: 100px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var item in Model.Agency) {
+                                <tr>
+                                    <td class="ps-3 text-muted">@item.Id</td>
+                                    <td class="fw-bold">@item.FullName (@item.Abbreviation)</td>
+                                    <td class="text-center text-muted">@(item.Certifications.Count) Certifications</td>
+                                    <td class="text-center"><span class="badge text-bg-success">Active</span></td>
+                                    <td class="text-end pe-3">
+                                        <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="more-horizontal" style="width: 16px;"></i></button>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="text-muted grid-info">Showing...</span>
+                        <ul class="pagination pagination-sm m-0 grid-pagination">
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -84,46 +99,63 @@
                     </button>
                 </div>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover align-middle mb-0" id="certTable">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="ps-3">Certification Name</th>
-                                <th>Issuing Agency</th>
-                                <th>Validity Period</th>
-                                <th>Requires Renewal?</th>
-                                <th class="text-end pe-3" style="width: 80px;"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        @foreach (var cert in Model.Certifications) {
-                            <tr>
-                                <td class="ps-3 fw-bold">@cert.Name</td>
-                                <td>@(cert.Agency?.Abbreviation ?? "Unknown")</td>
-                                <td>
-                                    @if (cert.ValidityPeriodMonths == 0) {
-                                        <text>Permanent</text>
-                                    } else if (cert.ValidityPeriodMonths % 12 == 0) {
-                                        <text>@(cert.ValidityPeriodMonths / 12) Years</text>
-                                    } else {
-                                        <text>@cert.ValidityPeriodMonths Months</text>
-                                    }
-                                </td>
-                                <td>
-                                    @if (cert.ValidityPeriodMonths > 0) {
-                                        <i data-lucide="check" class="text-success" style="width: 16px;"></i> <text>Yes</text>
-                                    } else {
-                                        <i data-lucide="x" class="text-muted" style="width: 16px;"></i> <text>No</text>
-                                    }
-                                </td>
-                                <td class="text-end pe-3">
-                                    <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="edit-2" style="width: 16px;"></i></button>
-                                </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
+            <div class="card-body p-3">
+                <div class="custom-data-grid" id="certGridContainer">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <input type="text" class="form-control grid-search-input" placeholder="Search...">
+                                <button class="btn btn-outline-secondary" type="button"><i data-lucide="search" style="width: 16px;"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle mb-0" id="certTable">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-3">Certification Name</th>
+                                    <th>Issuing Agency</th>
+                                    <th>Validity Period</th>
+                                    <th>Requires Renewal?</th>
+                                    <th class="text-end pe-3" style="width: 80px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var cert in Model.Certifications) {
+                                <tr>
+                                    <td class="ps-3 fw-bold">@cert.Name</td>
+                                    <td>@(cert.Agency?.Abbreviation ?? "Unknown")</td>
+                                    <td>
+                                        @if (cert.ValidityPeriodMonths == 0) {
+                                            <text>Permanent</text>
+                                        } else if (cert.ValidityPeriodMonths % 12 == 0) {
+                                            <text>@(cert.ValidityPeriodMonths / 12) Years</text>
+                                        } else {
+                                            <text>@cert.ValidityPeriodMonths Months</text>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (cert.ValidityPeriodMonths > 0) {
+                                            <i data-lucide="check" class="text-success" style="width: 16px;"></i> <text>Yes</text>
+                                        } else {
+                                            <i data-lucide="x" class="text-muted" style="width: 16px;"></i> <text>No</text>
+                                        }
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="edit-2" style="width: 16px;"></i></button>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="text-muted grid-info">Showing...</span>
+                        <ul class="pagination pagination-sm m-0 grid-pagination">
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -241,28 +273,107 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
     <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // 1. Initialize Client-Side Data Grids
-    if (document.getElementById('agencyTable')) {
-        new simpleDatatables.DataTable("#agencyTable", {
-            searchable: true,
-            fixedHeight: true,
-            perPage: 10
-        });
-    }
-    
-    if (document.getElementById('certTable')) {
-        new simpleDatatables.DataTable("#certTable", {
-            searchable: true,
-            fixedHeight: true,
-            perPage: 10
-        });
+class ClientSideDataGrid {
+    constructor(containerId, rowsPerPage = 10) {
+        this.container = document.getElementById(containerId);
+        if (!this.container) return;
+
+        this.searchInput = this.container.querySelector('.grid-search-input');
+        this.tableBody = this.container.querySelector('table tbody');
+        this.rows = Array.from(this.tableBody.querySelectorAll('tr'));
+        this.paginationContainer = this.container.querySelector('.grid-pagination');
+        this.infoText = this.container.querySelector('.grid-info');
+        
+        this.rowsPerPage = rowsPerPage;
+        this.currentPage = 1;
+        this.filteredRows = [...this.rows];
+
+        this.init();
     }
 
-    // 2. Tab State Retention
-    // Listen for tab changes and save the active target ID to localStorage
+    init() {
+        if(this.searchInput) {
+            this.searchInput.addEventListener('input', (e) => this.filterData(e.target.value));
+        }
+        this.render();
+    }
+
+    filterData(searchTerm) {
+        const term = searchTerm.toLowerCase();
+        this.filteredRows = this.rows.filter(row => {
+            return row.innerText.toLowerCase().includes(term);
+        });
+        this.currentPage = 1;
+        this.render();
+    }
+
+    render() {
+        // Hide all rows
+        this.rows.forEach(row => row.style.display = 'none');
+
+        // Calculate pagination
+        const totalPages = Math.ceil(this.filteredRows.length / this.rowsPerPage) || 1;
+        const start = (this.currentPage - 1) * this.rowsPerPage;
+        const end = start + this.rowsPerPage;
+
+        // Show current page rows
+        const pageRows = this.filteredRows.slice(start, end);
+        pageRows.forEach(row => row.style.display = '');
+
+        // Update Info Text
+        const currentEnd = Math.min(end, this.filteredRows.length);
+        if(this.infoText) {
+            this.infoText.textContent = `Showing ${this.filteredRows.length === 0 ? 0 : start + 1} to ${currentEnd} of ${this.filteredRows.length} entries`;
+        }
+
+        // Render Pagination HTML
+        this.renderPagination(totalPages);
+    }
+
+    renderPagination(totalPages) {
+        if(!this.paginationContainer) return;
+        let html = '';
+        
+        // Prev Button
+        html += `<li class="page-item ${this.currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="javascript:void(0)" data-page="${this.currentPage - 1}">&laquo;</a>
+                 </li>`;
+                 
+        // Page Numbers
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<li class="page-item ${this.currentPage === i ? 'active' : ''}">
+                        <a class="page-link" href="javascript:void(0)" data-page="${i}">${i}</a>
+                     </li>`;
+        }
+
+        // Next Button
+        html += `<li class="page-item ${this.currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="javascript:void(0)" data-page="${this.currentPage + 1}">&raquo;</a>
+                 </li>`;
+
+        this.paginationContainer.innerHTML = html;
+
+        // Attach click events
+        this.paginationContainer.querySelectorAll('.page-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const parentLi = e.target.closest('.page-item');
+                if (!parentLi.classList.contains('disabled') && !parentLi.classList.contains('active')) {
+                    this.currentPage = parseInt(e.target.getAttribute('data-page'));
+                    this.render();
+                }
+            });
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Instantiate reusable grids
+    new ClientSideDataGrid('agencyGridContainer', 10);
+    new ClientSideDataGrid('certGridContainer', 10);
+
+    // Tab State Retention
     var tabElements = document.querySelectorAll('button[data-bs-toggle="tab"]');
     tabElements.forEach(function(tabEl) {
         tabEl.addEventListener('shown.bs.tab', function (event) {
@@ -270,13 +381,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // On page load, check localStorage and open the saved tab
     var activeTabTarget = localStorage.getItem('activeAdminTab');
     if (activeTabTarget) {
         var tabToActivate = document.querySelector('button[data-bs-target="' + activeTabTarget + '"]');
         if (tabToActivate) {
-            var tab = new bootstrap.Tab(tabToActivate);
-            tab.show();
+            new bootstrap.Tab(tabToActivate).show();
         }
     }
 });

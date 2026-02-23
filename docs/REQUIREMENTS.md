@@ -121,3 +121,9 @@
 
 ### 3. Expiring Soon Status Logic
 * **Description:** QA identified that certifications expiring on the current day still show as 'Active'. In the upcoming Notifications/Certifications phase, implement a global threshold calculation (e.g., < 30 days) to accurately apply an 'Expiring Soon' badge and status instead of just 'Active'.
+
+## Post-MVP UI/UX & Code Reusability Audit
+Before final production handoff, a dedicated sprint must be executed to ensure strict DRY (Don't Repeat Yourself) principles across the portal:
+* **Global CSS Styling:** Verify all pages, sections, and tables utilize shared, reusable CSS classes/variables. Eliminate hard-coded, one-off inline styles.
+* **Component Standardization:** Ensure header titles, action icons, and table layouts share a unified visual design language.
+* **Backend Logic Reusability:** Audit the C# search, filtering, and pagination logic across all pages (Requests, Certifications, Admin). Abstract duplicate backend filtering logic into reusable services, extensions, or base classes where applicable.
