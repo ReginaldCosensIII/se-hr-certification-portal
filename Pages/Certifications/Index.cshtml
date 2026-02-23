@@ -305,6 +305,88 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // 1. MASTER TABLE CONTROLLER (Handles Actions AND Row Clicks)
+            var tableBody = document.querySelector('tbody');
+            if (tableBody) {
+                tableBody.addEventListener('click', function(e) {
+                    
+                    // A. Check if an EDIT icon was clicked
+                    var editBtn = e.target.closest('.edit-cert-btn');
+                    if (editBtn) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('--- EDIT TRIGGERED ---');
+                        document.getElementById('editCertId').value = editBtn.getAttribute('data-request-id');
+                        document.getElementById('editDatePassed').value = editBtn.getAttribute('data-date-passed');
+                        document.getElementById('editExpiration').value = editBtn.getAttribute('data-expiration');
+                        new bootstrap.Modal(document.getElementById('editCertModal')).show();
+                        return; // Stop execution
+                    }
+
+                    // B. Check if a REVOKE icon was clicked
+                    var revokeBtn = e.target.closest('.remove-cert-btn');
+                    if (revokeBtn) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('--- REVOKE TRIGGERED ---');
+                        document.getElementById('revokeCertId').value = revokeBtn.getAttribute('data-request-id');
+                        new bootstrap.Modal(document.getElementById('revokeCertModal')).show();
+                        return; // Stop execution
+                    }
+
+                    // C. If neither action was clicked, handle the ROW CLICK (Employee Modal)
+                    var row = e.target.closest('.clickable-row');
+                    if (row) {
+                        console.log('--- ROW TRIGGERED ---');
+                        var requestId = row.getAttribute('data-request-id');
+                        
+                        // Set Modal Title
+                        var employeeName = row.querySelector('td:first-child')?.textContent.trim() || 'Employee';
+                        document.getElementById('modalEmployeeName').textContent = employeeName + "'s Certifications";
+
+                        // Fetch Data
+                        fetch('?handler=EmployeeHistory&employeeId=' + row.getAttribute('data-employee-id'))
+                            .then(response => response.json())
+                            .then(data => {
+                                var tbodyHtml = '';
+                                if (data.length === 0) {
+                                    tbodyHtml = '<tr><td colspan="5" class="text-center text-muted fst-italic py-4">No certification history found.</td></tr>';
+                                } else {
+                                    data.forEach(function(item) {
+                                        var badgeClass = 'bg-secondary';
+                                        if (item.status === 'Active') badgeClass = 'bg-success';
+                                        else if (item.status === 'ExpiringSoon') badgeClass = 'bg-warning text-dark';
+                                        else if (item.status === 'Expired') badgeClass = 'bg-danger';
+                                        else if (item.status === 'Permanent') badgeClass = 'bg-info text-dark';
+
+                                        tbodyHtml += `<tr>
+                                            <td>${item.agency}</td>
+                                            <td>${item.certification}</td>
+                                            <td>${item.datePassed}</td>
+                                            <td>${item.expirationDate}</td>
+                                            <td><span class="badge ${badgeClass}">${item.status}</span></td>
+                                        </tr>`;
+                                    });
+                                }
+                                document.getElementById('modalHistoryBody').innerHTML = tbodyHtml;
+                                if(window.lucide) { window.lucide.createIcons(); }
+                                new bootstrap.Modal(document.getElementById('employeeHistoryModal')).show();
+                            })
+                            .catch(err => console.error('Fetch error:', err));
+                    }
+                });
+            }
+
+            // 2. ANALYTICS TOGGLE LOGIC
+            var toggle = document.getElementById('analyticsVisualToggle');
+            if (toggle) {
+                toggle.addEventListener('change', function() {
+                    document.getElementById('hiddenFilterAnalytics').value = this.checked;
+                    document.getElementById('filterForm').submit();
+                });
+            }
+
+            // 3. RENDER CHART.JS (Keep your existing @Html.Raw C# injections here)
             var agencyCtx = document.getElementById('agencyChart').getContext('2d');
             new Chart(agencyCtx, {
                 type: 'doughnut',
@@ -323,116 +405,6 @@
                     datasets: [{ label: 'Active Employees', data: @Html.Raw(Model.CertChartData), backgroundColor: '#0d6efd' }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }
-            });
-
-            // Handle Analytics Toggle
-            document.getElementById('analyticsVisualToggle').addEventListener('change', function() {
-                document.getElementById('hiddenFilterAnalytics').value = this.checked.toString().toLowerCase();
-                document.getElementById('filterForm').submit();
-            });
-
-            var rows = document.querySelectorAll('.clickable-row');
-            
-            rows.forEach(function(row) {
-                row.addEventListener('click', function() {
-                    var employeeId = this.getAttribute('data-employee-id');
-                    console.log('--- ROW CLICKED ---');
-                    console.log('Employee ID mapped:', employeeId);
-
-                    fetch('?handler=EmployeeHistory&employeeId=' + employeeId)
-                        .then(response => {
-                            console.log('Fetch response status:', response.status);
-                            if (!response.ok) {
-                                throw new Error('Server returned ' + response.status);
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            console.log('JSON Data received successfully:', data);
-                            
-                            // 1. Get the employee name from the clicked row to set the modal title
-                            var employeeName = this.textContent.trim(); // Fallback if needed
-                            var nameCell = this.querySelector('td:first-child');
-                            if (nameCell) employeeName = nameCell.textContent.trim();
-                            document.getElementById('modalEmployeeName').textContent = employeeName + "'s Certifications";
-
-                            // 2. Build the table rows from the JSON array
-                            var tbodyHtml = '';
-                            if (data.length === 0) {
-                                tbodyHtml = '<tr><td colspan="5" class="text-center text-muted fst-italic py-4">No certification history found.</td></tr>';
-                            } else {
-                                data.forEach(function(item) {
-                                    // Determine badge class
-                                    var badgeClass = 'bg-secondary';
-                                    if (item.status === 'Active') badgeClass = 'bg-success';
-                                    else if (item.status === 'ExpiringSoon') badgeClass = 'bg-warning text-dark';
-                                    else if (item.status === 'Expired') badgeClass = 'bg-danger';
-                                    else if (item.status === 'Permanent') badgeClass = 'bg-info text-dark';
-
-                                    tbodyHtml += `<tr>
-                                        <td>${item.agency}</td>
-                                        <td>${item.certification}</td>
-                                        <td>${item.datePassed}</td>
-                                        <td>${item.expirationDate}</td>
-                                        <td><span class="badge ${badgeClass}">${item.status}</span></td>
-                                    </tr>`;
-                                });
-                            }
-
-                            // 3. Inject HTML and open the modal
-                            document.getElementById('modalHistoryBody').innerHTML = tbodyHtml;
-                            if(window.lucide) { window.lucide.createIcons(); } // Re-render icons if needed
-                            var historyModal = new bootstrap.Modal(document.getElementById('employeeHistoryModal'));
-                            historyModal.show();
-                        })
-                        .catch(error => {
-                            console.error('Fetch caught an error:', error);
-                        });
-                });
-            });
-
-            // Prevent modal open when clicking action buttons
-            var actionBtns = document.querySelectorAll('.action-btn');
-            actionBtns.forEach(function(btn) {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            });
-
-            document.addEventListener('click', function(e) {
-                // 1. Check for Edit Button clicks (using .closest() to handle inner SVG clicks)
-                var editBtn = e.target.closest('.edit-cert-btn');
-                if (editBtn) {
-                    e.preventDefault();
-                    e.stopPropagation(); // Shield against row-click modal
-                    
-                    console.log('--- EDIT ACTION TRIGGERED ---');
-                    console.log('Target ID:', editBtn.getAttribute('data-request-id'));
-                    
-                    document.getElementById('editCertId').value = editBtn.getAttribute('data-request-id');
-                    document.getElementById('editDatePassed').value = editBtn.getAttribute('data-date-passed');
-                    document.getElementById('editExpiration').value = editBtn.getAttribute('data-expiration');
-                    
-                    var editModal = new bootstrap.Modal(document.getElementById('editCertModal'));
-                    editModal.show();
-                    return; // Exit function
-                }
-
-                // 2. Check for Revoke Button clicks
-                var revokeBtn = e.target.closest('.remove-cert-btn');
-                if (revokeBtn) {
-                    e.preventDefault();
-                    e.stopPropagation(); // Shield against row-click modal
-                    
-                    console.log('--- REVOKE ACTION TRIGGERED ---');
-                    console.log('Target ID:', revokeBtn.getAttribute('data-request-id'));
-                    
-                    document.getElementById('revokeCertId').value = revokeBtn.getAttribute('data-request-id');
-                    
-                    var revokeModal = new bootstrap.Modal(document.getElementById('revokeCertModal'));
-                    revokeModal.show();
-                    return; // Exit function
-                }
             });
 
             if(window.lucide) { window.lucide.createIcons(); }
