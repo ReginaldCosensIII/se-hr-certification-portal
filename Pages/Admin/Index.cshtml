@@ -38,10 +38,12 @@
             <div class="card-body p-3">
                 <div class="custom-data-grid" id="agencyGridContainer">
                     <div class="row mb-3">
-                        <div class="col-md-4">
-                            <div class="input-group">
-                                <input type="text" class="form-control grid-search-input" placeholder="Search...">
-                                <button class="btn btn-secondary" type="button"><i data-lucide="search" style="width: 16px;"></i></button>
+                        <div class="col-12">
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control grid-search-input" placeholder="Search..." style="max-width: 200px;">
+                                <button class="btn btn-brand" type="button">
+                                    <i data-lucide="search" class="text-white" style="width: 14px;"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -73,22 +75,20 @@
                         </table>
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center mt-3">
-                        <span class="text-muted grid-info" style="font-size: 0.9rem;">Showing...</span>
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="d-flex align-items-center text-muted" style="font-size: 0.9rem;">
-                                <span class="me-2">Show</span>
-                                <select class="form-select form-select-sm grid-per-page" style="width: auto; display: inline-block;">
+                    <div class="card-footer bg-transparent border-top-0 py-3 mt-3 px-0">
+                        <nav aria-label="Page navigation" class="d-flex justify-content-end align-items-center gap-3">
+                            <label class="mb-0 text-muted small">
+                                Show 
+                                <select class="form-select form-select-sm d-inline-block w-auto mx-1 shadow-sm grid-per-page">
                                     <option value="10">10</option>
                                     <option value="25" selected>25</option>
                                     <option value="50">50</option>
                                     <option value="100">100</option>
-                                </select>
-                                <span class="ms-2">entries</span>
-                            </div>
-                            <ul class="pagination pagination-sm m-0 grid-pagination">
+                                </select> entries
+                            </label>
+                            <ul class="pagination pagination-sm mb-0 grid-pagination">
                             </ul>
-                        </div>
+                        </nav>
                     </div>
                 </div>
             </div>
@@ -114,10 +114,12 @@
             <div class="card-body p-3">
                 <div class="custom-data-grid" id="certGridContainer">
                     <div class="row mb-3">
-                        <div class="col-md-4">
-                            <div class="input-group">
-                                <input type="text" class="form-control grid-search-input" placeholder="Search...">
-                                <button class="btn btn-secondary" type="button"><i data-lucide="search" style="width: 16px;"></i></button>
+                        <div class="col-12">
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control grid-search-input" placeholder="Search..." style="max-width: 200px;">
+                                <button class="btn btn-brand" type="button">
+                                    <i data-lucide="search" class="text-white" style="width: 14px;"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -163,22 +165,20 @@
                         </table>
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center mt-3">
-                        <span class="text-muted grid-info" style="font-size: 0.9rem;">Showing...</span>
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="d-flex align-items-center text-muted" style="font-size: 0.9rem;">
-                                <span class="me-2">Show</span>
-                                <select class="form-select form-select-sm grid-per-page" style="width: auto; display: inline-block;">
+                    <div class="card-footer bg-transparent border-top-0 py-3 mt-3 px-0">
+                        <nav aria-label="Page navigation" class="d-flex justify-content-end align-items-center gap-3">
+                            <label class="mb-0 text-muted small">
+                                Show 
+                                <select class="form-select form-select-sm d-inline-block w-auto mx-1 shadow-sm grid-per-page">
                                     <option value="10">10</option>
                                     <option value="25" selected>25</option>
                                     <option value="50">50</option>
                                     <option value="100">100</option>
-                                </select>
-                                <span class="ms-2">entries</span>
-                            </div>
-                            <ul class="pagination pagination-sm m-0 grid-pagination">
+                                </select> entries
+                            </label>
+                            <ul class="pagination pagination-sm mb-0 grid-pagination">
                             </ul>
-                        </div>
+                        </nav>
                     </div>
                 </div>
             </div>
@@ -308,7 +308,6 @@ class ClientSideDataGrid {
         this.tableBody = this.container.querySelector('table tbody');
         this.rows = Array.from(this.tableBody.querySelectorAll('tr'));
         this.paginationContainer = this.container.querySelector('.grid-pagination');
-        this.infoText = this.container.querySelector('.grid-info');
         
         this.rowsPerPage = defaultRowsPerPage;
         this.currentPage = 1;
@@ -360,9 +359,6 @@ class ClientSideDataGrid {
         pageRows.forEach(row => row.style.display = '');
 
         const currentEnd = Math.min(end, this.filteredRows.length);
-        if(this.infoText) {
-            this.infoText.textContent = `Showing ${this.filteredRows.length === 0 ? 0 : start + 1} to ${currentEnd} of ${this.filteredRows.length} entries`;
-        }
 
         this.renderPagination(totalPages);
     }
@@ -373,22 +369,22 @@ class ClientSideDataGrid {
         
         // Prev Button
         html += `<li class="page-item ${this.currentPage === 1 ? 'disabled' : ''}">
-                    <a class="page-link" href="javascript:void(0)" data-page="${this.currentPage - 1}">&laquo;</a>
+                    <a class="page-link shadow-sm" href="javascript:void(0)" data-page="${this.currentPage - 1}">&laquo;</a>
                  </li>`;
                  
-        // Compact Page Indicator (Current / Total)
-        html += `<li class="page-item disabled">
-                    <span class="page-link bg-light text-muted fw-bold px-3">${this.currentPage} / ${totalPages}</span>
+        // Compact Page Indicator (using brand classes)
+        html += `<li class="page-item active">
+                    <span class="page-link shadow-sm border-brand bg-brand text-white" style="pointer-events: none;">${this.currentPage} / ${totalPages}</span>
                  </li>`;
 
         // Next Button
         html += `<li class="page-item ${this.currentPage === totalPages ? 'disabled' : ''}">
-                    <a class="page-link" href="javascript:void(0)" data-page="${this.currentPage + 1}">&raquo;</a>
+                    <a class="page-link shadow-sm" href="javascript:void(0)" data-page="${this.currentPage + 1}">&raquo;</a>
                  </li>`;
 
         this.paginationContainer.innerHTML = html;
 
-        // Attach click events to active buttons
+        // Attach click events
         this.paginationContainer.querySelectorAll('a.page-link').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
