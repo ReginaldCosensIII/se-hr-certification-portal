@@ -29,6 +29,9 @@ namespace SeHrCertificationPortal.Pages.Admin
     public string? AgencyName { get; set; }
 
     [BindProperty]
+    public string? AgencyAbbreviation { get; set; }
+
+    [BindProperty]
     public int CertId { get; set; }
 
     [BindProperty]
@@ -113,9 +116,10 @@ namespace SeHrCertificationPortal.Pages.Admin
     public async Task<IActionResult> OnPostEditAgencyAsync()
     {
         var agency = await _context.Agencies.FindAsync(AgencyId);
-        if (agency != null && !string.IsNullOrWhiteSpace(AgencyName))
+        if (agency != null && !string.IsNullOrWhiteSpace(AgencyName) && !string.IsNullOrWhiteSpace(AgencyAbbreviation))
         {
             agency.FullName = AgencyName;
+            agency.Abbreviation = AgencyAbbreviation;
             await _context.SaveChangesAsync();
         }
         return RedirectToPage(); // PRG Pattern (Reloads active tab via our JS localstorage)

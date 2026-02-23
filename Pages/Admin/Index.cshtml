@@ -37,12 +37,19 @@
             </div>
             <div class="card-body p-3">
                 <div class="custom-data-grid" id="agencyGridContainer">
-                    <div class="d-flex justify-content-end mb-3">
-                        <div class="input-group input-group-sm" style="width: auto;">
-                            <input type="text" class="form-control grid-search-input" placeholder="Search..." style="max-width: 200px;">
-                            <button class="btn btn-brand" type="button">
-                                <i data-lucide="search" class="text-white" style="width: 14px;"></i>
-                            </button>
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="d-flex gap-2 justify-content-end">
+                                <div class="input-group input-group-sm" style="max-width: 250px;">
+                                    <input type="text" class="form-control grid-search-input" placeholder="Search agencies...">
+                                    <button class="btn btn-brand grid-search-btn" type="button">
+                                        <i data-lucide="search" class="text-white" style="width: 14px;"></i>
+                                    </button>
+                                </div>
+                                <button class="btn btn-outline-brand btn-sm grid-clear-btn d-none d-flex align-items-center" type="button" title="Clear Filters">
+                                    <i data-lucide="x" style="width: 14px;"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     
@@ -68,6 +75,7 @@
                                         <a href="javascript:void(0)" class="text-primary text-decoration-none me-2 edit-agency-btn" 
                                            data-id="@item.Id" 
                                            data-name="@item.FullName" 
+                                           data-abbreviation="@item.Abbreviation"
                                            title="Edit Agency">
                                             <i data-lucide="edit" style="width: 18px; height: 18px;"></i>
                                         </a>
@@ -127,7 +135,7 @@
                             <div class="d-flex gap-2 justify-content-end">
                                 <div class="input-group input-group-sm" style="max-width: 250px;">
                                     <input type="text" class="form-control grid-search-input" placeholder="Search certifications...">
-                                    <button class="btn btn-brand" type="button">
+                                    <button class="btn btn-brand grid-search-btn" type="button">
                                         <i data-lucide="search" class="text-white" style="width: 14px;"></i>
                                     </button>
                                 </div>
@@ -137,6 +145,9 @@
                                         <option value="@agency.Abbreviation">@agency.Abbreviation</option>
                                     }
                                 </select>
+                                <button class="btn btn-outline-brand btn-sm grid-clear-btn d-none d-flex align-items-center" type="button" title="Clear Filters">
+                                    <i data-lucide="x" style="width: 14px;"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -340,6 +351,10 @@
                         <label class="form-label fw-bold">Agency Name</label>
                         <input type="text" class="form-control" name="AgencyName" id="editAgencyName" required />
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Abbreviation</label>
+                        <input type="text" class="form-control" name="AgencyAbbreviation" id="editAgencyAbbreviation" required />
+                    </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
                     <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
@@ -432,37 +447,52 @@
 @section Scripts {
     <script>
 class ClientSideDataGrid {
+class ClientSideDataGrid {
     constructor(containerId, defaultRowsPerPage = 25) {
         this.container = document.getElementById(containerId);
         if (!this.container) return;
 
         this.searchInput = this.container.querySelector('.grid-search-input');
+        this.searchBtn = this.container.querySelector('.grid-search-btn');
+        this.filterSelect = this.container.querySelector('.grid-filter-select');
+        this.clearBtn = this.container.querySelector('.grid-clear-btn');
         this.perPageSelect = this.container.querySelector('.grid-per-page');
         this.tableBody = this.container.querySelector('table tbody');
         this.rows = Array.from(this.tableBody.querySelectorAll('tr'));
         this.paginationContainer = this.container.querySelector('.grid-pagination');
-        this.filterSelect = this.container.querySelector('.grid-filter-select');
         
         this.rowsPerPage = defaultRowsPerPage;
         this.currentPage = 1;
         this.filteredRows = [...this.rows];
 
-        // Ensure select dropdown matches default
-        if(this.perPageSelect) {
-            this.perPageSelect.value = this.rowsPerPage;
-        }
+        this.activeSearchTerm = '';
+        this.activeFilterVal = '';
+
+        if(this.perPageSelect) this.perPageSelect.value = this.rowsPerPage;
 
         this.init();
     }
 
     init() {
-        if(this.searchInput) {
-            this.searchInput.addEventListener('input', () => this.filterData());
+        if (this.searchBtn && this.searchInput) {
+            this.searchBtn.addEventListener('click', () => this.applyFilters());
+            this.searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.applyFilters();
+                }
+            });
         }
-        if(this.filterSelect) {
-            this.filterSelect.addEventListener('change', () => this.filterData());
+
+        if (this.filterSelect) {
+            this.filterSelect.addEventListener('change', () => this.applyFilters());
         }
-        if(this.perPageSelect) {
+
+        if (this.clearBtn) {
+            this.clearBtn.addEventListener('click', () => this.clearFilters());
+        }
+
+        if (this.perPageSelect) {
             this.perPageSelect.addEventListener('change', (e) => {
                 this.rowsPerPage = parseInt(e.target.value);
                 this.currentPage = 1;
@@ -472,61 +502,65 @@ class ClientSideDataGrid {
         this.render();
     }
 
-    filterData() {
-        const term = this.searchInput ? this.searchInput.value.toLowerCase() : '';
-        const filterVal = this.filterSelect ? this.filterSelect.value.toLowerCase() : '';
-        
+    applyFilters() {
+        this.activeSearchTerm = this.searchInput ? this.searchInput.value.toLowerCase().trim() : '';
+        this.activeFilterVal = this.filterSelect ? this.filterSelect.value.toLowerCase() : '';
+        this.executeFilter();
+    }
+
+    clearFilters() {
+        if (this.searchInput) this.searchInput.value = '';
+        if (this.filterSelect) this.filterSelect.value = '';
+        this.activeSearchTerm = '';
+        this.activeFilterVal = '';
+        this.executeFilter();
+    }
+
+    executeFilter() {
         this.filteredRows = this.rows.filter(row => {
             const text = row.innerText.toLowerCase();
-            const matchesSearch = text.includes(term);
-            const matchesFilter = filterVal === '' || text.includes(filterVal);
+            const matchesSearch = this.activeSearchTerm === '' || text.includes(this.activeSearchTerm);
+            const matchesFilter = this.activeFilterVal === '' || text.includes(this.activeFilterVal);
             return matchesSearch && matchesFilter;
         });
+
+        if (this.clearBtn) {
+            if (this.activeSearchTerm !== '' || this.activeFilterVal !== '') {
+                this.clearBtn.classList.remove('d-none');
+            } else {
+                this.clearBtn.classList.add('d-none');
+            }
+        }
+
         this.currentPage = 1;
         this.render();
     }
 
     render() {
         this.rows.forEach(row => row.style.display = 'none');
-
         const totalPages = Math.ceil(this.filteredRows.length / this.rowsPerPage) || 1;
-        
-        // Failsafe: if filtering reduces pages below current page
         if (this.currentPage > totalPages) this.currentPage = totalPages;
-
         const start = (this.currentPage - 1) * this.rowsPerPage;
         const end = start + this.rowsPerPage;
-
         const pageRows = this.filteredRows.slice(start, end);
         pageRows.forEach(row => row.style.display = '');
-
-        const currentEnd = Math.min(end, this.filteredRows.length);
-
         this.renderPagination(totalPages);
+        if(window.lucide) { window.lucide.createIcons(); } // Refresh icons if DOM changes
     }
 
     renderPagination(totalPages) {
         if(!this.paginationContainer) return;
         let html = '';
-        
-        // Prev Button
         html += `<li class="page-item ${this.currentPage === 1 ? 'disabled' : ''}">
                     <a class="page-link shadow-sm" href="javascript:void(0)" data-page="${this.currentPage - 1}">&laquo;</a>
                  </li>`;
-                 
-        // Compact Page Indicator (using brand classes)
         html += `<li class="page-item active">
                     <span class="page-link shadow-sm border-brand bg-brand text-white" style="pointer-events: none;">${this.currentPage} / ${totalPages}</span>
                  </li>`;
-
-        // Next Button
         html += `<li class="page-item ${this.currentPage === totalPages ? 'disabled' : ''}">
                     <a class="page-link shadow-sm" href="javascript:void(0)" data-page="${this.currentPage + 1}">&raquo;</a>
                  </li>`;
-
         this.paginationContainer.innerHTML = html;
-
-        // Attach click events
         this.paginationContainer.querySelectorAll('a.page-link').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -553,6 +587,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             document.getElementById('editAgencyId').value = editBtn.getAttribute('data-id');
             document.getElementById('editAgencyName').value = editBtn.getAttribute('data-name');
+            document.getElementById('editAgencyAbbreviation').value = editBtn.getAttribute('data-abbreviation');
             new bootstrap.Modal(document.getElementById('editAgencyModal')).show();
             return;
         }
