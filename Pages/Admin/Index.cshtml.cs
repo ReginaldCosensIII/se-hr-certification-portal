@@ -23,6 +23,12 @@ namespace SeHrCertificationPortal.Pages.Admin
     public SeHrCertificationPortal.Models.Certification NewCertification { get; set; } = new() { Name = "" };
 
     [BindProperty]
+    public int AgencyId { get; set; }
+
+    [BindProperty]
+    public string AgencyName { get; set; }
+
+    [BindProperty]
     public int ExpiringSoonThresholdDays { get; set; }
 
     [BindProperty]
@@ -89,6 +95,28 @@ namespace SeHrCertificationPortal.Pages.Admin
         }
 
         await _context.SaveChangesAsync();
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostEditAgencyAsync()
+    {
+        var agency = await _context.Agencies.FindAsync(AgencyId);
+        if (agency != null && !string.IsNullOrWhiteSpace(AgencyName))
+        {
+            agency.FullName = AgencyName;
+            await _context.SaveChangesAsync();
+        }
+        return RedirectToPage(); // PRG Pattern (Reloads active tab via our JS localstorage)
+    }
+
+    public async Task<IActionResult> OnPostDeactivateAgencyAsync()
+    {
+        var agency = await _context.Agencies.FindAsync(AgencyId);
+        if (agency != null)
+        {
+            agency.IsActive = false;
+            await _context.SaveChangesAsync();
+        }
         return RedirectToPage();
     }
     }

@@ -54,7 +54,7 @@
                                     <th>Name</th>
                                     <th class="text-center" style="width: 170px;">Active Certifications</th>
                                     <th class="text-center" style="width: 100px;">Status</th>
-                                    <th class="text-end pe-3" style="width: 100px;">Actions</th>
+                                    <th class="text-center" style="width: 100px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -64,8 +64,19 @@
                                     <td class="fw-bold">@item.FullName (@item.Abbreviation)</td>
                                     <td class="text-center text-muted">@(item.Certifications.Count) Certifications</td>
                                     <td class="text-center"><span class="badge text-bg-success">Active</span></td>
-                                    <td class="text-end pe-3">
-                                        <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="more-horizontal" style="width: 16px;"></i></button>
+                                    <td class="text-center border-start">
+                                        <a href="javascript:void(0)" class="text-primary me-2 edit-agency-btn" 
+                                           data-id="@item.Id" 
+                                           data-name="@item.FullName" 
+                                           title="Edit Agency">
+                                            <i data-lucide="edit" style="width: 18px; height: 18px;"></i>
+                                        </a>
+                                        <a href="javascript:void(0)" class="text-danger deactivate-agency-btn" 
+                                           data-id="@item.Id" 
+                                           data-name="@item.FullName" 
+                                           title="Deactivate Agency">
+                                            <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                                        </a>
                                     </td>
                                 </tr>
                             }
@@ -292,6 +303,52 @@
     </div>
 </div>
 
+<div class="modal fade" id="editAgencyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post" asp-page-handler="EditAgency">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Edit Agency</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="AgencyId" id="editAgencyId" />
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Agency Name</label>
+                        <input type="text" class="form-control" name="AgencyName" id="editAgencyName" required />
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary text-white fw-bold">Save Changes</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="deactivateAgencyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post" asp-page-handler="DeactivateAgency">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-danger">Deactivate Agency</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="AgencyId" id="deactivateAgencyId" />
+                    <p>Are you sure you want to deactivate <strong id="deactivateAgencyNameDisplay"></strong>?</p>
+                    <p class="text-muted small mb-0">This will not delete historical records, but it will prevent this agency from being selected for new certifications.</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger text-white fw-bold">Yes, Deactivate</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 @section Scripts {
     <script>
 class ClientSideDataGrid {
@@ -398,6 +455,29 @@ document.addEventListener('DOMContentLoaded', function() {
     // Instantiate reusable grids
     new ClientSideDataGrid('agencyGridContainer', 25);
     new ClientSideDataGrid('certGridContainer', 25);
+
+    // Agency Action Event Delegation
+    document.addEventListener('click', function(e) {
+        // Edit Agency Trigger
+        var editBtn = e.target.closest('.edit-agency-btn');
+        if (editBtn) {
+            e.preventDefault();
+            document.getElementById('editAgencyId').value = editBtn.getAttribute('data-id');
+            document.getElementById('editAgencyName').value = editBtn.getAttribute('data-name');
+            new bootstrap.Modal(document.getElementById('editAgencyModal')).show();
+            return;
+        }
+
+        // Deactivate Agency Trigger
+        var deactivateBtn = e.target.closest('.deactivate-agency-btn');
+        if (deactivateBtn) {
+            e.preventDefault();
+            document.getElementById('deactivateAgencyId').value = deactivateBtn.getAttribute('data-id');
+            document.getElementById('deactivateAgencyNameDisplay').textContent = deactivateBtn.getAttribute('data-name');
+            new bootstrap.Modal(document.getElementById('deactivateAgencyModal')).show();
+            return;
+        }
+    });
 
     // Tab State Retention
     var tabElements = document.querySelectorAll('button[data-bs-toggle="tab"]');
