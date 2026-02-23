@@ -26,7 +26,19 @@ namespace SeHrCertificationPortal.Pages.Admin
     public int AgencyId { get; set; }
 
     [BindProperty]
-    public string AgencyName { get; set; }
+    public string? AgencyName { get; set; }
+
+    [BindProperty]
+    public int CertId { get; set; }
+
+    [BindProperty]
+    public string? CertName { get; set; }
+
+    [BindProperty]
+    public int CertAgencyId { get; set; }
+
+    [BindProperty]
+    public int CertValidity { get; set; }
 
     [BindProperty]
     public int ExpiringSoonThresholdDays { get; set; }
@@ -115,6 +127,30 @@ namespace SeHrCertificationPortal.Pages.Admin
         if (agency != null)
         {
             agency.IsActive = false;
+            await _context.SaveChangesAsync();
+        }
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostEditCertificationAsync()
+    {
+        var cert = await _context.Certifications.FindAsync(CertId);
+        if (cert != null && !string.IsNullOrWhiteSpace(CertName))
+        {
+            cert.Name = CertName;
+            cert.AgencyId = CertAgencyId;
+            cert.ValidityPeriodMonths = CertValidity;
+            await _context.SaveChangesAsync();
+        }
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostDeactivateCertificationAsync()
+    {
+        var cert = await _context.Certifications.FindAsync(CertId);
+        if (cert != null)
+        {
+            _context.Certifications.Remove(cert);
             await _context.SaveChangesAsync();
         }
         return RedirectToPage();
