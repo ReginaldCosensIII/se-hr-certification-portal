@@ -30,7 +30,14 @@
             <div class="accordion-body bg-light">
                 
                 <div id="employeeHistoryContent" class="table-responsive">
-                    <p class="text-muted">Select an employee from the table below to view their certification history.</p>
+                    <table class="table table-sm table-bordered text-muted opacity-50">
+                        <thead class="bg-light">
+                            <tr><th>Agency</th><th>Certification</th><th>Date Passed</th><th>Expiration</th><th>Status</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="5" class="text-center py-4 fst-italic">Select an employee from the table below to load their history...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -91,10 +98,8 @@
             <tbody>
                 @foreach (var item in Model.PassedCertifications)
                 {
-                    <tr>
-                        <td>
-                            <button type="button" class="btn btn-link p-0 fw-bold text-start fetch-history" data-employee-id="@item.EmployeeId">@item.Employee?.DisplayName</button>
-                        </td>
+                    <tr class="clickable-row" style="cursor: pointer;" data-employee-id="@item.EmployeeId" title="Click to view certification history">
+                        <td>@item.Employee?.DisplayName</td>
                         <td>@(item.Agency?.Abbreviation ?? item.CustomAgencyName ?? "Custom")</td>
                         <td>@(item.Certification?.Name ?? item.CustomCertificationName ?? "Custom")</td>
                         <td>
@@ -175,10 +180,11 @@
 
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            $('.fetch-history').on('click', function() {
+        $(document).ready(function() {
+            $('.clickable-row').on('click', function() {
                 var employeeId = $(this).data('employee-id');
-                var employeeName = $(this).text();
+                // The third column is the name, but our text might just be the first td
+                var employeeName = $.trim($(this).find('td:first').text());
                 
                 $('#employeeHistoryContent').html('<p class="text-muted">Loading history for ' + employeeName + '...</p>');
                 
@@ -226,9 +232,9 @@
                         $('#employeeHistoryContent').html(html);
                         if(window.lucide) { window.lucide.createIcons(); }
                         
-                        var collapseElement = document.getElementById('collapseDetail');
-                        if(collapseElement) {
-                            new bootstrap.Collapse(collapseElement, { toggle: false }).show();
+                        var $accordionCollapse = $('#employeeHistoryContent').closest('.accordion-collapse');
+                        if ($accordionCollapse.length) {
+                            new bootstrap.Collapse($accordionCollapse[0], { toggle: false }).show();
                         }
                     })
                     .catch(error => {
