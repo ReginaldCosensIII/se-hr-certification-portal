@@ -36,6 +36,14 @@ namespace SeHrCertificationPortal.Pages.Certifications
         public int TotalRecords { get; set; }
         public int ThresholdDays { get; set; } = 30;
 
+        public int AnalyticsTotalActive { get; set; }
+        public int AnalyticsExpiringSoon { get; set; }
+        public int AnalyticsExpired { get; set; }
+        public string AgencyChartLabels { get; set; } = "[]";
+        public string AgencyChartData { get; set; } = "[]";
+        public string CertChartLabels { get; set; } = "[]";
+        public string CertChartData { get; set; } = "[]";
+
         public TrackerStatus GetComputedStatus(DateTime? expDate)
         {
             if (expDate == null) return TrackerStatus.Permanent;
@@ -96,6 +104,26 @@ namespace SeHrCertificationPortal.Pages.Certifications
                         break;
                 }
             }
+
+            // --- ANALYTICS ENGINE ---
+            var analyticsRaw = await query.Select(c => new {
+                AgencyName = c.Agency != null ? c.Agency.Abbreviation : (c.CustomAgencyName ?? "Unknown"),
+                CertName = c.Certification != null ? c.Certification.Name : (c.CustomCertificationName ?? "Unknown"),
+                ExpDate = c.ExpirationDate
+            }).ToListAsync();
+
+            AnalyticsExpired = analyticsRaw.Count(c => c.ExpDate.HasValue && c.ExpDate.Value < today);
+            AnalyticsExpiringSoon = analyticsRaw.Count(c => c.ExpDate.HasValue && c.ExpDate.Value >= today && c.ExpDate.Value <= thresholdDate);
+            AnalyticsTotalActive = analyticsRaw.Count(c => !c.ExpDate.HasValue || c.ExpDate.Value > thresholdDate);
+
+            var topAgencies = analyticsRaw.GroupBy(c => c.AgencyName).OrderByDescending(g => g.Count()).Take(5).ToList();
+            AgencyChartLabels = System.Text.Json.JsonSerializer.Serialize(topAgencies.Select(g => g.Key));
+            AgencyChartData = System.Text.Json.JsonSerializer.Serialize(topAgencies.Select(g => g.Count()));
+
+            var topCerts = analyticsRaw.GroupBy(c => c.CertName).OrderByDescending(g => g.Count()).Take(5).ToList();
+            CertChartLabels = System.Text.Json.JsonSerializer.Serialize(topCerts.Select(g => g.Key));
+            CertChartData = System.Text.Json.JsonSerializer.Serialize(topCerts.Select(g => g.Count()));
+            // ------------------------
 
             TotalRecords = await query.CountAsync();
             TotalPages = (int)Math.Ceiling(TotalRecords / (double)PageSize);
