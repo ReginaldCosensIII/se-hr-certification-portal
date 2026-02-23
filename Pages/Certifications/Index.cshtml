@@ -399,30 +399,40 @@
                 });
             });
 
-            document.addEventListener('DOMContentLoaded', function() {
-                // Wire up the Edit buttons
-                document.querySelectorAll('.edit-cert-btn').forEach(function(btn) {
-                    btn.addEventListener('click', function(e) {
-                        e.stopPropagation(); // Shield against the row-click modal
-                        
-                        document.getElementById('editCertId').value = this.getAttribute('data-request-id');
-                        document.getElementById('editDatePassed').value = this.getAttribute('data-date-passed');
-                        document.getElementById('editExpiration').value = this.getAttribute('data-expiration');
-                        
-                        new bootstrap.Modal(document.getElementById('editCertModal')).show();
-                    });
-                });
+            document.addEventListener('click', function(e) {
+                // 1. Check for Edit Button clicks (using .closest() to handle inner SVG clicks)
+                var editBtn = e.target.closest('.edit-cert-btn');
+                if (editBtn) {
+                    e.preventDefault();
+                    e.stopPropagation(); // Shield against row-click modal
+                    
+                    console.log('--- EDIT ACTION TRIGGERED ---');
+                    console.log('Target ID:', editBtn.getAttribute('data-request-id'));
+                    
+                    document.getElementById('editCertId').value = editBtn.getAttribute('data-request-id');
+                    document.getElementById('editDatePassed').value = editBtn.getAttribute('data-date-passed');
+                    document.getElementById('editExpiration').value = editBtn.getAttribute('data-expiration');
+                    
+                    var editModal = new bootstrap.Modal(document.getElementById('editCertModal'));
+                    editModal.show();
+                    return; // Exit function
+                }
 
-                // Wire up the Revoke buttons
-                document.querySelectorAll('.remove-cert-btn').forEach(function(btn) {
-                    btn.addEventListener('click', function(e) {
-                        e.stopPropagation(); // Shield against the row-click modal
-                        
-                        document.getElementById('revokeCertId').value = this.getAttribute('data-request-id');
-                        
-                        new bootstrap.Modal(document.getElementById('revokeCertModal')).show();
-                    });
-                });
+                // 2. Check for Revoke Button clicks
+                var revokeBtn = e.target.closest('.remove-cert-btn');
+                if (revokeBtn) {
+                    e.preventDefault();
+                    e.stopPropagation(); // Shield against row-click modal
+                    
+                    console.log('--- REVOKE ACTION TRIGGERED ---');
+                    console.log('Target ID:', revokeBtn.getAttribute('data-request-id'));
+                    
+                    document.getElementById('revokeCertId').value = revokeBtn.getAttribute('data-request-id');
+                    
+                    var revokeModal = new bootstrap.Modal(document.getElementById('revokeCertModal'));
+                    revokeModal.show();
+                    return; // Exit function
+                }
             });
 
             if(window.lucide) { window.lucide.createIcons(); }
