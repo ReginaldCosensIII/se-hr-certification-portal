@@ -41,7 +41,7 @@
                         <div class="col-md-4">
                             <div class="input-group">
                                 <input type="text" class="form-control grid-search-input" placeholder="Search...">
-                                <button class="btn btn-outline-secondary" type="button"><i data-lucide="search" style="width: 16px;"></i></button>
+                                <button class="btn btn-secondary" type="button"><i data-lucide="search" style="width: 16px;"></i></button>
                             </div>
                         </div>
                     </div>
@@ -74,9 +74,21 @@
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center mt-3">
-                        <span class="text-muted grid-info">Showing...</span>
-                        <ul class="pagination pagination-sm m-0 grid-pagination">
-                        </ul>
+                        <span class="text-muted grid-info" style="font-size: 0.9rem;">Showing...</span>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="d-flex align-items-center text-muted" style="font-size: 0.9rem;">
+                                <span class="me-2">Show</span>
+                                <select class="form-select form-select-sm grid-per-page" style="width: auto; display: inline-block;">
+                                    <option value="10">10</option>
+                                    <option value="25" selected>25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                                <span class="ms-2">entries</span>
+                            </div>
+                            <ul class="pagination pagination-sm m-0 grid-pagination">
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -105,7 +117,7 @@
                         <div class="col-md-4">
                             <div class="input-group">
                                 <input type="text" class="form-control grid-search-input" placeholder="Search...">
-                                <button class="btn btn-outline-secondary" type="button"><i data-lucide="search" style="width: 16px;"></i></button>
+                                <button class="btn btn-secondary" type="button"><i data-lucide="search" style="width: 16px;"></i></button>
                             </div>
                         </div>
                     </div>
@@ -152,9 +164,21 @@
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center mt-3">
-                        <span class="text-muted grid-info">Showing...</span>
-                        <ul class="pagination pagination-sm m-0 grid-pagination">
-                        </ul>
+                        <span class="text-muted grid-info" style="font-size: 0.9rem;">Showing...</span>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="d-flex align-items-center text-muted" style="font-size: 0.9rem;">
+                                <span class="me-2">Show</span>
+                                <select class="form-select form-select-sm grid-per-page" style="width: auto; display: inline-block;">
+                                    <option value="10">10</option>
+                                    <option value="25" selected>25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                                <span class="ms-2">entries</span>
+                            </div>
+                            <ul class="pagination pagination-sm m-0 grid-pagination">
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -275,19 +299,25 @@
 @section Scripts {
     <script>
 class ClientSideDataGrid {
-    constructor(containerId, rowsPerPage = 10) {
+    constructor(containerId, defaultRowsPerPage = 25) {
         this.container = document.getElementById(containerId);
         if (!this.container) return;
 
         this.searchInput = this.container.querySelector('.grid-search-input');
+        this.perPageSelect = this.container.querySelector('.grid-per-page');
         this.tableBody = this.container.querySelector('table tbody');
         this.rows = Array.from(this.tableBody.querySelectorAll('tr'));
         this.paginationContainer = this.container.querySelector('.grid-pagination');
         this.infoText = this.container.querySelector('.grid-info');
         
-        this.rowsPerPage = rowsPerPage;
+        this.rowsPerPage = defaultRowsPerPage;
         this.currentPage = 1;
         this.filteredRows = [...this.rows];
+
+        // Ensure select dropdown matches default
+        if(this.perPageSelect) {
+            this.perPageSelect.value = this.rowsPerPage;
+        }
 
         this.init();
     }
@@ -295,6 +325,13 @@ class ClientSideDataGrid {
     init() {
         if(this.searchInput) {
             this.searchInput.addEventListener('input', (e) => this.filterData(e.target.value));
+        }
+        if(this.perPageSelect) {
+            this.perPageSelect.addEventListener('change', (e) => {
+                this.rowsPerPage = parseInt(e.target.value);
+                this.currentPage = 1;
+                this.render();
+            });
         }
         this.render();
     }
@@ -309,25 +346,24 @@ class ClientSideDataGrid {
     }
 
     render() {
-        // Hide all rows
         this.rows.forEach(row => row.style.display = 'none');
 
-        // Calculate pagination
         const totalPages = Math.ceil(this.filteredRows.length / this.rowsPerPage) || 1;
+        
+        // Failsafe: if filtering reduces pages below current page
+        if (this.currentPage > totalPages) this.currentPage = totalPages;
+
         const start = (this.currentPage - 1) * this.rowsPerPage;
         const end = start + this.rowsPerPage;
 
-        // Show current page rows
         const pageRows = this.filteredRows.slice(start, end);
         pageRows.forEach(row => row.style.display = '');
 
-        // Update Info Text
         const currentEnd = Math.min(end, this.filteredRows.length);
         if(this.infoText) {
             this.infoText.textContent = `Showing ${this.filteredRows.length === 0 ? 0 : start + 1} to ${currentEnd} of ${this.filteredRows.length} entries`;
         }
 
-        // Render Pagination HTML
         this.renderPagination(totalPages);
     }
 
@@ -340,12 +376,10 @@ class ClientSideDataGrid {
                     <a class="page-link" href="javascript:void(0)" data-page="${this.currentPage - 1}">&laquo;</a>
                  </li>`;
                  
-        // Page Numbers
-        for (let i = 1; i <= totalPages; i++) {
-            html += `<li class="page-item ${this.currentPage === i ? 'active' : ''}">
-                        <a class="page-link" href="javascript:void(0)" data-page="${i}">${i}</a>
-                     </li>`;
-        }
+        // Compact Page Indicator (Current / Total)
+        html += `<li class="page-item disabled">
+                    <span class="page-link bg-light text-muted fw-bold px-3">${this.currentPage} / ${totalPages}</span>
+                 </li>`;
 
         // Next Button
         html += `<li class="page-item ${this.currentPage === totalPages ? 'disabled' : ''}">
@@ -354,12 +388,12 @@ class ClientSideDataGrid {
 
         this.paginationContainer.innerHTML = html;
 
-        // Attach click events
-        this.paginationContainer.querySelectorAll('.page-link').forEach(link => {
+        // Attach click events to active buttons
+        this.paginationContainer.querySelectorAll('a.page-link').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const parentLi = e.target.closest('.page-item');
-                if (!parentLi.classList.contains('disabled') && !parentLi.classList.contains('active')) {
+                if (!parentLi.classList.contains('disabled')) {
                     this.currentPage = parseInt(e.target.getAttribute('data-page'));
                     this.render();
                 }
@@ -370,8 +404,8 @@ class ClientSideDataGrid {
 
 document.addEventListener('DOMContentLoaded', function() {
     // Instantiate reusable grids
-    new ClientSideDataGrid('agencyGridContainer', 10);
-    new ClientSideDataGrid('certGridContainer', 10);
+    new ClientSideDataGrid('agencyGridContainer', 25);
+    new ClientSideDataGrid('certGridContainer', 25);
 
     // Tab State Retention
     var tabElements = document.querySelectorAll('button[data-bs-toggle="tab"]');
