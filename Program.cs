@@ -2,6 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using SeHrCertificationPortal.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using QuestPDF.Infrastructure;
+
+// Configure QuestPDF License
+QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 

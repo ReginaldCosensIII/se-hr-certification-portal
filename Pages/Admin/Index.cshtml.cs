@@ -1,16 +1,21 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace SeHrCertificationPortal.Pages.Admin
 {
     public class SettingsModel : PageModel
     {
     private readonly SeHrCertificationPortal.Data.ApplicationDbContext _context;
+    private readonly IWebHostEnvironment _env;
 
-    public SettingsModel(SeHrCertificationPortal.Data.ApplicationDbContext context)
+    public SettingsModel(SeHrCertificationPortal.Data.ApplicationDbContext context, IWebHostEnvironment env)
     {
         _context = context;
+        _env = env;
     }
 
     public IList<SeHrCertificationPortal.Models.Agency> Agency { get;set; } = default!;
@@ -180,6 +185,92 @@ namespace SeHrCertificationPortal.Pages.Admin
             await _context.SaveChangesAsync();
         }
         return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnGetExportListAsync()
+    {
+        var agencies = await _context.Agencies
+            .Include(a => a.Certifications)
+            .OrderBy(a => a.Abbreviation)
+            .ToListAsync();
+
+        var logoPath = Path.Combine(_env.WebRootPath, "img", "branding-assets", "Specialized-Engineering-Logo-white.webp");
+        byte[]? logoBytes = System.IO.File.Exists(logoPath) ? await System.IO.File.ReadAllBytesAsync(logoPath) : null;
+
+        var document = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.Letter);
+                page.Margin(1, Unit.Centimetre);
+                page.PageColor(Colors.White);
+                page.DefaultTextStyle(x => x.FontSize(10).FontFamily(Fonts.Arial));
+
+                // Brand Header
+                page.Header().Background("#66615c").Padding(10).Row(row =>
+                {
+                    if (logoBytes != null)
+                    {
+                        row.ConstantItem(150).Image(logoBytes);
+                    }
+                    row.RelativeItem().AlignRight().AlignMiddle().Text("Agency & Certification Roster").FontColor(Colors.White).FontSize(16).SemiBold();
+                });
+
+                // Content
+                page.Content().PaddingVertical(1, Unit.Centimetre).Column(col =>
+                {
+                    foreach (var agency in agencies)
+                    {
+                        // Agency Group Header
+                        col.Item().PaddingTop(10).PaddingBottom(5).Text($"{agency.FullName} ({agency.Abbreviation})")
+                            .FontSize(14).SemiBold().FontColor("#a19482");
+
+                        if (!agency.Certifications.Any())
+                        {
+                            col.Item().PaddingBottom(15).Text("No certifications currently linked.").Italic().FontColor(Colors.Grey.Medium);
+                            continue;
+                        }
+
+                        // Certifications Table
+                        col.Item().PaddingBottom(15).Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(3); // Name
+                                columns.RelativeColumn(1); // Validity
+                                columns.RelativeColumn(1); // Status
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Certification Name").SemiBold();
+                                header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Validity Period").SemiBold();
+                                header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Status").SemiBold();
+                            });
+
+                            foreach (var cert in agency.Certifications)
+                            {
+                                table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(cert.Name);
+                                table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(cert.ValidityPeriodMonths == 0 ? "Permanent" : $"{cert.ValidityPeriodMonths} Months");
+                                table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(cert.IsActive ? "Active" : "Inactive");
+                            }
+                        });
+                    }
+                });
+
+                // Footer
+                page.Footer().AlignCenter().Text(x =>
+                {
+                    x.Span("Page ");
+                    x.CurrentPageNumber();
+                    x.Span(" of ");
+                    x.TotalPages();
+                });
+            });
+        });
+
+        byte[] pdfBytes = document.GeneratePdf();
+        return File(pdfBytes, "application/pdf", $"SPE_Admin_Export_{DateTime.Now:yyyyMMdd}.pdf");
     }
     }
 }
