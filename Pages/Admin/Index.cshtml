@@ -64,13 +64,19 @@
                                     <th class="text-center" style="width: 100px;">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody style="visibility: hidden;">
                             @foreach (var item in Model.Agency) {
                                 <tr>
                                     <td class="ps-3 text-muted">@item.Id</td>
                                     <td class="fw-bold">@item.FullName (@item.Abbreviation)</td>
                                     <td class="text-center text-muted">@(item.Certifications.Count) Certifications</td>
-                                    <td class="text-center"><span class="badge text-bg-success">Active</span></td>
+                                    <td class="text-center">
+                                        @if(item.IsActive) {
+                                            <span class="badge text-bg-success">Active</span>
+                                        } else {
+                                            <span class="badge text-bg-secondary">Inactive</span>
+                                        }
+                                    </td>
                                     <td class="text-center border-start">
                                         <a href="javascript:void(0)" class="text-primary text-decoration-none me-2 edit-agency-btn" 
                                            data-id="@item.Id" 
@@ -79,12 +85,17 @@
                                            title="Edit Agency">
                                             <i data-lucide="edit" style="width: 18px; height: 18px;"></i>
                                         </a>
-                                        <a href="javascript:void(0)" class="text-danger text-decoration-none deactivate-agency-btn" 
-                                           data-id="@item.Id" 
-                                           data-name="@item.FullName" 
-                                           title="Deactivate Agency">
-                                            <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
-                                        </a>
+                                        @if(item.IsActive) {
+                                            <a href="javascript:void(0)" class="text-danger text-decoration-none deactivate-agency-btn" 
+                                               data-id="@item.Id" data-name="@item.FullName" title="Deactivate Agency">
+                                                <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                                            </a>
+                                        } else {
+                                            <a href="javascript:void(0)" class="text-success text-decoration-none reactivate-agency-btn" 
+                                               data-id="@item.Id" data-name="@item.FullName" title="Reactivate Agency">
+                                                <i data-lucide="rotate-ccw" style="width: 18px; height: 18px;"></i>
+                                            </a>
+                                        }
                                     </td>
                                 </tr>
                             }
@@ -163,7 +174,7 @@
                                     <th class="text-center" style="width: 100px;">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody style="visibility: hidden;">
                             @foreach (var cert in Model.Certifications) {
                                 <tr>
                                     <td class="ps-3 fw-bold">@cert.Name</td>
@@ -193,12 +204,17 @@
                                            title="Edit Certification">
                                             <i data-lucide="edit" style="width: 18px; height: 18px;"></i>
                                         </a>
-                                        <a href="javascript:void(0)" class="text-danger text-decoration-none deactivate-cert-btn" 
-                                           data-id="@cert.Id" 
-                                           data-name="@cert.Name" 
-                                           title="Deactivate Certification">
-                                            <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
-                                        </a>
+                                        @if(cert.IsActive) {
+                                            <a href="javascript:void(0)" class="text-danger text-decoration-none deactivate-cert-btn" 
+                                               data-id="@cert.Id" data-name="@cert.Name" title="Deactivate Certification">
+                                                <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                                            </a>
+                                        } else {
+                                            <a href="javascript:void(0)" class="text-success text-decoration-none reactivate-cert-btn" 
+                                               data-id="@cert.Id" data-name="@cert.Name" title="Reactivate Certification">
+                                                <i data-lucide="rotate-ccw" style="width: 18px; height: 18px;"></i>
+                                            </a>
+                                        }
                                     </td>
                                 </tr>
                             }
@@ -444,6 +460,48 @@
     </div>
 </div>
 
+<div class="modal fade" id="reactivateAgencyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post" asp-page-handler="ReactivateAgency">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-success">Reactivate Agency</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="AgencyId" id="reactivateAgencyId" />
+                    <p>Are you sure you want to reactivate <strong id="reactivateAgencyNameDisplay"></strong>?</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success text-white fw-bold">Yes, Reactivate</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="reactivateCertModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post" asp-page-handler="ReactivateCertification">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-success">Reactivate Certification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="CertId" id="reactivateCertId" />
+                    <p>Are you sure you want to reactivate <strong id="reactivateCertNameDisplay"></strong>?</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success text-white fw-bold">Yes, Reactivate</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         // 1. REUSABLE DATA GRID CLASS
@@ -567,6 +625,7 @@
                 pageRows.forEach(row => row.style.display = '');
                 this.renderPagination(totalPages);
                 if(window.lucide) { window.lucide.createIcons(); } 
+                if(this.tableBody) this.tableBody.style.visibility = 'visible';
             }
 
             renderPagination(totalPages) {
@@ -658,6 +717,26 @@
                 document.getElementById('deactivateCertId').value = deactivateCertBtn.getAttribute('data-id');
                 document.getElementById('deactivateCertNameDisplay').textContent = deactivateCertBtn.getAttribute('data-name');
                 new bootstrap.Modal(document.getElementById('deactivateCertModal')).show();
+                return;
+            }
+
+            // Reactivate Agency Trigger
+            var reactivateAgencyBtn = e.target.closest('.reactivate-agency-btn');
+            if (reactivateAgencyBtn) {
+                e.preventDefault();
+                document.getElementById('reactivateAgencyId').value = reactivateAgencyBtn.getAttribute('data-id'); 
+                document.getElementById('reactivateAgencyNameDisplay').textContent = reactivateAgencyBtn.getAttribute('data-name');
+                new bootstrap.Modal(document.getElementById('reactivateAgencyModal')).show();
+                return;
+            }
+
+            // Reactivate Cert Trigger
+            var reactivateCertBtn = e.target.closest('.reactivate-cert-btn');
+            if (reactivateCertBtn) {
+                e.preventDefault();
+                document.getElementById('reactivateCertId').value = reactivateCertBtn.getAttribute('data-id'); 
+                document.getElementById('reactivateCertNameDisplay').textContent = reactivateCertBtn.getAttribute('data-name');
+                new bootstrap.Modal(document.getElementById('reactivateCertModal')).show();
                 return;
             }
         });

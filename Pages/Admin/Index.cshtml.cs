@@ -154,7 +154,29 @@ namespace SeHrCertificationPortal.Pages.Admin
         var cert = await _context.Certifications.FindAsync(CertId);
         if (cert != null)
         {
-            _context.Certifications.Remove(cert);
+            cert.IsActive = false;
+            await _context.SaveChangesAsync();
+        }
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostReactivateAgencyAsync()
+    {
+        var agency = await _context.Agencies.FindAsync(AgencyId);
+        if (agency != null)
+        {
+            agency.IsActive = true;
+            await _context.SaveChangesAsync();
+        }
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostReactivateCertificationAsync()
+    {
+        var cert = await _context.Certifications.FindAsync(CertId);
+        if (cert != null)
+        {
+            cert.IsActive = true;
             await _context.SaveChangesAsync();
         }
         return RedirectToPage();
