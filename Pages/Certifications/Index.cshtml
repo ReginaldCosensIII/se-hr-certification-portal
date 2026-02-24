@@ -10,9 +10,30 @@
         <!-- Page Title is handled in Layout -->
     </div>
     <div>
-        <button class="btn btn-brand d-flex align-items-center fw-bold">
-            <i data-lucide="file-down" class="me-2 text-white" style="width: 18px;"></i> Download Report
-        </button>
+        @{
+            bool hasActiveFilters = !string.IsNullOrEmpty(Model.SearchString) || Model.AgencyFilter.HasValue || Model.StatusFilter.HasValue;
+        }
+        <form id="pdfExportForm" method="post" asp-page-handler="DownloadReport">
+            <input type="hidden" name="searchString" value="@Model.SearchString" />
+            <input type="hidden" name="agencyFilter" value="@Model.AgencyFilter" />
+            <input type="hidden" name="statusFilter" value="@Model.StatusFilter" />
+            <input type="hidden" name="filterAnalytics" value="@Model.FilterAnalytics.ToString().ToLower()" />
+            <input type="hidden" name="agencyChartBase64" id="agencyChartBase64" />
+            <input type="hidden" name="certChartBase64" id="certChartBase64" />
+            
+            @if (hasActiveFilters)
+            {
+                <button type="button" class="btn btn-brand d-flex align-items-center fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#downloadWarningModal">
+                    <i data-lucide="file-down" class="me-2 text-white" style="width: 18px;"></i> Download Report
+                </button>
+            }
+            else
+            {
+                <button type="button" onclick="generatePdfReport()" class="btn btn-brand d-flex align-items-center fw-bold shadow-sm">
+                    <i data-lucide="file-down" class="me-2 text-white" style="width: 18px;"></i> Download Report
+                </button>
+            }
+        </form>
     </div>
     </div>
 </div>
@@ -301,9 +322,76 @@
     </div>
 </div>
 
+<div class="modal fade" id="downloadWarningModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title fw-bold text-dark">
+                    <i data-lucide="alert-triangle" class="me-2" style="width: 20px;"></i> Filtered Report Notice
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>You are downloading a customized report based on your active filters:</p>
+                <ul class="fw-bold text-dark mb-3">
+                    @if (!string.IsNullOrEmpty(Model.SearchString)) { <li>Employee Search: "@Model.SearchString"</li> }
+                    @if (Model.AgencyFilter.HasValue) { <li>Agency: @(Model.AgencyOptions?.FirstOrDefault(a => a.Value == Model.AgencyFilter.ToString())?.Text ?? "Selected")</li> }
+                    @if (Model.StatusFilter.HasValue) { <li>Status: @Model.StatusFilter.ToString()</li> }
+                </ul>
+                
+                @if (!Model.FilterAnalytics)
+                {
+                    <div class="alert alert-danger shadow-sm border-0 py-2 px-3 mb-0">
+                        <i data-lucide="info" class="me-1" style="width: 16px;"></i> <strong>Note on Visuals:</strong> Your <em>'Table Filters Affect Visuals'</em> toggle is turned <strong>OFF</strong>. The KPI metrics and charts in this PDF will reflect the <strong>entire company</strong> dataset, but the data table will only contain the filtered records.
+                    </div>
+                }
+                else
+                {
+                    <p class="mb-0 text-muted">Both the analytical charts and the data table in the PDF will be restricted to this filtered dataset.</p>
+                }
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" onclick="generatePdfReport()" class="btn btn-brand text-white fw-bold d-flex align-items-center" data-bs-dismiss="modal">
+                    <i data-lucide="download" class="me-2" style="width: 18px;"></i> Proceed to Download
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        function generatePdfReport() {
+            var agencyCanvas = document.getElementById('agencyChart');
+            var certCanvas = document.getElementById('certChart');
+            
+            // Convert to Base64 (using light background to prevent transparency issues in PDF)
+            if (agencyCanvas) {
+                var destCtx = cloneCanvasWithBg(agencyCanvas);
+                document.getElementById('agencyChartBase64').value = destCtx.canvas.toDataURL("image/png");
+            }
+            if (certCanvas) {
+                var destCtx = cloneCanvasWithBg(certCanvas);
+                document.getElementById('certChartBase64').value = destCtx.canvas.toDataURL("image/png");
+            }
+            
+            document.getElementById('pdfExportForm').submit();
+        }
+
+        // Helper to force a white background behind Chart.js transparent canvas exports
+        function cloneCanvasWithBg(oldCanvas) {
+            var newCanvas = document.createElement('canvas');
+            var context = newCanvas.getContext('2d');
+            newCanvas.width = oldCanvas.width;
+            newCanvas.height = oldCanvas.height;
+            context.fillStyle = "#FFFFFF";
+            context.fillRect(0,0, newCanvas.width, newCanvas.height);
+            context.drawImage(oldCanvas, 0, 0);
+            return context;
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // 1. MASTER TABLE CONTROLLER (Handles Actions AND Row Clicks)
             var tableBody = document.querySelector('tbody');
