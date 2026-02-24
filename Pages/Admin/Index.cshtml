@@ -72,9 +72,13 @@
                                     <td class="text-center text-muted">@(item.Certifications.Count) Certifications</td>
                                     <td class="text-center">
                                         @if(item.IsActive) {
-                                            <span class="badge text-bg-success">Active</span>
+                                            <span class="badge text-bg-success d-inline-flex align-items-center px-2 py-1">
+                                                <i data-lucide="check-circle" style="width: 14px; height: 14px;" class="me-1"></i> Active
+                                            </span>
                                         } else {
-                                            <span class="badge text-bg-secondary">Inactive</span>
+                                            <span class="badge text-bg-secondary d-inline-flex align-items-center px-2 py-1">
+                                                <i data-lucide="minus-circle" style="width: 14px; height: 14px;" class="me-1"></i> Inactive
+                                            </span>
                                         }
                                     </td>
                                     <td class="text-center border-start">
@@ -188,11 +192,15 @@
                                             <text>@cert.ValidityPeriodMonths Months</text>
                                         }
                                     </td>
-                                    <td>
-                                        @if (cert.ValidityPeriodMonths > 0) {
-                                            <i data-lucide="check" class="text-success" style="width: 16px;"></i> <text>Yes</text>
+                                    <td class="text-center">
+                                        @if(cert.IsActive) {
+                                            <span class="badge text-bg-success d-inline-flex align-items-center px-2 py-1">
+                                                <i data-lucide="check-circle" style="width: 14px; height: 14px;" class="me-1"></i> Active
+                                            </span>
                                         } else {
-                                            <i data-lucide="x" class="text-muted" style="width: 16px;"></i> <text>No</text>
+                                            <span class="badge text-bg-secondary d-inline-flex align-items-center px-2 py-1">
+                                                <i data-lucide="minus-circle" style="width: 14px; height: 14px;" class="me-1"></i> Inactive
+                                            </span>
                                         }
                                     </td>
                                     <td class="text-center border-start">
