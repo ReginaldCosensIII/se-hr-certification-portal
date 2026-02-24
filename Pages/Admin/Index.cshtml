@@ -452,6 +452,10 @@
                 this.container = document.getElementById(containerId);
                 if (!this.container) return;
 
+                // Unique storage keys per grid instance
+                this.storageKeySearch = containerId + '_search';
+                this.storageKeyFilter = containerId + '_filter';
+
                 this.searchInput = this.container.querySelector('.grid-search-input');
                 this.searchBtn = this.container.querySelector('.grid-search-btn');
                 this.filterSelect = this.container.querySelector('.grid-filter-select');
@@ -465,8 +469,9 @@
                 this.currentPage = 1;
                 this.filteredRows = [...this.rows];
 
-                this.activeSearchTerm = '';
-                this.activeFilterVal = '';
+                // Load state from sessionStorage
+                this.activeSearchTerm = sessionStorage.getItem(this.storageKeySearch) || '';
+                this.activeFilterVal = sessionStorage.getItem(this.storageKeyFilter) || '';
 
                 if(this.perPageSelect) this.perPageSelect.value = this.rowsPerPage;
 
@@ -474,6 +479,10 @@
             }
 
             init() {
+                // Restore UI Inputs from Memory
+                if (this.searchInput && this.activeSearchTerm) this.searchInput.value = this.activeSearchTerm;
+                if (this.filterSelect && this.activeFilterVal) this.filterSelect.value = this.activeFilterVal;
+
                 if (this.searchBtn && this.searchInput) {
                     this.searchBtn.addEventListener('click', () => this.applyFilters());
                     this.searchInput.addEventListener('keypress', (e) => {
@@ -499,12 +508,19 @@
                         this.render();
                     });
                 }
-                this.render();
+                
+                // Initial filter execution to respect restored state
+                this.executeFilter();
             }
 
             applyFilters() {
                 this.activeSearchTerm = this.searchInput ? this.searchInput.value.toLowerCase().trim() : '';
                 this.activeFilterVal = this.filterSelect ? this.filterSelect.value.toLowerCase() : '';
+                
+                // Save state to sessionStorage
+                sessionStorage.setItem(this.storageKeySearch, this.activeSearchTerm);
+                sessionStorage.setItem(this.storageKeyFilter, this.activeFilterVal);
+
                 this.executeFilter();
             }
 
@@ -513,6 +529,11 @@
                 if (this.filterSelect) this.filterSelect.value = '';
                 this.activeSearchTerm = '';
                 this.activeFilterVal = '';
+                
+                // Wipe state from sessionStorage
+                sessionStorage.removeItem(this.storageKeySearch);
+                sessionStorage.removeItem(this.storageKeyFilter);
+
                 this.executeFilter();
             }
 
