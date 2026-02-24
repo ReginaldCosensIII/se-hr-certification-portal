@@ -298,9 +298,9 @@ namespace SeHrCertificationPortal.Pages.Certifications
                         {
                             col.Item().PaddingBottom(20).Row(row =>
                             {
-                                if (agencyChartBytes != null) row.RelativeItem().AlignCenter().Height(150).Image(agencyChartBytes);
+                                if (agencyChartBytes != null) row.RelativeItem().Image(agencyChartBytes);
                                 row.ConstantItem(20);
-                                if (certChartBytes != null) row.RelativeItem().AlignCenter().Height(150).Image(certChartBytes);
+                                if (certChartBytes != null) row.RelativeItem().Image(certChartBytes);
                             });
                         }
 

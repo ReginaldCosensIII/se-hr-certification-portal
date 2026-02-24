@@ -6,6 +6,7 @@ using QuestPDF.Infrastructure;
 
 // Configure QuestPDF License
 QuestPDF.Settings.License = LicenseType.Community;
+QuestPDF.Settings.EnableDebugging = true;
 
 var builder = WebApplication.CreateBuilder(args);
 
