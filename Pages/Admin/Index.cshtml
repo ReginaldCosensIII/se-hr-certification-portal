@@ -597,7 +597,7 @@
 
             executeFilter() {
                 this.filteredRows = this.rows.filter(row => {
-                    const text = row.innerText.toLowerCase();
+                    const text = row.textContent.toLowerCase(); // HOTFIX: Swapped innerText for textContent
                     const matchesSearch = this.activeSearchTerm === '' || text.includes(this.activeSearchTerm);
                     const matchesFilter = this.activeFilterVal === '' || text.includes(this.activeFilterVal);
                     return matchesSearch && matchesFilter;
