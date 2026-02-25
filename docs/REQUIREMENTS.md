@@ -64,15 +64,10 @@
 - **Export**: "Generate Report" button (Action: Download CSV/PDF of active/expiring certs).
 - **Styling**: Must match Dashboard/Requests table styles exactly.
 
-### Employee Detail & Certification History View (Master-Detail)
-- **Trigger**: User clicks a row in the "Employee Certifications" table.
-- **Location**: Top of page (Collapsible/Accordion style), consistent with Requests page.
-- **Content**:
-    1.  **Employee Profile**: Name, ID, Manager, Role.
-    2.  **Selected Certification**: Details of the specific cert clicked (Agency, Issue Date, Expiration, PDF Copy link).
-    3.  **Certification History**: List of *other* certifications held by this employee.
-    4.  **Interaction**: Clicking a cert in the history list updates the "Selected Certification" view.
-- **Status**: UI Scaffolding only (Backend wiring in Phase 5).
+### Compliance & Coverage Analytics Dashboard
+- **Compliance & Coverage Analytics Dashboard:** A dynamic, visual analytics section utilizing Chart.js to display Total Active, Expiring Soon, and Critical Lapses.
+  - *Data Sync:* Analytics must perfectly respect client-side table filters via a unified toggle state.
+  - *WYSIWYG Export:* Includes a "Download Report" feature powered by QuestPDF that captures client-side visual states and generates a master Coverage-First layout.
 
 ## 3. Global Reporting & Export Features (Future)
 - **Data Tables (Admin, Requests, Certifications)**: 
@@ -121,6 +116,9 @@
 
 ### 3. Expiring Soon Status Logic
 * **Description:** QA identified that certifications expiring on the current day still show as 'Active'. In the upcoming Notifications/Certifications phase, implement a global threshold calculation (e.g., < 30 days) to accurately apply an 'Expiring Soon' badge and status instead of just 'Active'.
+
+### 4. SRE Text-Based CSV Fallback Engine
+- **SRE Text-Based CSV Fallback Engine:** As a Site Reliability Engineering (SRE) protocol, implement a lightweight, text-only CSV export fallback for all PDF generation endpoints to protect against future library deprecations or rendering engine failures.
 
 ## Post-MVP UI/UX & Code Reusability Audit
 Before final production handoff, a dedicated sprint must be executed to ensure strict DRY (Don't Repeat Yourself) principles across the portal:
