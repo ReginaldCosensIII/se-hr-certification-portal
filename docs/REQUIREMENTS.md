@@ -105,20 +105,15 @@
 
 ## 🌟 Future Enhancements & Wishlist (Post-MVP)
 
-### 1. Direct Certification Entry (Bypass Request Lifecycle)
-* **Description:** Allow Administrators/HR to manually add an active Certification to an Employee's profile without requiring them to submit a "Request" first.
-* **Use Case:** Onboarding a new hire who already holds active, valid certifications, or doing initial data population at launch.
-* **Implementation Notes:** Will require a new Create workflow on the Employee or Certifications page that directly writes to the `Certifications` table, collecting issuing agency, validity dates, and proof of completion.
-
-### 2. Global Reusable Table Sorting Service
+### 1. Global Reusable Table Sorting Service
 * **Description:** Implement a dynamic sorting capability across all data tables in the portal.
 * **Use Case:** Users need to sort Requests by Date, Employees by Name, or Certifications by Expiration Date.
 * **Implementation Notes:** Instead of writing custom sorting logic for every Razor Page, build a global service/helper class (e.g., passing `sortOrder` query parameters mapped to reflection/LINQ expressions) that can be easily plugged into any index page alongside the existing pagination logic.
 
-### 3. Expiring Soon Status Logic
+### 2. Expiring Soon Status Logic
 * **Description:** QA identified that certifications expiring on the current day still show as 'Active'. In the upcoming Notifications/Certifications phase, implement a global threshold calculation (e.g., < 30 days) to accurately apply an 'Expiring Soon' badge and status instead of just 'Active'.
 
-### 4. SRE Text-Based CSV Fallback Engine
+### 3. SRE Text-Based CSV Fallback Engine
 - **SRE Text-Based CSV Fallback Engine:** As a Site Reliability Engineering (SRE) protocol, implement a lightweight, text-only CSV export fallback for all PDF generation endpoints to protect against future library deprecations or rendering engine failures.
 
 ## Post-MVP UI/UX & Code Reusability Audit

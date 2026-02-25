@@ -48,6 +48,8 @@ namespace SeHrCertificationPortal.Pages.Certifications
 
         public IList<CertificationRequest> PassedCertifications { get; set; } = default!;
         public SelectList AgencyOptions { get; set; } = default!;
+        public SelectList EmployeeOptions { get; set; } = default!;
+        public IList<Certification> AllCertifications { get; set; } = default!;
 
         public int CurrentPage { get; set; } = 1;
         public int TotalPages { get; set; }
@@ -82,6 +84,11 @@ namespace SeHrCertificationPortal.Pages.Certifications
 
             var agencies = await _context.Agencies.Where(a => a.IsActive).ToListAsync();
             AgencyOptions = new SelectList(agencies, "Id", "Abbreviation");
+
+            var employees = await _context.Employees.OrderBy(e => e.DisplayName).ToListAsync();
+            EmployeeOptions = new SelectList(employees, "Id", "DisplayName");
+            
+            AllCertifications = await _context.Certifications.Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync();
 
             // Npgsql Date Standard: Declare local variables for the query
             DateTime today = DateTime.UtcNow;
@@ -203,6 +210,27 @@ namespace SeHrCertificationPortal.Pages.Certifications
                 _context.CertificationRequests.Remove(record);
                 await _context.SaveChangesAsync();
             }
+            return RedirectToPage(new { p, pageSize, SearchString = searchString, AgencyFilter = agencyFilter, StatusFilter = statusFilter, FilterAnalytics = filterAnalytics });
+        }
+
+        public async Task<IActionResult> OnPostAddDirectCertAsync(int NewEmployeeId, int NewAgencyId, int NewCertificationId, DateTime NewDatePassed, DateTime? NewExpirationDate, int p = 1, int pageSize = 25, string? searchString = null, int? agencyFilter = null, string? statusFilter = null, bool filterAnalytics = true)
+        {
+            if (NewEmployeeId > 0 && NewAgencyId > 0 && NewCertificationId > 0)
+            {
+                var newCert = new CertificationRequest
+                {
+                    EmployeeId = NewEmployeeId,
+                    AgencyId = NewAgencyId,
+                    CertificationId = NewCertificationId,
+                    RequestDate = NewDatePassed,
+                    ExpirationDate = NewExpirationDate,
+                    Status = RequestStatus.Passed // Bypass approval lifecycle
+                };
+
+                _context.CertificationRequests.Add(newCert);
+                await _context.SaveChangesAsync();
+            }
+
             return RedirectToPage(new { p, pageSize, SearchString = searchString, AgencyFilter = agencyFilter, StatusFilter = statusFilter, FilterAnalytics = filterAnalytics });
         }
 

@@ -13,39 +13,47 @@
         @{
             bool hasActiveFilters = !string.IsNullOrEmpty(Model.SearchString) || Model.AgencyFilter.HasValue || Model.StatusFilter.HasValue;
         }
-        <form id="pdfExportForm" method="post" asp-page-handler="DownloadReport">
-            <input type="hidden" name="searchString" value="@Model.SearchString" />
-            <input type="hidden" name="agencyFilter" value="@Model.AgencyFilter" />
-            <input type="hidden" name="statusFilter" value="@Model.StatusFilter" />
-            <input type="hidden" name="filterAnalytics" value="@Model.FilterAnalytics.ToString().ToLower()" />
-            <input type="hidden" name="agencyChartBase64" id="agencyChartBase64" />
-            <input type="hidden" name="certChartBase64" id="certChartBase64" />
-            
-            @if (hasActiveFilters)
-            {
-                <button type="button" class="btn btn-brand d-flex align-items-center fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#downloadWarningModal">
-                    <i data-lucide="file-down" class="me-2 text-white" style="width: 18px;"></i> Download Report
-                </button>
-            }
-            else
-            {
-                <button type="button" onclick="generatePdfReport()" class="btn btn-brand d-flex align-items-center fw-bold shadow-sm">
-                    <i data-lucide="file-down" class="me-2 text-white" style="width: 18px;"></i> Download Report
-                </button>
-            }
-        </form>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-brand d-flex align-items-center fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#addDirectCertModal">
+                <i data-lucide="plus" class="me-2" style="width: 18px;"></i> Add Certification
+            </button>
+            <form id="pdfExportForm" method="post" asp-page-handler="DownloadReport">
+                <input type="hidden" name="searchString" value="@Model.SearchString" />
+                <input type="hidden" name="agencyFilter" value="@Model.AgencyFilter" />
+                <input type="hidden" name="statusFilter" value="@Model.StatusFilter" />
+                <input type="hidden" name="filterAnalytics" value="@Model.FilterAnalytics.ToString().ToLower()" />
+                <input type="hidden" name="agencyChartBase64" id="agencyChartBase64" />
+                <input type="hidden" name="certChartBase64" id="certChartBase64" />
+                
+                @if (hasActiveFilters)
+                {
+                    <button type="button" class="btn btn-brand d-flex align-items-center fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#downloadWarningModal">
+                        <i data-lucide="file-down" class="me-2 text-white" style="width: 18px;"></i> Download Report
+                    </button>
+                }
+                else
+                {
+                    <button type="button" onclick="generatePdfReport()" class="btn btn-brand d-flex align-items-center fw-bold shadow-sm">
+                        <i data-lucide="file-down" class="me-2 text-white" style="width: 18px;"></i> Download Report
+                    </button>
+                }
+            </form>
+        </div>
     </div>
     </div>
 </div>
 
 <!-- ANALYTICS DASHBOARD -->
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="mb-0 fw-bold text-dark">Compliance & Coverage Analytics</h5>
+    <h5 class="mb-0 fw-bold text-dark d-flex align-items-center" data-bs-toggle="collapse" href="#analyticsCollapse" role="button" aria-expanded="true" aria-controls="analyticsCollapse" style="cursor: pointer; user-select: none;">
+        <i data-lucide="chevron-down" class="me-2" style="width: 20px; transition: transform 0.3s;" id="analyticsChevron"></i> Compliance & Coverage Analytics
+    </h5>
     <div class="form-check form-switch fs-5">
         <input class="form-check-input" type="checkbox" role="switch" id="analyticsVisualToggle" @(Model.FilterAnalytics ? "checked" : "")>
         <label class="form-check-label fs-6 text-muted mt-1" for="analyticsVisualToggle">Table Filters Affect Visuals</label>
     </div>
 </div>
+<div class="collapse show" id="analyticsCollapse">
 <div class="row mb-4">
     <div class="col-md-4">
         <div class="card bg-success text-white shadow-sm h-100">
@@ -86,6 +94,7 @@
             <div class="card-body"><canvas id="certChart" style="max-height: 250px;"></canvas></div>
         </div>
     </div>
+</div>
 </div>
 <!-- /ANALYTICS DASHBOARD -->
 
@@ -138,7 +147,7 @@
                     <th>Certification</th>
                     <th>Date Passed</th>
                     <th>Expiration Date</th>
-                    <th>Status</th>
+                    <th class="text-center" style="width: 120px;">Status</th>
                     <th class="text-end">Actions</th>
                 </tr>
             </thead>
@@ -166,7 +175,7 @@
                                 <span class="text-muted fst-italic">None</span>
                             }
                         </td>
-                        <td>
+                        <td class="text-center">
                             @{
                                 var status = Model.GetComputedStatus(item.ExpirationDate);
                                 switch (status)
@@ -236,6 +245,67 @@
                 </li>
             </ul>
         </nav>
+    </div>
+</div>
+
+<div class="modal fade" id="addDirectCertModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post" asp-page-handler="AddDirectCert">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold">
+                        <i data-lucide="award" class="me-2 text-brand" style="width: 20px;"></i> Direct Certification Entry
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info py-2 px-3 mb-4 shadow-sm border-0" style="font-size: 0.9rem;">
+                        <i data-lucide="info" class="me-1" style="width: 16px;"></i> This form bypasses the standard request lifecycle and immediately flags the certification as <strong>Active</strong>.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Employee</label>
+                        <select name="NewEmployeeId" class="form-select" asp-items="Model.EmployeeOptions" required>
+                            <option value="">-- Select Employee --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Issuing Agency</label>
+                        <select name="NewAgencyId" id="newAgencyId" class="form-select" asp-items="Model.AgencyOptions" required>
+                            <option value="">-- Select Agency --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Certification</label>
+                        <select name="NewCertificationId" id="newCertificationId" class="form-select" required disabled>
+                            <option value="">-- Select Agency First --</option>
+                            @if(Model.AllCertifications != null)
+                            {
+                                foreach(var cert in Model.AllCertifications)
+                                {
+                                    <option value="@cert.Id" data-agency-id="@cert.AgencyId">@cert.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Date Passed</label>
+                            <input type="date" class="form-control" name="NewDatePassed" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Expiration Date</label>
+                            <input type="date" class="form-control" name="NewExpirationDate" />
+                            <div class="form-text" style="font-size: 0.75rem;">Leave blank if permanent.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-brand text-white fw-bold">Save Record</button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -393,6 +463,41 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Analytics Chevron Animation
+            var analyticsCollapse = document.getElementById('analyticsCollapse');
+            var analyticsChevron = document.getElementById('analyticsChevron');
+            if (analyticsCollapse && analyticsChevron) {
+                analyticsCollapse.addEventListener('hide.bs.collapse', function () { analyticsChevron.style.transform = 'rotate(-90deg)'; });
+                analyticsCollapse.addEventListener('show.bs.collapse', function () { analyticsChevron.style.transform = 'rotate(0deg)'; });
+            }
+
+            // Cascading Dropdown for Direct Entry Modal
+            var agencySelect = document.getElementById('newAgencyId');
+            var certSelect = document.getElementById('newCertificationId');
+            if (agencySelect && certSelect) {
+                agencySelect.addEventListener('change', function() {
+                    var selectedAgency = this.value;
+                    certSelect.value = ''; // Reset
+                    
+                    if (!selectedAgency) {
+                        certSelect.disabled = true;
+                        certSelect.options[0].text = "-- Select Agency First --";
+                    } else {
+                        certSelect.disabled = false;
+                        certSelect.options[0].text = "-- Select Certification --";
+                    }
+
+                    Array.from(certSelect.options).forEach(opt => {
+                        if (opt.value === '') return; // Skip default option
+                        if (opt.getAttribute('data-agency-id') === selectedAgency) {
+                            opt.hidden = false;
+                        } else {
+                            opt.hidden = true;
+                        }
+                    });
+                });
+            }
+
             // 1. MASTER TABLE CONTROLLER (Handles Actions AND Row Clicks)
             var tableBody = document.querySelector('tbody');
             if (tableBody) {
