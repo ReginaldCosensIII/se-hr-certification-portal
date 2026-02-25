@@ -221,9 +221,12 @@ namespace SeHrCertificationPortal.Pages.Admin
                 {
                     foreach (var agency in agencies)
                     {
-                        // Agency Group Header
-                        col.Item().PaddingTop(10).PaddingBottom(5).Text($"{agency.FullName} ({agency.Abbreviation})")
-                            .FontSize(14).SemiBold().FontColor("#a19482");
+                        // 1. Dynamic Agency Header
+                        var agencyColor = agency.IsActive ? "#a19482" : (string)Colors.Red.Medium;
+                        var agencyStatusText = agency.IsActive ? "" : " [INACTIVE]";
+                        
+                        col.Item().PaddingTop(10).PaddingBottom(5).Text($"{agency.FullName} ({agency.Abbreviation}){agencyStatusText}")
+                            .FontSize(14).SemiBold().FontColor(agencyColor);
 
                         if (!agency.Certifications.Any())
                         {
@@ -231,7 +234,7 @@ namespace SeHrCertificationPortal.Pages.Admin
                             continue;
                         }
 
-                        // Certifications Table
+                        // 2. Certifications Table
                         col.Item().PaddingBottom(15).Table(table =>
                         {
                             table.ColumnsDefinition(columns =>
@@ -250,9 +253,13 @@ namespace SeHrCertificationPortal.Pages.Admin
 
                             foreach (var cert in agency.Certifications)
                             {
-                                table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(cert.Name);
-                                table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(cert.ValidityPeriodMonths == 0 ? "Permanent" : $"{cert.ValidityPeriodMonths} Months");
-                                table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(cert.IsActive ? "Active" : "Inactive");
+                                // Dynamic Row Colors
+                                var rowTextColor = cert.IsActive ? Colors.Black : Colors.Grey.Medium;
+                                var statusColor = cert.IsActive ? Colors.Green.Darken1 : Colors.Red.Medium;
+
+                                table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(cert.Name).FontColor(rowTextColor);
+                                table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(cert.ValidityPeriodMonths == 0 ? "Permanent" : $"{cert.ValidityPeriodMonths} Months").FontColor(rowTextColor);
+                                table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(cert.IsActive ? "Active" : "Inactive").FontColor(statusColor).SemiBold();
                             }
                         });
                     }
