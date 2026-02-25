@@ -80,11 +80,12 @@
     - *Note*: This requires a dedicated PDF generation service or template.
 
 ## 4. Technical & Workflow Requirements
+- **Tech Stack**: ASP.NET Core 10 (LTS) with Razor Pages.
 - **Architecture Strategy**: **Frontend-First**.
     1.  **UI Scaffolding**: Build all Razor Pages and visuals first.
     2.  **Database**: Design schema and seed data *after* UI approval.
     3.  **Wiring**: Connect UI to DB and implement backend logic last.
-- **Database**: PostgreSQL with Entity Framework Core.
+- **Database**: PostgreSQL with Entity Framework Core 10.
     - **Migration**: Use `pg_dump` for production schema promotion.
     - **Seeding**: Realistic mock data required for dev/testing.
 - **Testing**: 100% Unit Test coverage for logic. Regression testing required.
