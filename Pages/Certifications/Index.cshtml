@@ -1,7 +1,7 @@
 @page
 @model SeHrCertificationPortal.Pages.Certifications.IndexModel
 @{
-    ViewData["Title"] = "Certifications";
+    ViewData["Title"] = "Employee Certifications Tracker";
 }
 
 <!-- Page Header with Report Action -->
@@ -10,93 +10,93 @@
         <!-- Page Title is handled in Layout -->
     </div>
     <div>
-        <button class="btn btn-brand d-flex align-items-center fw-bold">
-            <i data-lucide="file-down" class="me-2 text-white" style="width: 18px;"></i> Generate Report
-        </button>
+        @{
+            bool hasActiveFilters = !string.IsNullOrEmpty(Model.SearchString) || Model.AgencyFilter.HasValue || Model.StatusFilter.HasValue;
+        }
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-brand d-flex align-items-center fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#addDirectCertModal">
+                <i data-lucide="plus" class="me-2" style="width: 18px;"></i> Add Certification
+            </button>
+            <form id="pdfExportForm" method="post" asp-page-handler="DownloadReport">
+                <input type="hidden" name="searchString" value="@Model.SearchString" />
+                <input type="hidden" name="agencyFilter" value="@Model.AgencyFilter" />
+                <input type="hidden" name="statusFilter" value="@Model.StatusFilter" />
+                <input type="hidden" name="filterAnalytics" value="@Model.FilterAnalytics.ToString().ToLower()" />
+                <input type="hidden" name="agencyChartBase64" id="agencyChartBase64" />
+                <input type="hidden" name="certChartBase64" id="certChartBase64" />
+                
+                @if (hasActiveFilters)
+                {
+                    <button type="button" class="btn btn-brand d-flex align-items-center fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#downloadWarningModal">
+                        <i data-lucide="file-down" class="me-2 text-white" style="width: 18px;"></i> Download Report
+                    </button>
+                }
+                else
+                {
+                    <button type="button" onclick="generatePdfReport()" class="btn btn-brand d-flex align-items-center fw-bold shadow-sm">
+                        <i data-lucide="file-down" class="me-2 text-white" style="width: 18px;"></i> Download Report
+                    </button>
+                }
+            </form>
+        </div>
+    </div>
     </div>
 </div>
 
-<!-- Employee Detail View (Accordion Style) -->
-<div class="accordion mb-4 shadow-sm" id="employeeDetailAccordion">
-    <div class="accordion-item border-0" style="border-top: 4px solid var(--brand-primary) !important;">
-        <h2 class="accordion-header" id="headingDetail">
-            <button class="accordion-button collapsed text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetail" aria-expanded="false" aria-controls="collapseDetail">
-                <span class="fs-4 fw-bold">
-                    <i data-lucide="user" class="me-2 text-brand-primary" style="color: var(--brand-primary);"></i> Certification Details
-                </span>
-            </button>
-        </h2>
-        <div id="collapseDetail" class="accordion-collapse collapse" aria-labelledby="headingDetail" data-bs-parent="#employeeDetailAccordion">
-            <div class="accordion-body bg-light">
-                
-                <!-- Empty State Message -->
-                <div class="alert alert-warning border-0 d-flex align-items-center mb-3" role="alert">
-                    <i data-lucide="info" class="me-2"></i>
-                    <div>
-                        <strong>No Selection:</strong> Please select an employee from the table below to view details.
-                    </div>
-                </div>
-
-                <!-- Disabled / Empty Fields Representation -->
-                <div class="row g-4 opacity-50" style="pointer-events: none; user-select: none;">
-                    <!-- Left Col: Employee Info & Current Cert -->
-                    <div class="col-md-4 border-end">
-                        <h6 class="text-muted text-uppercase small fw-bold mb-3">Employee Profile</h6>
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="bg-white rounded-circle d-flex align-items-center justify-content-center me-3 border" style="width: 48px; height: 48px;">
-                                <span class="fw-bold text-muted">--</span>
-                            </div>
-                            <div>
-                                <div class="fw-bold text-muted">Select Employee</div>
-                                <div class="small text-muted">Role • ID: ---</div>
-                            </div>
-                        </div>
-                        
-                        <h6 class="text-muted text-uppercase small fw-bold mb-3 mt-4">Selected Certification</h6>
-                        <div class="p-3 bg-white rounded border">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="fw-bold text-muted">---</span>
-                                <span class="badge bg-secondary">---</span>
-                            </div>
-                            <div class="small text-muted mb-1">Agency: <span class="fw-bold text-muted">---</span></div>
-                            <div class="small text-muted mb-1">Issued: <span class="fw-bold text-muted">--/--/----</span></div>
-                            <div class="small text-muted mb-3">Expires: <span class="fw-bold text-muted">--/--/----</span></div>
-                            
-                            <button class="btn btn-sm btn-outline-secondary w-100" disabled>
-                                 <i data-lucide="download" class="me-1" style="width: 14px;"></i> Download Copy
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Right Col: Cert History -->
-                    <div class="col-md-8">
-                        <h6 class="text-muted text-uppercase small fw-bold mb-3">Certification History</h6>
-                        <div class="table-responsive">
-                             <table class="table table-sm align-middle text-muted">
-                                <thead class="bg-light">
-                                    <tr>
-                                        <th>Certification</th>
-                                        <th>Agency</th>
-                                        <th>Status</th>
-                                        <th>Expiration</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                 <tbody>
-                                    <tr>
-                                        <td colspan="5" class="text-center py-4">
-                                            <em>No records requested</em>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+<!-- ANALYTICS DASHBOARD -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0 fw-bold text-dark d-flex align-items-center" data-bs-toggle="collapse" href="#analyticsCollapse" role="button" aria-expanded="true" aria-controls="analyticsCollapse" style="cursor: pointer; user-select: none;">
+        <i data-lucide="chevron-down" class="me-2" style="width: 20px; transition: transform 0.3s;" id="analyticsChevron"></i> Compliance & Coverage Analytics
+    </h5>
+    <div class="form-check form-switch fs-5">
+        <input class="form-check-input" type="checkbox" role="switch" id="analyticsVisualToggle" @(Model.FilterAnalytics ? "checked" : "")>
+        <label class="form-check-label fs-6 text-muted mt-1" for="analyticsVisualToggle">Table Filters Affect Visuals</label>
+    </div>
+</div>
+<div class="collapse show" id="analyticsCollapse">
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-success text-white shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase fw-bold mb-1">Total Active</h6>
+                <h2 class="mb-0">@Model.AnalyticsTotalActive</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase fw-bold mb-1"><i data-lucide="alert-triangle" class="me-1" style="width: 18px;"></i> Expiring Soon</h6>
+                <h2 class="mb-0">@Model.AnalyticsExpiringSoon</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-danger text-white shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase fw-bold mb-1">Critical Lapses</h6>
+                <h2 class="mb-0">@Model.AnalyticsExpired</h2>
             </div>
         </div>
     </div>
 </div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white"><h6 class="mb-0 fw-bold">Top Agency Distribution</h6></div>
+            <div class="card-body"><canvas id="agencyChart" style="max-height: 250px;"></canvas></div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white"><h6 class="mb-0 fw-bold">Skill Void Tracker (Top 5)</h6></div>
+            <div class="card-body"><canvas id="certChart" style="max-height: 250px;"></canvas></div>
+        </div>
+    </div>
+</div>
+</div>
+<!-- /ANALYTICS DASHBOARD -->
 
 <div class="card shadow-sm">
     <div class="card-header border-0 bg-transparent py-3">
@@ -104,33 +104,35 @@
             <h3 class="card-title mb-0 fw-bold text-dark">Employee Certifications</h3>
             
             <div class="card-tools d-flex align-items-center gap-2">
-                <!-- Search & Filter -->
-                <form method="get" class="d-flex align-items-center gap-2">
-                    <div class="input-group input-group-sm">
-                        <input type="text" name="SearchString" class="form-control" placeholder="Search..." style="max-width: 200px;">
-                         <button class="btn btn-brand" type="submit">
+                <form method="get" id="filterForm" class="d-flex align-items-center gap-2">
+                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                    <input type="hidden" name="FilterAnalytics" id="hiddenFilterAnalytics" value="@Model.FilterAnalytics.ToString().ToLower()" />
+                    
+                    <div class="input-group input-group-sm mb-0 me-2" style="max-width: 250px;">
+                        <input type="text" asp-for="SearchString" class="form-control" placeholder="Search employee...">
+                        <button class="btn btn-brand" type="submit">
                             <i data-lucide="search" class="text-white" style="width: 14px;"></i>
                         </button>
                     </div>
                     
-                    <select name="Agency" class="form-select form-select-sm" style="width: 130px;">
+                    <select asp-for="AgencyFilter" class="form-select form-select-sm" style="width: 200px;" asp-items="Model.AgencyOptions">
                         <option value="">All Agencies</option>
-                        <option value="ACI">ACI</option>
-                        <option value="WACEL">WACEL</option>
-                        <option value="VDEQ">VDEQ</option>
-                        <option value="OSHA">OSHA</option>
                     </select>
 
-                    <select name="Status" class="form-select form-select-sm" style="width: 130px;">
-                        <option value="">All Status</option>
-                        <option value="Active">Active</option>
-                        <option value="Expiring">Expiring Soon</option>
-                        <option value="Expired">Expired</option>
+                    <select asp-for="StatusFilter" class="form-select form-select-sm" style="width: 150px;" asp-items="Html.GetEnumSelectList<SeHrCertificationPortal.Models.TrackerStatus>()">
+                        <option value="">All Statuses</option>
                     </select>
                     
                     <button type="submit" class="btn btn-brand btn-sm d-flex align-items-center">
                         <i data-lucide="filter" class="me-1" style="width: 14px;"></i> Filter
                     </button>
+
+                    @if (!string.IsNullOrEmpty(Model.SearchString) || Model.AgencyFilter.HasValue || Model.StatusFilter.HasValue)
+                    {
+                        <a asp-page="./Index" class="btn btn-outline-brand btn-sm d-flex align-items-center" title="Clear Filters">
+                            <i data-lucide="x" style="width: 14px;"></i>
+                        </a>
+                    }
                 </form>
             </div>
         </div>
@@ -140,57 +142,492 @@
         <table class="table table-striped table-hover align-middle mb-0">
             <thead class="bg-light">
                 <tr>
-                    <th style="width: 100px;">Emp ID</th>
-                    <th>Employee Name</th>
-                    <th>Agency</th>
+                    <th>Employee</th>
+                    <th>Agency / Board</th>
                     <th>Certification</th>
-                    <th>Status</th>
+                    <th>Date Passed</th>
                     <th>Expiration Date</th>
-                    <th class="text-end" style="min-width: 100px;">Actions</th>
+                    <th class="text-center" style="width: 120px;">Status</th>
+                    <th class="text-end">Actions</th>
                 </tr>
             </thead>
             <tbody>
-            @foreach (var item in Model.ActiveCertifications) {
-                <tr>
-                    <td><span class="text-muted fw-mono">#(ID:@item.Employee?.Id)</span></td>
-                    <td>
-                        <span class="fw-bold">@item.Employee?.DisplayName</span>
-                    </td>
-                    <td>@(item.Certification?.Agency?.Abbreviation ?? item.CustomAgencyName)</td>
-                    <td>@(item.Certification?.Name ?? item.CustomCertificationName)</td>
-                    <td>
-                        <span class="badge text-bg-success">Active</span>
-                    </td>
-                    <td>
-                        @if(item.ExpirationDate.HasValue) {
-                            <text>@item.ExpirationDate.Value.ToString("MMM dd, yyyy")</text>
-                        } else {
-                            <text>Permanent</text>
-                        }
-                    </td>
-                    <td class="text-end">
-                        <a href="#" class="text-muted me-2" title="View details">
-                            <i data-lucide="eye" style="width: 16px;"></i>
-                        </a>
-                        <a href="#" class="text-muted me-2" title="Edit certification">
-                            <i data-lucide="pencil" style="width: 16px;"></i>
-                        </a>
-                    </td>
-                </tr>
-            }
+                @foreach (var item in Model.PassedCertifications)
+                {
+                    <tr class="clickable-row" style="cursor: pointer;" data-employee-id="@item.EmployeeId" title="Click to view certification history">
+                        <td>@item.Employee?.DisplayName</td>
+                        <td>@(item.Agency?.Abbreviation ?? item.CustomAgencyName ?? "Custom")</td>
+                        <td>@(item.Certification?.Name ?? item.CustomCertificationName ?? "Custom")</td>
+                        <td>
+                            @{
+                                // By domain definition, passing date is basically RequestDate when it was passed. You can modify if needed.
+                                // It could also be inferred from ExpirationDate minus duration, but for now we'll display RequestDate.
+                            }
+                            @item.RequestDate.ToString("MMM dd, yyyy") 
+                        </td>
+                        <td>
+                            @if (item.ExpirationDate.HasValue)
+                            {
+                                @item.ExpirationDate.Value.ToString("MMM dd, yyyy")
+                            }
+                            else
+                            {
+                                <span class="text-muted fst-italic">None</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            @{
+                                var status = Model.GetComputedStatus(item.ExpirationDate);
+                                switch (status)
+                                {
+                                    case SeHrCertificationPortal.Models.TrackerStatus.Expired:
+                                        <span class="badge text-bg-danger d-inline-flex align-items-center"><i data-lucide="alert-triangle" class="me-1" style="width: 12px; height: 12px;"></i>Expired</span>
+                                        break;
+                                    case SeHrCertificationPortal.Models.TrackerStatus.ExpiringSoon:
+                                        <span class="badge text-bg-warning d-inline-flex align-items-center"><i data-lucide="clock" class="me-1" style="width: 12px; height: 12px;"></i>Expiring Soon</span>
+                                        break;
+                                    case SeHrCertificationPortal.Models.TrackerStatus.Active:
+                                        <span class="badge text-bg-success d-inline-flex align-items-center"><i data-lucide="check-circle" class="me-1" style="width: 12px; height: 12px;"></i>Active</span>
+                                        break;
+                                    case SeHrCertificationPortal.Models.TrackerStatus.Permanent:
+                                        <span class="badge text-bg-info text-white d-inline-flex align-items-center"><i data-lucide="infinity" class="me-1" style="width: 12px; height: 12px;"></i>Permanent</span>
+                                        break;
+                                }
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="d-flex justify-content-end gap-3">
+                                <a href="javascript:void(0)" class="text-primary action-btn edit-cert-btn" 
+                                   data-request-id="@item.Id" 
+                                   data-date-passed="@item.RequestDate.ToString("yyyy-MM-dd")" 
+                                   data-expiration="@(item.ExpirationDate.HasValue ? item.ExpirationDate.Value.ToString("yyyy-MM-dd") : "")" 
+                                   title="Edit Certification">
+                                    <i data-lucide="edit" style="width: 18px; height: 18px;"></i>
+                                </a>
+                                <a href="javascript:void(0)" class="text-danger action-btn remove-cert-btn" data-request-id="@item.Id" title="Revoke/Remove Certification">
+                                    <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
             </tbody>
         </table>
     </div>
-    
+
     <div class="card-footer bg-transparent border-top-0 py-3">
-        <!-- Pagination Mock -->
-        <nav aria-label="Page navigation">
-            <ul class="pagination pagination-sm justify-content-end mb-0">
-                <li class="page-item disabled"><a class="page-link" href="#" aria-label="Previous">Previous</a></li>
-                <li class="page-item active"><a class="page-link shadow-sm" href="#">1</a></li>
-                <li class="page-item disabled"><a class="page-link text-muted" href="#">2</a></li>
-                <li class="page-item disabled"><a class="page-link" href="#" aria-label="Next">Next</a></li>
+        <nav aria-label="Page navigation" class="d-flex justify-content-end align-items-center gap-3">
+            <label class="mb-0 text-muted small">
+                Show 
+                <select class="form-select form-select-sm d-inline-block w-auto mx-1 shadow-sm" onchange="window.location.href='?p=1&pageSize=' + this.value + '&SearchString=@Model.SearchString&AgencyFilter=@Model.AgencyFilter&StatusFilter=@Model.StatusFilter'">
+                    @foreach(var size in new[] { 10, 15, 20, 25, 50 })
+                    {
+                         if (size == Model.PageSize)
+                        {
+                            <option value="@size" selected>@size</option>
+                        }
+                        else
+                        {
+                            <option value="@size">@size</option>
+                        }
+                    }
+                </select> entries
+            </label>
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                    <a class="page-link shadow-sm" asp-page="./Index" asp-route-p="@(Model.CurrentPage - 1)" asp-route-pageSize="@Model.PageSize" asp-route-SearchString="@Model.SearchString" asp-route-AgencyFilter="@Model.AgencyFilter" asp-route-StatusFilter="@Model.StatusFilter">&laquo;</a>
+                </li>
+                <li class="page-item active">
+                    <span class="page-link shadow-sm border-brand bg-brand text-white">@Model.CurrentPage / @Math.Max(1, Model.TotalPages)</span>
+                </li>
+                <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link shadow-sm" asp-page="./Index" asp-route-p="@(Model.CurrentPage + 1)" asp-route-pageSize="@Model.PageSize" asp-route-SearchString="@Model.SearchString" asp-route-AgencyFilter="@Model.AgencyFilter" asp-route-StatusFilter="@Model.StatusFilter">&raquo;</a>
+                </li>
             </ul>
         </nav>
     </div>
 </div>
+
+<div class="modal fade" id="addDirectCertModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post" asp-page-handler="AddDirectCert">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold">
+                        <i data-lucide="award" class="me-2 text-brand" style="width: 20px;"></i> Direct Certification Entry
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info py-2 px-3 mb-4 shadow-sm border-0" style="font-size: 0.9rem;">
+                        <i data-lucide="info" class="me-1" style="width: 16px;"></i> This form bypasses the standard request lifecycle and immediately flags the certification as <strong>Active</strong>.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Employee</label>
+                        <select name="NewEmployeeId" id="newEmployeeIdSelect" class="form-select mb-2" required>
+                            <option value="">-- Select Employee --</option>
+                            <option value="-1" class="fw-bold text-brand">+ Add New Employee</option>
+                            @if(Model.EmployeeOptions != null)
+                            {
+                                foreach(var emp in Model.EmployeeOptions)
+                                {
+                                    <option value="@emp.Value">@emp.Text</option>
+                                }
+                            }
+                        </select>
+                        <input type="text" name="NewEmployeeName" id="newEmployeeNameInput" class="form-control d-none" placeholder="Enter new employee's full name..." />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Issuing Agency</label>
+                        <select name="NewAgencyId" id="newAgencyId" class="form-select" asp-items="Model.AgencyOptions" required>
+                            <option value="">-- Select Agency --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Certification</label>
+                        <select name="NewCertificationId" id="newCertificationId" class="form-select" required disabled>
+                            <option value="">-- Select Agency First --</option>
+                            @if(Model.AllCertifications != null)
+                            {
+                                foreach(var cert in Model.AllCertifications)
+                                {
+                                    <option value="@cert.Id" data-agency-id="@cert.AgencyId">@cert.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Date Passed</label>
+                            <input type="date" class="form-control" name="NewDatePassed" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Expiration Date</label>
+                            <input type="date" class="form-control" name="NewExpirationDate" />
+                            <div class="form-text" style="font-size: 0.75rem;">Leave blank if permanent.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-brand text-white fw-bold">Save Record</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="employeeHistoryModal" tabindex="-1" aria-labelledby="employeeHistoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title" id="employeeHistoryModalLabel">
+                    <i data-lucide="user" class="me-2"></i><span id="modalEmployeeName">Employee History</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle mb-0" id="modalHistoryTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Agency</th>
+                                <th>Certification</th>
+                                <th>Date Passed</th>
+                                <th>Expiration</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalHistoryBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editCertModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post" asp-page-handler="EditCert">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Certification Record</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="TargetCertId" id="editCertId" />
+                    <div class="mb-3">
+                        <label class="form-label">Date Passed</label>
+                        <input type="date" class="form-control" name="EditDatePassed" id="editDatePassed" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Expiration Date</label>
+                        <input type="date" class="form-control" name="EditExpiration" id="editExpiration" />
+                        <div class="form-text">Leave blank for permanent certifications.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="revokeCertModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post" asp-page-handler="RevokeCert">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Revoke Certification</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="TargetCertId" id="revokeCertId" />
+                    <p>Are you sure you want to permanently remove this certification record? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Yes, Revoke</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="downloadWarningModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title fw-bold text-dark">
+                    <i data-lucide="alert-triangle" class="me-2" style="width: 20px;"></i> Filtered Report Notice
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>You are downloading a customized report based on your active filters:</p>
+                <ul class="fw-bold text-dark mb-3">
+                    @if (!string.IsNullOrEmpty(Model.SearchString)) { <li>Employee Search: "@Model.SearchString"</li> }
+                    @if (Model.AgencyFilter.HasValue) { <li>Agency: @(Model.AgencyOptions?.FirstOrDefault(a => a.Value == Model.AgencyFilter.ToString())?.Text ?? "Selected")</li> }
+                    @if (Model.StatusFilter.HasValue) { <li>Status: @Model.StatusFilter.ToString()</li> }
+                </ul>
+                
+                @if (!Model.FilterAnalytics)
+                {
+                    <div class="alert alert-danger shadow-sm border-0 py-2 px-3 mb-0">
+                        <i data-lucide="info" class="me-1" style="width: 16px;"></i> <strong>Note on Visuals:</strong> Your <em>'Table Filters Affect Visuals'</em> toggle is turned <strong>OFF</strong>. The KPI metrics and charts in this PDF will reflect the <strong>entire company</strong> dataset, but the data table will only contain the filtered records.
+                    </div>
+                }
+                else
+                {
+                    <p class="mb-0 text-muted">Both the analytical charts and the data table in the PDF will be restricted to this filtered dataset.</p>
+                }
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" onclick="generatePdfReport()" class="btn btn-brand text-white fw-bold d-flex align-items-center" data-bs-dismiss="modal">
+                    <i data-lucide="download" class="me-2" style="width: 18px;"></i> Proceed to Download
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function generatePdfReport() {
+            var agencyCanvas = document.getElementById('agencyChart');
+            var certCanvas = document.getElementById('certChart');
+            
+            // Convert to Base64 (using light background to prevent transparency issues in PDF)
+            if (agencyCanvas) {
+                var destCtx = cloneCanvasWithBg(agencyCanvas);
+                document.getElementById('agencyChartBase64').value = destCtx.canvas.toDataURL("image/png");
+            }
+            if (certCanvas) {
+                var destCtx = cloneCanvasWithBg(certCanvas);
+                document.getElementById('certChartBase64').value = destCtx.canvas.toDataURL("image/png");
+            }
+            
+            document.getElementById('pdfExportForm').submit();
+        }
+
+        // Helper to force a white background behind Chart.js transparent canvas exports
+        function cloneCanvasWithBg(oldCanvas) {
+            var newCanvas = document.createElement('canvas');
+            var context = newCanvas.getContext('2d');
+            newCanvas.width = oldCanvas.width;
+            newCanvas.height = oldCanvas.height;
+            context.fillStyle = "#FFFFFF";
+            context.fillRect(0,0, newCanvas.width, newCanvas.height);
+            context.drawImage(oldCanvas, 0, 0);
+            return context;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Analytics Chevron Animation
+            var analyticsCollapse = document.getElementById('analyticsCollapse');
+            var analyticsChevron = document.getElementById('analyticsChevron');
+            if (analyticsCollapse && analyticsChevron) {
+                analyticsCollapse.addEventListener('hide.bs.collapse', function () { analyticsChevron.style.transform = 'rotate(-90deg)'; });
+                analyticsCollapse.addEventListener('show.bs.collapse', function () { analyticsChevron.style.transform = 'rotate(0deg)'; });
+            }
+
+            // Dynamic New Employee Toggle in Direct Entry Modal
+            var employeeSelect = document.getElementById('newEmployeeIdSelect');
+            var employeeNameInput = document.getElementById('newEmployeeNameInput');
+            
+            if (employeeSelect && employeeNameInput) {
+                employeeSelect.addEventListener('change', function() {
+                    if (this.value === '-1') {
+                        employeeNameInput.classList.remove('d-none');
+                        employeeNameInput.required = true;
+                        employeeNameInput.focus();
+                    } else {
+                        employeeNameInput.classList.add('d-none');
+                        employeeNameInput.required = false;
+                        employeeNameInput.value = ''; // Clear out the value if they change their mind
+                    }
+                });
+            }
+
+            // Cascading Dropdown for Direct Entry Modal
+            var agencySelect = document.getElementById('newAgencyId');
+            var certSelect = document.getElementById('newCertificationId');
+            if (agencySelect && certSelect) {
+                agencySelect.addEventListener('change', function() {
+                    var selectedAgency = this.value;
+                    certSelect.value = ''; // Reset
+                    
+                    if (!selectedAgency) {
+                        certSelect.disabled = true;
+                        certSelect.options[0].text = "-- Select Agency First --";
+                    } else {
+                        certSelect.disabled = false;
+                        certSelect.options[0].text = "-- Select Certification --";
+                    }
+
+                    Array.from(certSelect.options).forEach(opt => {
+                        if (opt.value === '') return; // Skip default option
+                        if (opt.getAttribute('data-agency-id') === selectedAgency) {
+                            opt.hidden = false;
+                        } else {
+                            opt.hidden = true;
+                        }
+                    });
+                });
+            }
+
+            // 1. MASTER TABLE CONTROLLER (Handles Actions AND Row Clicks)
+            var tableBody = document.querySelector('tbody');
+            if (tableBody) {
+                tableBody.addEventListener('click', function(e) {
+                    
+                    // A. Check if an EDIT icon was clicked
+                    var editBtn = e.target.closest('.edit-cert-btn');
+                    if (editBtn) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('--- EDIT TRIGGERED ---');
+                        document.getElementById('editCertId').value = editBtn.getAttribute('data-request-id');
+                        document.getElementById('editDatePassed').value = editBtn.getAttribute('data-date-passed');
+                        document.getElementById('editExpiration').value = editBtn.getAttribute('data-expiration');
+                        new bootstrap.Modal(document.getElementById('editCertModal')).show();
+                        return; // Stop execution
+                    }
+
+                    // B. Check if a REVOKE icon was clicked
+                    var revokeBtn = e.target.closest('.remove-cert-btn');
+                    if (revokeBtn) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('--- REVOKE TRIGGERED ---');
+                        document.getElementById('revokeCertId').value = revokeBtn.getAttribute('data-request-id');
+                        new bootstrap.Modal(document.getElementById('revokeCertModal')).show();
+                        return; // Stop execution
+                    }
+
+                    // C. If neither action was clicked, handle the ROW CLICK (Employee Modal)
+                    var row = e.target.closest('.clickable-row');
+                    if (row) {
+                        console.log('--- ROW TRIGGERED ---');
+                        var requestId = row.getAttribute('data-request-id');
+                        
+                        // Set Modal Title
+                        var employeeName = row.querySelector('td:first-child')?.textContent.trim() || 'Employee';
+                        document.getElementById('modalEmployeeName').textContent = employeeName + "'s Certifications";
+
+                        // Fetch Data
+                        fetch('?handler=EmployeeHistory&employeeId=' + row.getAttribute('data-employee-id'))
+                            .then(response => response.json())
+                            .then(data => {
+                                var tbodyHtml = '';
+                                if (data.length === 0) {
+                                    tbodyHtml = '<tr><td colspan="5" class="text-center text-muted fst-italic py-4">No certification history found.</td></tr>';
+                                } else {
+                                    data.forEach(function(item) {
+                                        var badgeClass = 'bg-secondary';
+                                        if (item.status === 'Active') badgeClass = 'bg-success';
+                                        else if (item.status === 'ExpiringSoon') badgeClass = 'bg-warning text-dark';
+                                        else if (item.status === 'Expired') badgeClass = 'bg-danger';
+                                        else if (item.status === 'Permanent') badgeClass = 'bg-info text-dark';
+
+                                        tbodyHtml += `<tr>
+                                            <td>${item.agency}</td>
+                                            <td>${item.certification}</td>
+                                            <td>${item.datePassed}</td>
+                                            <td>${item.expirationDate}</td>
+                                            <td><span class="badge ${badgeClass}">${item.status}</span></td>
+                                        </tr>`;
+                                    });
+                                }
+                                document.getElementById('modalHistoryBody').innerHTML = tbodyHtml;
+                                if(window.lucide) { window.lucide.createIcons(); }
+                                new bootstrap.Modal(document.getElementById('employeeHistoryModal')).show();
+                            })
+                            .catch(err => console.error('Fetch error:', err));
+                    }
+                });
+            }
+
+            // 2. ANALYTICS TOGGLE LOGIC
+            var toggle = document.getElementById('analyticsVisualToggle');
+            if (toggle) {
+                toggle.addEventListener('change', function() {
+                    document.getElementById('hiddenFilterAnalytics').value = this.checked;
+                    document.getElementById('filterForm').submit();
+                });
+            }
+
+            // 3. RENDER CHART.JS (Keep your existing Html.Raw C# injections here)
+            var agencyCtx = document.getElementById('agencyChart').getContext('2d');
+            new Chart(agencyCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: @Html.Raw(Model.AgencyChartLabels),
+                    datasets: [{ data: @Html.Raw(Model.AgencyChartData), backgroundColor: ['#0d6efd', '#6c757d', '#198754', '#ffc107', '#dc3545'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            var certCtx = document.getElementById('certChart').getContext('2d');
+            new Chart(certCtx, {
+                type: 'bar',
+                data: {
+                    labels: @Html.Raw(Model.CertChartLabels),
+                    datasets: [{ label: 'Active Employees', data: @Html.Raw(Model.CertChartData), backgroundColor: '#0d6efd' }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }
+            });
+
+            if(window.lucide) { window.lucide.createIcons(); }
+        });
+    </script>
+}

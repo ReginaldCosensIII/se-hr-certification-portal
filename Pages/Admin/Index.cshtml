@@ -27,40 +27,101 @@
                     Manage Agencies
                 </h5>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-brand fw-bold">
-                        <i data-lucide="download" class="me-1" style="width: 14px;"></i> Export List
-                    </button>
+                    <a asp-page-handler="ExportList" class="btn btn-sm btn-outline-brand fw-bold d-inline-flex align-items-center">
+                        <i data-lucide="download" class="me-1" style="width: 14px; height: 14px;"></i> Export List
+                    </a>
                     <button class="btn btn-sm btn-brand fw-bold text-white" data-bs-toggle="modal" data-bs-target="#addAgencyModal">
                         <i data-lucide="plus" class="me-1" style="width: 14px;"></i> Add Agency
                     </button>
                 </div>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover align-middle mb-0">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="ps-3" style="width: 60px;">ID</th>
-                                <th>Name</th>
-                                <th class="text-center" style="width: 120px;">Contact Person</th>
-                                <th class="text-center" style="width: 100px;">Status</th>
-                                <th class="text-end pe-3" style="width: 100px;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        @foreach (var item in Model.Agency) {
-                            <tr>
-                                <td class="ps-3 text-muted">@item.Id</td>
-                                <td class="fw-bold">@item.FullName (@item.Abbreviation)</td>
-                                <td class="text-center text-muted">@(item.Certifications.Count) Certifications</td>
-                                <td class="text-center"><span class="badge text-bg-success">Active</span></td>
-                                <td class="text-end pe-3">
-                                    <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="more-horizontal" style="width: 16px;"></i></button>
-                                </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
+            <div class="card-body p-3">
+                <div class="custom-data-grid" id="agencyGridContainer">
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="d-flex gap-2 justify-content-end">
+                                <div class="input-group input-group-sm" style="max-width: 250px;">
+                                    <input type="text" class="form-control grid-search-input" placeholder="Search agencies...">
+                                    <button class="btn btn-brand grid-search-btn" type="button">
+                                        <i data-lucide="search" class="text-white" style="width: 14px;"></i>
+                                    </button>
+                                </div>
+                                <button class="btn btn-outline-brand btn-sm grid-clear-btn d-none d-flex align-items-center" type="button" title="Clear Filters">
+                                    <i data-lucide="x" style="width: 14px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle mb-0" id="agencyTable">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-3" style="width: 60px;">ID</th>
+                                    <th>Name</th>
+                                    <th class="text-center" style="width: 170px;">Active Certifications</th>
+                                    <th class="text-center" style="width: 120px;">Status</th>
+                                    <th class="text-center" style="width: 100px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody style="visibility: hidden;">
+                            @foreach (var item in Model.Agency) {
+                                <tr>
+                                    <td class="ps-3 text-muted">@item.Id</td>
+                                    <td class="fw-bold">@item.FullName (@item.Abbreviation)</td>
+                                    <td class="text-center text-muted">@(item.Certifications.Count) Certifications</td>
+                                    <td class="text-center">
+                                        @if(item.IsActive) {
+                                            <span class="badge text-bg-success d-inline-flex align-items-center px-2 py-1">
+                                                <i data-lucide="check-circle" style="width: 14px; height: 14px;" class="me-1"></i> Active
+                                            </span>
+                                        } else {
+                                            <span class="badge text-bg-secondary d-inline-flex align-items-center px-2 py-1">
+                                                <i data-lucide="minus-circle" style="width: 14px; height: 14px;" class="me-1"></i> Inactive
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="text-center border-start">
+                                        <a href="javascript:void(0)" class="text-primary text-decoration-none me-2 edit-agency-btn" 
+                                           data-id="@item.Id" 
+                                           data-name="@item.FullName" 
+                                           data-abbreviation="@item.Abbreviation"
+                                           title="Edit Agency">
+                                            <i data-lucide="edit" style="width: 18px; height: 18px;"></i>
+                                        </a>
+                                        @if(item.IsActive) {
+                                            <a href="javascript:void(0)" class="text-danger text-decoration-none deactivate-agency-btn" 
+                                               data-id="@item.Id" data-name="@item.FullName" title="Deactivate Agency">
+                                                <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                                            </a>
+                                        } else {
+                                            <a href="javascript:void(0)" class="text-success text-decoration-none reactivate-agency-btn" 
+                                               data-id="@item.Id" data-name="@item.FullName" title="Reactivate Agency">
+                                                <i data-lucide="rotate-ccw" style="width: 18px; height: 18px;"></i>
+                                            </a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card-footer bg-transparent border-top-0 py-3 mt-3 px-0">
+                        <nav aria-label="Page navigation" class="d-flex justify-content-end align-items-center gap-3">
+                            <label class="mb-0 text-muted small">
+                                Show 
+                                <select class="form-select form-select-sm d-inline-block w-auto mx-1 shadow-sm grid-per-page">
+                                    <option value="10">10</option>
+                                    <option value="25" selected>25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select> entries
+                            </label>
+                            <ul class="pagination pagination-sm mb-0 grid-pagination">
+                            </ul>
+                        </nav>
+                    </div>
                 </div>
             </div>
         </div>
@@ -74,54 +135,116 @@
                     Manage Certifications
                 </h5>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-brand fw-bold">
-                        <i data-lucide="download" class="me-1" style="width: 14px;"></i> Export List
-                    </button>
+                    <a asp-page-handler="ExportList" class="btn btn-sm btn-outline-brand fw-bold d-inline-flex align-items-center">
+                        <i data-lucide="download" class="me-1" style="width: 14px; height: 14px;"></i> Export List
+                    </a>
                     <button class="btn btn-sm btn-brand fw-bold text-white" data-bs-toggle="modal" data-bs-target="#addCertificationModal">
                         <i data-lucide="plus" class="me-1" style="width: 14px;"></i> Add Certification
                     </button>
                 </div>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover align-middle mb-0">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="ps-3">Certification Name</th>
-                                <th>Issuing Agency</th>
-                                <th>Validity Period</th>
-                                <th>Requires Renewal?</th>
-                                <th class="text-end pe-3" style="width: 80px;"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        @foreach (var cert in Model.Certifications) {
-                            <tr>
-                                <td class="ps-3 fw-bold">@cert.Name</td>
-                                <td>@(cert.Agency?.Abbreviation ?? "Unknown")</td>
-                                <td>
-                                    @if (cert.ValidityPeriodMonths == 0) {
-                                        <text>Permanent</text>
-                                    } else if (cert.ValidityPeriodMonths % 12 == 0) {
-                                        <text>@(cert.ValidityPeriodMonths / 12) Years</text>
-                                    } else {
-                                        <text>@cert.ValidityPeriodMonths Months</text>
+            <div class="card-body p-3">
+                <div class="custom-data-grid" id="certGridContainer">
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="d-flex gap-2 justify-content-end">
+                                <div class="input-group input-group-sm" style="max-width: 250px;">
+                                    <input type="text" class="form-control grid-search-input" placeholder="Search certifications...">
+                                    <button class="btn btn-brand grid-search-btn" type="button">
+                                        <i data-lucide="search" class="text-white" style="width: 14px;"></i>
+                                    </button>
+                                </div>
+                                <select class="form-select form-select-sm grid-filter-select" style="max-width: 200px;">
+                                    <option value="">All Agencies</option>
+                                    @foreach(var agency in Model.Agency) {
+                                        <option value="@agency.Abbreviation">@agency.Abbreviation</option>
                                     }
-                                </td>
-                                <td>
-                                    @if (cert.ValidityPeriodMonths > 0) {
-                                        <i data-lucide="check" class="text-success" style="width: 16px;"></i> <text>Yes</text>
-                                    } else {
-                                        <i data-lucide="x" class="text-muted" style="width: 16px;"></i> <text>No</text>
-                                    }
-                                </td>
-                                <td class="text-end pe-3">
-                                    <button class="btn btn-sm btn-link text-muted p-0"><i data-lucide="edit-2" style="width: 16px;"></i></button>
-                                </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
+                                </select>
+                                <button class="btn btn-outline-brand btn-sm grid-clear-btn d-none d-flex align-items-center" type="button" title="Clear Filters">
+                                    <i data-lucide="x" style="width: 14px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle mb-0" id="certTable">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-3">Certification Name</th>
+                                    <th>Issuing Agency</th>
+                                    <th>Validity Period</th>
+                                    <th class="text-center" style="width: 120px;">Status</th>
+                                    <th class="text-center" style="width: 100px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody style="visibility: hidden;">
+                            @foreach (var cert in Model.Certifications) {
+                                <tr>
+                                    <td class="ps-3 fw-bold">@cert.Name</td>
+                                    <td>@(cert.Agency?.Abbreviation ?? "Unknown")</td>
+                                    <td>
+                                        @if (cert.ValidityPeriodMonths == 0) {
+                                            <text>Permanent</text>
+                                        } else if (cert.ValidityPeriodMonths % 12 == 0) {
+                                            <text>@(cert.ValidityPeriodMonths / 12) Years</text>
+                                        } else {
+                                            <text>@cert.ValidityPeriodMonths Months</text>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if(cert.IsActive) {
+                                            <span class="badge text-bg-success d-inline-flex align-items-center px-2 py-1">
+                                                <i data-lucide="check-circle" style="width: 14px; height: 14px;" class="me-1"></i> Active
+                                            </span>
+                                        } else {
+                                            <span class="badge text-bg-secondary d-inline-flex align-items-center px-2 py-1">
+                                                <i data-lucide="minus-circle" style="width: 14px; height: 14px;" class="me-1"></i> Inactive
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="text-center border-start">
+                                        <a href="javascript:void(0)" class="text-primary text-decoration-none me-2 edit-cert-btn" 
+                                           data-id="@cert.Id" 
+                                           data-name="@cert.Name"
+                                           data-agency="@cert.AgencyId"
+                                           data-validity="@cert.ValidityPeriodMonths"
+                                           title="Edit Certification">
+                                            <i data-lucide="edit" style="width: 18px; height: 18px;"></i>
+                                        </a>
+                                        @if(cert.IsActive) {
+                                            <a href="javascript:void(0)" class="text-danger text-decoration-none deactivate-cert-btn" 
+                                               data-id="@cert.Id" data-name="@cert.Name" title="Deactivate Certification">
+                                                <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                                            </a>
+                                        } else {
+                                            <a href="javascript:void(0)" class="text-success text-decoration-none reactivate-cert-btn" 
+                                               data-id="@cert.Id" data-name="@cert.Name" title="Reactivate Certification">
+                                                <i data-lucide="rotate-ccw" style="width: 18px; height: 18px;"></i>
+                                            </a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card-footer bg-transparent border-top-0 py-3 mt-3 px-0">
+                        <nav aria-label="Page navigation" class="d-flex justify-content-end align-items-center gap-3">
+                            <label class="mb-0 text-muted small">
+                                Show 
+                                <select class="form-select form-select-sm d-inline-block w-auto mx-1 shadow-sm grid-per-page">
+                                    <option value="10">10</option>
+                                    <option value="25" selected>25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select> entries
+                            </label>
+                            <ul class="pagination pagination-sm mb-0 grid-pagination">
+                            </ul>
+                        </nav>
+                    </div>
                 </div>
             </div>
         </div>
@@ -132,24 +255,38 @@
 <div class="row">
     <div class="col-md-12">
         <div class="card shadow-sm border-0 bg-white">
-            <div class="card-body d-flex align-items-center justify-content-between py-4">
-               <div class="d-flex align-items-center">
-                   <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
-                       <i data-lucide="settings" class="text-muted"></i>
+            <div class="card-body py-4">
+                <form method="post" asp-page-handler="SaveSettings">
+                   <div class="d-flex align-items-center justify-content-between mb-4">
+                       <div class="d-flex align-items-center">
+                           <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
+                               <i data-lucide="settings" class="text-muted"></i>
+                           </div>
+                           <div>
+                               <h5 class="fw-bold mb-1">General Settings</h5>
+                               <p class="text-muted small mb-0">Configure system-wide notifications and contacts.</p>
+                           </div>
+                       </div>
+                       <button type="submit" class="btn btn-brand fw-bold px-4">Save Settings</button>
                    </div>
-                   <div>
-                       <h5 class="fw-bold mb-1">General Settings</h5>
-                       <p class="text-muted small mb-0">Configure system-wide notifications and contacts.</p>
+                   
+                   <div class="row g-3">
+                       <div class="col-md-8 col-lg-9">
+                           <label asp-for="AdminEmail" class="form-label fw-bold text-muted small">Admin Email</label>
+                           <div class="input-group">
+                               <span class="input-group-text bg-light border-end-0"><i data-lucide="mail" style="width: 16px;" class="text-muted"></i></span>
+                               <input type="email" asp-for="AdminEmail" class="form-control" placeholder="admin@specializedengineering.com">
+                           </div>
+                       </div>
+                       <div class="col-md-4 col-lg-3">
+                           <label asp-for="ExpiringSoonThresholdDays" class="form-label fw-bold text-muted small">Expiring Soon Threshold (Days)</label>
+                           <div class="input-group">
+                               <span class="input-group-text bg-light border-end-0"><i data-lucide="clock" style="width: 16px;" class="text-muted"></i></span>
+                               <input type="number" asp-for="ExpiringSoonThresholdDays" class="form-control" placeholder="30">
+                           </div>
+                       </div>
                    </div>
-               </div>
-               
-               <div class="d-flex align-items-center gap-3">
-                   <div class="input-group">
-                       <span class="input-group-text bg-light border-end-0"><i data-lucide="mail" style="width: 16px;" class="text-muted"></i></span>
-                       <input type="email" class="form-control" placeholder="Admin Email" value="admin@specializedengineering.com" style="min-width: 300px;">
-                   </div>
-                   <button class="btn btn-brand fw-bold px-4">Save</button>
-               </div>
+                </form>
             </div>
         </div>
     </div>
@@ -223,3 +360,393 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="editAgencyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post" asp-page-handler="EditAgency">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Edit Agency</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="AgencyId" id="editAgencyId" />
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Agency Name</label>
+                        <input type="text" class="form-control" name="AgencyName" id="editAgencyName" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Abbreviation</label>
+                        <input type="text" class="form-control" name="AgencyAbbreviation" id="editAgencyAbbreviation" required />
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary text-white fw-bold">Save Changes</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="deactivateAgencyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post" asp-page-handler="DeactivateAgency">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-danger">Deactivate Agency</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="AgencyId" id="deactivateAgencyId" />
+                    <p>Are you sure you want to deactivate <strong id="deactivateAgencyNameDisplay"></strong>?</p>
+                    <p class="text-muted small mb-0">This will not delete historical records, but it will prevent this agency from being selected for new certifications.</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger text-white fw-bold">Yes, Deactivate</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="editCertModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post" asp-page-handler="EditCertification">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Edit Certification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="CertId" id="editCertId" />
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Certification Name</label>
+                        <input type="text" class="form-control" name="CertName" id="editCertName" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Issuing Agency</label>
+                        <select class="form-select" name="CertAgencyId" id="editCertAgency" required>
+                            @foreach(var agency in Model.Agency) {
+                                <option value="@agency.Id">@agency.FullName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Validity Period (Months)</label>
+                        <input type="number" class="form-control" name="CertValidity" id="editCertValidity" required />
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary text-white fw-bold">Save Changes</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="deactivateCertModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post" asp-page-handler="DeactivateCertification">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-danger">Deactivate Certification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="CertId" id="deactivateCertId" />
+                    <p>Are you sure you want to deactivate <strong id="deactivateCertNameDisplay"></strong>?</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger text-white fw-bold">Yes, Deactivate</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="reactivateAgencyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post" asp-page-handler="ReactivateAgency">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-success">Reactivate Agency</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="AgencyId" id="reactivateAgencyId" />
+                    <p>Are you sure you want to reactivate <strong id="reactivateAgencyNameDisplay"></strong>?</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success text-white fw-bold">Yes, Reactivate</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="reactivateCertModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post" asp-page-handler="ReactivateCertification">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-success">Reactivate Certification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="CertId" id="reactivateCertId" />
+                    <p>Are you sure you want to reactivate <strong id="reactivateCertNameDisplay"></strong>?</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success text-white fw-bold">Yes, Reactivate</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // 1. REUSABLE DATA GRID CLASS
+        class ClientSideDataGrid {
+            constructor(containerId, defaultRowsPerPage = 25) {
+                this.container = document.getElementById(containerId);
+                if (!this.container) return;
+
+                // Unique storage keys per grid instance
+                this.storageKeySearch = containerId + '_search';
+                this.storageKeyFilter = containerId + '_filter';
+
+                this.searchInput = this.container.querySelector('.grid-search-input');
+                this.searchBtn = this.container.querySelector('.grid-search-btn');
+                this.filterSelect = this.container.querySelector('.grid-filter-select');
+                this.clearBtn = this.container.querySelector('.grid-clear-btn');
+                this.perPageSelect = this.container.querySelector('.grid-per-page');
+                this.tableBody = this.container.querySelector('table tbody');
+                this.rows = Array.from(this.tableBody.querySelectorAll('tr'));
+                this.paginationContainer = this.container.querySelector('.grid-pagination');
+                
+                this.rowsPerPage = defaultRowsPerPage;
+                this.currentPage = 1;
+                this.filteredRows = [...this.rows];
+
+                // Load state from sessionStorage
+                this.activeSearchTerm = sessionStorage.getItem(this.storageKeySearch) || '';
+                this.activeFilterVal = sessionStorage.getItem(this.storageKeyFilter) || '';
+
+                if(this.perPageSelect) this.perPageSelect.value = this.rowsPerPage;
+
+                this.init();
+            }
+
+            init() {
+                // Restore UI Inputs from Memory
+                if (this.searchInput && this.activeSearchTerm) this.searchInput.value = this.activeSearchTerm;
+                if (this.filterSelect && this.activeFilterVal) this.filterSelect.value = this.activeFilterVal;
+
+                if (this.searchBtn && this.searchInput) {
+                    this.searchBtn.addEventListener('click', () => this.applyFilters());
+                    this.searchInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            this.applyFilters();
+                        }
+                    });
+                }
+
+                if (this.filterSelect) {
+                    this.filterSelect.addEventListener('change', () => this.applyFilters());
+                }
+
+                if (this.clearBtn) {
+                    this.clearBtn.addEventListener('click', () => this.clearFilters());
+                }
+
+                if (this.perPageSelect) {
+                    this.perPageSelect.addEventListener('change', (e) => {
+                        this.rowsPerPage = parseInt(e.target.value);
+                        this.currentPage = 1;
+                        this.render();
+                    });
+                }
+                
+                // Initial filter execution to respect restored state
+                this.executeFilter();
+            }
+
+            applyFilters() {
+                this.activeSearchTerm = this.searchInput ? this.searchInput.value.toLowerCase().trim() : '';
+                this.activeFilterVal = this.filterSelect ? this.filterSelect.value.toLowerCase() : '';
+                
+                // Save state to sessionStorage
+                sessionStorage.setItem(this.storageKeySearch, this.activeSearchTerm);
+                sessionStorage.setItem(this.storageKeyFilter, this.activeFilterVal);
+
+                this.executeFilter();
+            }
+
+            clearFilters() {
+                if (this.searchInput) this.searchInput.value = '';
+                if (this.filterSelect) this.filterSelect.value = '';
+                this.activeSearchTerm = '';
+                this.activeFilterVal = '';
+                
+                // Wipe state from sessionStorage
+                sessionStorage.removeItem(this.storageKeySearch);
+                sessionStorage.removeItem(this.storageKeyFilter);
+
+                this.executeFilter();
+            }
+
+            executeFilter() {
+                this.filteredRows = this.rows.filter(row => {
+                    const text = row.textContent.toLowerCase(); // HOTFIX: Swapped innerText for textContent
+                    const matchesSearch = this.activeSearchTerm === '' || text.includes(this.activeSearchTerm);
+                    const matchesFilter = this.activeFilterVal === '' || text.includes(this.activeFilterVal);
+                    return matchesSearch && matchesFilter;
+                });
+
+                if (this.clearBtn) {
+                    if (this.activeSearchTerm !== '' || this.activeFilterVal !== '') {
+                        this.clearBtn.classList.remove('d-none');
+                    } else {
+                        this.clearBtn.classList.add('d-none');
+                    }
+                }
+
+                this.currentPage = 1;
+                this.render();
+            }
+
+            render() {
+                this.rows.forEach(row => row.style.display = 'none');
+                const totalPages = Math.ceil(this.filteredRows.length / this.rowsPerPage) || 1;
+                if (this.currentPage > totalPages) this.currentPage = totalPages;
+                const start = (this.currentPage - 1) * this.rowsPerPage;
+                const end = start + this.rowsPerPage;
+                const pageRows = this.filteredRows.slice(start, end);
+                pageRows.forEach(row => row.style.display = '');
+                this.renderPagination(totalPages);
+                if(window.lucide) { window.lucide.createIcons(); } 
+                if(this.tableBody) this.tableBody.style.visibility = 'visible';
+            }
+
+            renderPagination(totalPages) {
+                if(!this.paginationContainer) return;
+                let html = '';
+                html += `<li class="page-item ${this.currentPage === 1 ? 'disabled' : ''}">
+                            <a class="page-link shadow-sm" href="javascript:void(0)" data-page="${this.currentPage - 1}">&laquo;</a>
+                         </li>`;
+                html += `<li class="page-item active">
+                            <span class="page-link shadow-sm border-brand bg-brand text-white" style="pointer-events: none;">${this.currentPage} / ${totalPages}</span>
+                         </li>`;
+                html += `<li class="page-item ${this.currentPage === totalPages ? 'disabled' : ''}">
+                            <a class="page-link shadow-sm" href="javascript:void(0)" data-page="${this.currentPage + 1}">&raquo;</a>
+                         </li>`;
+                this.paginationContainer.innerHTML = html;
+                this.paginationContainer.querySelectorAll('a.page-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const parentLi = e.target.closest('.page-item');
+                        if (!parentLi.classList.contains('disabled')) {
+                            this.currentPage = parseInt(e.target.getAttribute('data-page'));
+                            this.render();
+                        }
+                    });
+                });
+            }
+        }
+
+        // 2. PAGE INITIALIZATION
+        document.addEventListener('DOMContentLoaded', function() {
+            // Instantiate reusable grids
+            new ClientSideDataGrid('agencyGridContainer', 25);
+            new ClientSideDataGrid('certGridContainer', 25);
+
+            // Tab State Retention
+            var tabElements = document.querySelectorAll('button[data-bs-toggle="tab"]');
+            tabElements.forEach(function(tabEl) {
+                tabEl.addEventListener('shown.bs.tab', function (event) {
+                    localStorage.setItem('activeAdminTab', event.target.getAttribute('data-bs-target'));
+                });
+            });
+
+            var activeTabTarget = localStorage.getItem('activeAdminTab');
+            if (activeTabTarget) {
+                var tabToActivate = document.querySelector('button[data-bs-target="' + activeTabTarget + '"]');
+                if (tabToActivate) {
+                    new bootstrap.Tab(tabToActivate).show();
+                }
+            }
+        });
+
+        // 3. MASTER ACTION MODALS EVENT DELEGATION
+        document.addEventListener('click', function(e) {
+            // Agency Actions
+            var editAgencyBtn = e.target.closest('.edit-agency-btn');
+            if (editAgencyBtn) {
+                e.preventDefault();
+                document.getElementById('editAgencyId').value = editAgencyBtn.getAttribute('data-id');
+                document.getElementById('editAgencyName').value = editAgencyBtn.getAttribute('data-name');
+                document.getElementById('editAgencyAbbreviation').value = editAgencyBtn.getAttribute('data-abbreviation');
+                new bootstrap.Modal(document.getElementById('editAgencyModal')).show();
+                return;
+            }
+
+            var deactivateAgencyBtn = e.target.closest('.deactivate-agency-btn');
+            if (deactivateAgencyBtn) {
+                e.preventDefault();
+                document.getElementById('deactivateAgencyId').value = deactivateAgencyBtn.getAttribute('data-id');
+                document.getElementById('deactivateAgencyNameDisplay').textContent = deactivateAgencyBtn.getAttribute('data-name');
+                new bootstrap.Modal(document.getElementById('deactivateAgencyModal')).show();
+                return;
+            }
+
+            // Certification Actions
+            var editCertBtn = e.target.closest('.edit-cert-btn');
+            if (editCertBtn) {
+                e.preventDefault();
+                document.getElementById('editCertId').value = editCertBtn.getAttribute('data-id');
+                document.getElementById('editCertName').value = editCertBtn.getAttribute('data-name');
+                document.getElementById('editCertAgency').value = editCertBtn.getAttribute('data-agency');
+                document.getElementById('editCertValidity').value = editCertBtn.getAttribute('data-validity');
+                new bootstrap.Modal(document.getElementById('editCertModal')).show();
+                return;
+            }
+
+            var deactivateCertBtn = e.target.closest('.deactivate-cert-btn');
+            if (deactivateCertBtn) {
+                e.preventDefault();
+                document.getElementById('deactivateCertId').value = deactivateCertBtn.getAttribute('data-id');
+                document.getElementById('deactivateCertNameDisplay').textContent = deactivateCertBtn.getAttribute('data-name');
+                new bootstrap.Modal(document.getElementById('deactivateCertModal')).show();
+                return;
+            }
+
+            // Reactivate Agency Trigger
+            var reactivateAgencyBtn = e.target.closest('.reactivate-agency-btn');
+            if (reactivateAgencyBtn) {
+                e.preventDefault();
+                document.getElementById('reactivateAgencyId').value = reactivateAgencyBtn.getAttribute('data-id'); 
+                document.getElementById('reactivateAgencyNameDisplay').textContent = reactivateAgencyBtn.getAttribute('data-name');
+                new bootstrap.Modal(document.getElementById('reactivateAgencyModal')).show();
+                return;
+            }
+
+            // Reactivate Cert Trigger
+            var reactivateCertBtn = e.target.closest('.reactivate-cert-btn');
+            if (reactivateCertBtn) {
+                e.preventDefault();
+                document.getElementById('reactivateCertId').value = reactivateCertBtn.getAttribute('data-id'); 
+                document.getElementById('reactivateCertNameDisplay').textContent = reactivateCertBtn.getAttribute('data-name');
+                new bootstrap.Modal(document.getElementById('reactivateCertModal')).show();
+                return;
+            }
+        });
+    </script>
+}

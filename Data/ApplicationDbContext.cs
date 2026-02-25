@@ -14,5 +14,6 @@ namespace SeHrCertificationPortal.Data
         public DbSet<Certification> Certifications { get; set; }
         public DbSet<Employee> Employees { get; set; }
         public DbSet<CertificationRequest> CertificationRequests { get; set; }
+        public DbSet<SystemSetting> SystemSettings { get; set; }
     }
 }

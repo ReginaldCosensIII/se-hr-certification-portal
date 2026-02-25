@@ -3,34 +3,35 @@
 ## 1. Brand Identity & Design System
 ### Color Palette
 - **Primary Backgrounds/Accents**:
-    - Dark Gray: `#66615c` (Sidebar/Backgrounds)
-    - Tan (Main Accent): `#a19482`
-    - Sage Green: `#a1aba0`
-- **Theme**: "Dull Industrial Concrete"
-- **Highlights/Borders/Icons**: Fluorescent bright colors (Safety Orange, High-Vis Yellow) - mimicking construction sites.
+    - Light Gray: `#f4f6f9` (Main Body Background)
+    - Black: `#000000` (Sidebar/Header accents)
+    - Tan (Main Accent/Primary Brand): `#a19482`
+    - Dark Tan (Secondary Brand): `#66615c`
+    - Yellow-400 (Active/Warning states): `#fbbf24`
+- **Theme**: "Clean Light Industrial"
+- **Highlights/Borders/Icons**: Clean layout with standard Bootstrap 5 secondary warning (`#fbbf24`), danger (`#dc3545`), and success (`#198754`) semantic colors mimicking industrial safety statuses.
 
 ### Layout Customizations
-- **Sidebar**:
+- **Sidebar (Width: 260px Expanded, 80px Collapsed)**:
     - **Expanded**:
-        - Header: Taller to fit `Specialized-Engineering-Logo-white.webp`.
+        - Header: Contains `Specialized-Engineering-Logo-white.webp`.
         - Content: Navigation links.
-        - Footer: Toggle arrow icon (moved from top).
+        - Floating Toggle: Right-aligned toggle arrow overlaps the sidebar and main content boundary.
     - **Collapsed**:
         - Header: Custom SVG Logo (White Rectangle + Stacked "S" "E").
-        - Content: Icons only.
+        - Content: Icons only, natively transitioned using `grid-template-columns`.
 - **Header (Top Bar)**:
-    - Page Title (e.g., "Dashboard" or "HR Certification Portal").
-    - Search Bar (Right aligned).
-    - Notification Bell & Dropdown.
+    - Page Title (e.g., "Dashboard", "Admin").
+    - Notification Bell & Fullscreen toggles.
 
 ## 2. Core Functional Requirements
 ### Dashboard
 - **Header**: Standard App Header.
-- **Top Cards**: Counts (Requests, Pending, Expiring, Active).
-    - **Action**: "More Info" buttons must link to `Requests/Index` with *specific filters* applied (e.g., Status='Pending').
-- **Recent Certifications Table**:
-    - Columns: Employee, Agency, Certification, Requests Type, Rec Date, Exp Date, Status.
-    - Location: Below top cards.
+- **Top Cards**: Counts (Total Requests, Active Certifications, Pending Approvals, Expiring Soon).
+    - **Action**: Direct links mapping to respective views (e.g., `Requests/Index?status=Pending`). Cards utilize semantic state styling (warning logic) if > 0.
+- **Recent Requests Table**:
+    - Columns: Req ID, Employee, Manager, Agency, Certification, Type, Status, Request Date, Actions.
+    - Features: Includes inline form input for text search and a direct "New Request" button in the table header.
 
 ### Certification Requests
 - **Form**:
@@ -43,12 +44,12 @@
     - Actions: View, Edit, Remove.
 
 ### Admin Settings (System Management)
-- **Top Section**: Domain Management (Cards/Tables).
-    - **Agency Management**: List Agencies. Actions: Add New, Edit Name, Toggle Active status.
-    - **Certification Management**: List Certifications. Actions: Add New, Edit Name, Assign Agency, Set Validity Period (Years).
+- **Top Section**: Domain Management (Cards/Data Grids).
+    - **Agency Management**: List Agencies using ClientSideDataGrid implementation. Actions: Quick search, toggle Soft Delete `IsActive` state. Active states are designated visually with Lucide icons.
+    - **Certification Management**: List Certifications with relationships to Agencies. Quick search, toggle Soft Delete `IsActive` state.
+    - **Export list**: QuestPDF export engine that explicitly highlights in-active elements natively via document structure.
 - **Bottom Section**: General Configuration.
     - **Admin Email**: Field to set the contact for system notifications (e.g., `hr@speceng.com`).
-    - **Application Name**: *Removed* (Hardcoded to brand).
 - **Future/Suggested Features**:
     - **Audit Log**: View history of changes.
     - **Data Seeding**: Button to "Reset to Default" for testing.
@@ -64,15 +65,10 @@
 - **Export**: "Generate Report" button (Action: Download CSV/PDF of active/expiring certs).
 - **Styling**: Must match Dashboard/Requests table styles exactly.
 
-### Employee Detail & Certification History View (Master-Detail)
-- **Trigger**: User clicks a row in the "Employee Certifications" table.
-- **Location**: Top of page (Collapsible/Accordion style), consistent with Requests page.
-- **Content**:
-    1.  **Employee Profile**: Name, ID, Manager, Role.
-    2.  **Selected Certification**: Details of the specific cert clicked (Agency, Issue Date, Expiration, PDF Copy link).
-    3.  **Certification History**: List of *other* certifications held by this employee.
-    4.  **Interaction**: Clicking a cert in the history list updates the "Selected Certification" view.
-- **Status**: UI Scaffolding only (Backend wiring in Phase 5).
+### Compliance & Coverage Analytics Dashboard
+- **Compliance & Coverage Analytics Dashboard:** A dynamic, visual analytics section utilizing Chart.js to display Total Active, Expiring Soon, and Critical Lapses.
+  - *Data Sync:* Analytics must perfectly respect client-side table filters via a unified toggle state.
+  - *WYSIWYG Export:* Includes a "Download Report" feature powered by QuestPDF that captures client-side visual states and generates a master Coverage-First layout.
 
 ## 3. Global Reporting & Export Features (Future)
 - **Data Tables (Admin, Requests, Certifications)**: 
@@ -109,15 +105,19 @@
 
 ## 🌟 Future Enhancements & Wishlist (Post-MVP)
 
-### 1. Direct Certification Entry (Bypass Request Lifecycle)
-* **Description:** Allow Administrators/HR to manually add an active Certification to an Employee's profile without requiring them to submit a "Request" first.
-* **Use Case:** Onboarding a new hire who already holds active, valid certifications, or doing initial data population at launch.
-* **Implementation Notes:** Will require a new Create workflow on the Employee or Certifications page that directly writes to the `Certifications` table, collecting issuing agency, validity dates, and proof of completion.
-
-### 2. Global Reusable Table Sorting Service
+### 1. Global Reusable Table Sorting Service
 * **Description:** Implement a dynamic sorting capability across all data tables in the portal.
 * **Use Case:** Users need to sort Requests by Date, Employees by Name, or Certifications by Expiration Date.
 * **Implementation Notes:** Instead of writing custom sorting logic for every Razor Page, build a global service/helper class (e.g., passing `sortOrder` query parameters mapped to reflection/LINQ expressions) that can be easily plugged into any index page alongside the existing pagination logic.
 
-### 3. Expiring Soon Status Logic
+### 2. Expiring Soon Status Logic
 * **Description:** QA identified that certifications expiring on the current day still show as 'Active'. In the upcoming Notifications/Certifications phase, implement a global threshold calculation (e.g., < 30 days) to accurately apply an 'Expiring Soon' badge and status instead of just 'Active'.
+
+### 3. SRE Text-Based CSV Fallback Engine
+- **SRE Text-Based CSV Fallback Engine:** As a Site Reliability Engineering (SRE) protocol, implement a lightweight, text-only CSV export fallback for all PDF generation endpoints to protect against future library deprecations or rendering engine failures.
+
+## Post-MVP UI/UX & Code Reusability Audit
+Before final production handoff, a dedicated sprint must be executed to ensure strict DRY (Don't Repeat Yourself) principles across the portal:
+* **Global CSS Styling:** Verify all pages, sections, and tables utilize shared, reusable CSS classes/variables. Eliminate hard-coded, one-off inline styles.
+* **Component Standardization:** Ensure header titles, action icons, and table layouts share a unified visual design language.
+* **Backend Logic Reusability:** Audit the C# search, filtering, and pagination logic across all pages (Requests, Certifications, Admin). Abstract duplicate backend filtering logic into reusable services, extensions, or base classes where applicable.

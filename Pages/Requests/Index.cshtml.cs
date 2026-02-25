@@ -70,6 +70,7 @@ namespace SeHrCertificationPortal.Pages.Requests
 
         CertificationRequest = await query
             .OrderByDescending(c => c.RequestDate)
+            .ThenByDescending(c => c.Id)
             .Skip((CurrentPage - 1) * PageSize)
             .Take(PageSize)
             .AsNoTracking()
@@ -95,7 +96,7 @@ namespace SeHrCertificationPortal.Pages.Requests
         return new JsonResult(certs);
     }
 
-    public async Task<IActionResult> OnPostUpdateStatusAsync(int id, SeHrCertificationPortal.Models.RequestStatus newStatus, int p = 1, int pageSize = 25)
+    public async Task<IActionResult> OnPostUpdateStatusAsync(int id, SeHrCertificationPortal.Models.RequestStatus newStatus, int p = 1, int pageSize = 25, string? searchString = null, SeHrCertificationPortal.Models.RequestStatus? statusFilter = null)
     {
         var request = await _context.CertificationRequests.FindAsync(id);
         if (request == null) return NotFound();
@@ -103,19 +104,26 @@ namespace SeHrCertificationPortal.Pages.Requests
         request.Status = newStatus;
         await _context.SaveChangesAsync();
 
-        return RedirectToPage(new { p, pageSize });
+        return RedirectToPage(new { p, pageSize, SearchString = searchString, StatusFilter = statusFilter });
     }
 
-    public async Task<IActionResult> OnPostMarkPassedAsync(int id, DateTime expirationDate, int p = 1, int pageSize = 25)
+    public async Task<IActionResult> OnPostMarkPassedAsync(int id, DateTime? expirationDate, int p = 1, int pageSize = 25, string? searchString = null, SeHrCertificationPortal.Models.RequestStatus? statusFilter = null)
     {
         var request = await _context.CertificationRequests.FindAsync(id);
         if (request != null)
         {
             request.Status = SeHrCertificationPortal.Models.RequestStatus.Passed;
-            request.ExpirationDate = DateTime.SpecifyKind(expirationDate, DateTimeKind.Utc);
+            if (expirationDate.HasValue)
+            {
+                request.ExpirationDate = DateTime.SpecifyKind(expirationDate.Value, DateTimeKind.Utc);
+            }
+            else
+            {
+                request.ExpirationDate = null;
+            }
             await _context.SaveChangesAsync();
         }
-        return RedirectToPage(new { p, pageSize });
+        return RedirectToPage(new { p, pageSize, SearchString = searchString, StatusFilter = statusFilter });
     }
 
     public async Task<IActionResult> OnPostAsync()
@@ -151,7 +159,7 @@ namespace SeHrCertificationPortal.Pages.Requests
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnPostEditRequestAsync(int id, string managerName, SeHrCertificationPortal.Models.RequestType requestType, DateTime requestDate, int agencyId, int certificationId, int p = 1, int pageSize = 25)
+    public async Task<IActionResult> OnPostEditRequestAsync(int id, string managerName, SeHrCertificationPortal.Models.RequestType requestType, DateTime requestDate, int agencyId, int certificationId, int p = 1, int pageSize = 25, string? searchString = null, SeHrCertificationPortal.Models.RequestStatus? statusFilter = null)
     {
         var request = await _context.CertificationRequests.FindAsync(id);
         if (request != null)
@@ -163,7 +171,7 @@ namespace SeHrCertificationPortal.Pages.Requests
             request.CertificationId = certificationId;
             await _context.SaveChangesAsync();
         }
-        return RedirectToPage(new { p, pageSize });
+        return RedirectToPage(new { p, pageSize, SearchString = searchString, StatusFilter = statusFilter });
     }
     }
 }
