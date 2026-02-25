@@ -213,18 +213,39 @@ namespace SeHrCertificationPortal.Pages.Certifications
             return RedirectToPage(new { p, pageSize, SearchString = searchString, AgencyFilter = agencyFilter, StatusFilter = statusFilter, FilterAnalytics = filterAnalytics });
         }
 
-        public async Task<IActionResult> OnPostAddDirectCertAsync(int NewEmployeeId, int NewAgencyId, int NewCertificationId, DateTime NewDatePassed, DateTime? NewExpirationDate, int p = 1, int pageSize = 25, string? searchString = null, int? agencyFilter = null, string? statusFilter = null, bool filterAnalytics = true)
+        public async Task<IActionResult> OnPostAddDirectCertAsync(int NewEmployeeId, string? NewEmployeeName, int NewAgencyId, int NewCertificationId, DateTime NewDatePassed, DateTime? NewExpirationDate, int p = 1, int pageSize = 25, string? searchString = null, int? agencyFilter = null, string? statusFilter = null, bool filterAnalytics = true)
         {
+            // 1. Handle "Create New Employee" workflow on the fly
+            if (NewEmployeeId == -1 && !string.IsNullOrWhiteSpace(NewEmployeeName))
+            {
+                var newEmployee = new Employee 
+                { 
+                    DisplayName = NewEmployeeName.Trim()
+                };
+                // Adding Employee without setting IsActive since it's not a property of Employee
+                _context.Employees.Add(newEmployee);
+                await _context.SaveChangesAsync(); // Save to generate the new ID
+                
+                NewEmployeeId = newEmployee.Id; // Map the new ID for the certification record
+            }
+
+            // 2. Standard Certification Save Workflow
             if (NewEmployeeId > 0 && NewAgencyId > 0 && NewCertificationId > 0)
             {
+                DateTime utcDatePassed = DateTime.SpecifyKind(NewDatePassed, DateTimeKind.Utc);
+                DateTime? utcExpirationDate = NewExpirationDate.HasValue 
+                    ? DateTime.SpecifyKind(NewExpirationDate.Value, DateTimeKind.Utc) 
+                    : null;
+
                 var newCert = new CertificationRequest
                 {
                     EmployeeId = NewEmployeeId,
                     AgencyId = NewAgencyId,
                     CertificationId = NewCertificationId,
-                    RequestDate = NewDatePassed,
-                    ExpirationDate = NewExpirationDate,
-                    Status = RequestStatus.Passed // Bypass approval lifecycle
+                    RequestDate = utcDatePassed,
+                    ExpirationDate = utcExpirationDate,
+                    Status = RequestStatus.Passed, 
+                    // Bypass approval lifecycle, no ActionDate included based on previous error
                 };
 
                 _context.CertificationRequests.Add(newCert);

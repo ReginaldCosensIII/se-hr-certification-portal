@@ -265,9 +265,18 @@
                     
                     <div class="mb-3">
                         <label class="form-label fw-bold small text-muted text-uppercase">Employee</label>
-                        <select name="NewEmployeeId" class="form-select" asp-items="Model.EmployeeOptions" required>
+                        <select name="NewEmployeeId" id="newEmployeeIdSelect" class="form-select mb-2" required>
                             <option value="">-- Select Employee --</option>
+                            <option value="-1" class="fw-bold text-brand">+ Add New Employee</option>
+                            @if(Model.EmployeeOptions != null)
+                            {
+                                foreach(var emp in Model.EmployeeOptions)
+                                {
+                                    <option value="@emp.Value">@emp.Text</option>
+                                }
+                            }
                         </select>
+                        <input type="text" name="NewEmployeeName" id="newEmployeeNameInput" class="form-control d-none" placeholder="Enter new employee's full name..." />
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold small text-muted text-uppercase">Issuing Agency</label>
@@ -469,6 +478,24 @@
             if (analyticsCollapse && analyticsChevron) {
                 analyticsCollapse.addEventListener('hide.bs.collapse', function () { analyticsChevron.style.transform = 'rotate(-90deg)'; });
                 analyticsCollapse.addEventListener('show.bs.collapse', function () { analyticsChevron.style.transform = 'rotate(0deg)'; });
+            }
+
+            // Dynamic New Employee Toggle in Direct Entry Modal
+            var employeeSelect = document.getElementById('newEmployeeIdSelect');
+            var employeeNameInput = document.getElementById('newEmployeeNameInput');
+            
+            if (employeeSelect && employeeNameInput) {
+                employeeSelect.addEventListener('change', function() {
+                    if (this.value === '-1') {
+                        employeeNameInput.classList.remove('d-none');
+                        employeeNameInput.required = true;
+                        employeeNameInput.focus();
+                    } else {
+                        employeeNameInput.classList.add('d-none');
+                        employeeNameInput.required = false;
+                        employeeNameInput.value = ''; // Clear out the value if they change their mind
+                    }
+                });
             }
 
             // Cascading Dropdown for Direct Entry Modal
