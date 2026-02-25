@@ -3,34 +3,35 @@
 ## 1. Brand Identity & Design System
 ### Color Palette
 - **Primary Backgrounds/Accents**:
-    - Dark Gray: `#66615c` (Sidebar/Backgrounds)
-    - Tan (Main Accent): `#a19482`
-    - Sage Green: `#a1aba0`
-- **Theme**: "Dull Industrial Concrete"
-- **Highlights/Borders/Icons**: Fluorescent bright colors (Safety Orange, High-Vis Yellow) - mimicking construction sites.
+    - Light Gray: `#f4f6f9` (Main Body Background)
+    - Black: `#000000` (Sidebar/Header accents)
+    - Tan (Main Accent/Primary Brand): `#a19482`
+    - Dark Tan (Secondary Brand): `#66615c`
+    - Yellow-400 (Active/Warning states): `#fbbf24`
+- **Theme**: "Clean Light Industrial"
+- **Highlights/Borders/Icons**: Clean layout with standard Bootstrap 5 secondary warning (`#fbbf24`), danger (`#dc3545`), and success (`#198754`) semantic colors mimicking industrial safety statuses.
 
 ### Layout Customizations
-- **Sidebar**:
+- **Sidebar (Width: 260px Expanded, 80px Collapsed)**:
     - **Expanded**:
-        - Header: Taller to fit `Specialized-Engineering-Logo-white.webp`.
+        - Header: Contains `Specialized-Engineering-Logo-white.webp`.
         - Content: Navigation links.
-        - Footer: Toggle arrow icon (moved from top).
+        - Floating Toggle: Right-aligned toggle arrow overlaps the sidebar and main content boundary.
     - **Collapsed**:
         - Header: Custom SVG Logo (White Rectangle + Stacked "S" "E").
-        - Content: Icons only.
+        - Content: Icons only, natively transitioned using `grid-template-columns`.
 - **Header (Top Bar)**:
-    - Page Title (e.g., "Dashboard" or "HR Certification Portal").
-    - Search Bar (Right aligned).
-    - Notification Bell & Dropdown.
+    - Page Title (e.g., "Dashboard", "Admin").
+    - Notification Bell & Fullscreen toggles.
 
 ## 2. Core Functional Requirements
 ### Dashboard
 - **Header**: Standard App Header.
-- **Top Cards**: Counts (Requests, Pending, Expiring, Active).
-    - **Action**: "More Info" buttons must link to `Requests/Index` with *specific filters* applied (e.g., Status='Pending').
-- **Recent Certifications Table**:
-    - Columns: Employee, Agency, Certification, Requests Type, Rec Date, Exp Date, Status.
-    - Location: Below top cards.
+- **Top Cards**: Counts (Total Requests, Active Certifications, Pending Approvals, Expiring Soon).
+    - **Action**: Direct links mapping to respective views (e.g., `Requests/Index?status=Pending`). Cards utilize semantic state styling (warning logic) if > 0.
+- **Recent Requests Table**:
+    - Columns: Req ID, Employee, Manager, Agency, Certification, Type, Status, Request Date, Actions.
+    - Features: Includes inline form input for text search and a direct "New Request" button in the table header.
 
 ### Certification Requests
 - **Form**:
@@ -43,12 +44,12 @@
     - Actions: View, Edit, Remove.
 
 ### Admin Settings (System Management)
-- **Top Section**: Domain Management (Cards/Tables).
-    - **Agency Management**: List Agencies. Actions: Add New, Edit Name, Toggle Active status.
-    - **Certification Management**: List Certifications. Actions: Add New, Edit Name, Assign Agency, Set Validity Period (Years).
+- **Top Section**: Domain Management (Cards/Data Grids).
+    - **Agency Management**: List Agencies using ClientSideDataGrid implementation. Actions: Quick search, toggle Soft Delete `IsActive` state. Active states are designated visually with Lucide icons.
+    - **Certification Management**: List Certifications with relationships to Agencies. Quick search, toggle Soft Delete `IsActive` state.
+    - **Export list**: QuestPDF export engine that explicitly highlights in-active elements natively via document structure.
 - **Bottom Section**: General Configuration.
     - **Admin Email**: Field to set the contact for system notifications (e.g., `hr@speceng.com`).
-    - **Application Name**: *Removed* (Hardcoded to brand).
 - **Future/Suggested Features**:
     - **Audit Log**: View history of changes.
     - **Data Seeding**: Button to "Reset to Default" for testing.
