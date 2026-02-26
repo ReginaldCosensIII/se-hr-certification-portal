@@ -21,6 +21,12 @@ public class IndexModel : PageModel
     public int ExpiringCount { get; set; }
     public IList<CertificationRequest> RecentRequests { get; set; } = default!;
 
+    [BindProperty(SupportsGet = true)]
+    public int PageSize { get; set; } = 5;
+
+    [BindProperty(SupportsGet = true)]
+    public string? SearchString { get; set; }
+
     public async Task OnGetAsync()
     {
         // 1. Fetch Dynamic Expiration Threshold
@@ -43,12 +49,22 @@ public class IndexModel : PageModel
             .CountAsync(r => r.Status == RequestStatus.Passed && r.ExpirationDate >= today && r.ExpirationDate <= thresholdDate);
 
         // 3. Fetch Recent Requests
-        RecentRequests = await _context.CertificationRequests
+        var requestQuery = _context.CertificationRequests
             .Include(r => r.Employee)
             .Include(r => r.Agency)
             .Include(r => r.Certification)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(SearchString))
+        {
+            requestQuery = requestQuery.Where(r => 
+                (r.Employee != null && r.Employee.DisplayName.ToLower().Contains(SearchString.ToLower())) || 
+                r.Id.ToString() == SearchString);
+        }
+
+        RecentRequests = await requestQuery
             .OrderByDescending(r => r.RequestDate)
-            .Take(5)
+            .Take(PageSize > 0 ? PageSize : 5)
             .ToListAsync();
     }
 }
