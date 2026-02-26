@@ -3,14 +3,13 @@
 
 // Write your JavaScript code.
 
-// Native Fullscreen API Interceptor for Header Toggle (State-Synced)
+// Native Fullscreen API Interceptor for Header Toggle (State-Synced with F11 Override)
 document.addEventListener('DOMContentLoaded', function () {
     const fullscreenBtn = document.querySelector('[data-lte-toggle="fullscreen"]');
 
     if (fullscreenBtn) {
-        // 1. Handle the Click Action
-        fullscreenBtn.addEventListener('click', function (e) {
-            e.preventDefault();
+        // 1. Unified Toggle Logic
+        const toggleFullscreen = function () {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(err => {
                     console.error(`Error attempting to enable fullscreen: ${err.message}`);
@@ -20,9 +19,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     document.exitFullscreen();
                 }
             }
+        };
+
+        // 2. Handle Button Click
+        fullscreenBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            toggleFullscreen();
         });
 
-        // 2. Handle the Icon Rendering (Listens for Button Clicks, F11, and Esc keys)
+        // 3. Intercept F11 Keyboard Shortcut
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'F11') {
+                e.preventDefault(); // Stop native browser UI fullscreen
+                toggleFullscreen(); // Force HTML5 Fullscreen API instead
+            }
+        });
+
+        // 4. Handle Icon Rendering (Listens for API changes and Esc key)
         document.addEventListener('fullscreenchange', function () {
             if (document.fullscreenElement) {
                 fullscreenBtn.innerHTML = '<i data-lucide="minimize"></i>';
