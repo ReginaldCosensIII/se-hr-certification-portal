@@ -142,7 +142,7 @@
                     <th>Type</th>
                     <th>Status</th>
                     <th>Request Date</th>
-                    <th class="text-center">Actions</th>
+                    <th class="text-center" style="min-width: 100px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -181,10 +181,35 @@
                         }
                     </td>
                     <td>@item.RequestDate.ToString("MMM dd, yyyy")</td>
-                    <td class="text-center">
-                        <a href="#" class="text-warning" data-bs-toggle="modal" data-bs-target="#editModal-@item.Id" title="Manage Request">
-                            <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
-                        </a>
+                    <td class="text-center border-start">
+                        <form method="post" asp-page-handler="UpdateStatus" class="d-inline">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="hidden" name="p" value="@Model.CurrentPage" />
+                            <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                            <input type="hidden" name="searchString" value="@Model.SearchString" />
+                            <input type="hidden" name="statusFilter" value="@Model.StatusFilter" />
+                            @if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Pending)
+                            {
+                                <button type="submit" name="newStatus" value="@SeHrCertificationPortal.Models.RequestStatus.Approved" class="btn btn-sm btn-link text-success p-0 me-2" title="Approve Request">
+                                    <i data-lucide="check" style="width: 18px;"></i>
+                                </button>
+                                <button type="submit" name="newStatus" value="@SeHrCertificationPortal.Models.RequestStatus.Rejected" class="btn btn-sm btn-link text-danger p-0" title="Reject Request">
+                                    <i data-lucide="x" style="width: 18px;"></i>
+                                </button>
+                            }
+                            else if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Approved)
+                            {
+                                <button type="button" class="btn btn-sm btn-link text-success p-0 me-2" onclick="$('#passModal-@item.Id').modal('show');" title="Mark as Passed">
+                                    <i data-lucide="award" style="width: 18px;"></i>
+                                </button>
+                                <button type="submit" name="newStatus" value="@SeHrCertificationPortal.Models.RequestStatus.Failed" class="btn btn-sm btn-link text-warning p-0" title="Mark as Failed">
+                                    <i data-lucide="user-x" style="width: 18px;"></i>
+                                </button>
+                            }
+                            <button type="button" class="btn btn-sm btn-link text-primary p-0 ml-2" onclick="$('#editModal-@item.Id').modal('show');" title="Edit Request">
+                                <i data-lucide="edit-2" style="width: 18px; height: 18px;"></i>
+                            </button>
+                        </form>
                     </td>
                 </tr>
             }
