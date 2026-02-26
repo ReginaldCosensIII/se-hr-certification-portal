@@ -77,10 +77,8 @@
     </div>
 </div>
 
-<!-- Recent Requests Table & Critical Action Items Split -->
-<div class="row">
-    <div class="col-xl-8 col-lg-7 mb-4">
-        <div class="card">
+<!-- Recent Requests Table -->
+<div class="card mb-4">
     <div class="card-header d-flex align-items-center bg-white border-0">
         <h3 class="card-title">Recent Requests</h3>
         <div class="card-tools ms-auto d-flex gap-3 align-items-center">
@@ -141,7 +139,7 @@
                     </td>
                     <td>@item.RequestDate.ToString("yyyy-MM-dd")</td>
                     <td class="text-center">
-                        <a href="/Requests/Index?SearchString=@(item.Employee?.DisplayName ?? "")" class="text-muted" title="Manage Record">
+                        <a href="/Requests/Index?SearchString=@(item.Employee?.DisplayName ?? "")" class="text-warning" title="Manage Record">
                             <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
                         </a>
                     </td>
@@ -171,9 +169,10 @@
         </div>
         </div>
     </div>
-    <div class="col-xl-4 col-lg-5 mb-4">
-        <div class="card h-100 border-danger border-top border-3">
-            <div class="card-header bg-white border-0 py-3">
+    
+    <!-- Critical Action Items -->
+    <div class="card border-danger border-top border-3 mb-4">
+        <div class="card-header bg-white border-0 py-3">
                 <h3 class="card-title text-danger fw-bold">
                     <i data-lucide="alert-triangle" class="me-2" style="width: 20px;"></i> Critical Action Items
                 </h3>
@@ -217,5 +216,3 @@
             </div>
         </div>
     </div>
-</div>
-
