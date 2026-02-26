@@ -20,6 +20,7 @@ public class IndexModel : PageModel
     public int PendingCount { get; set; }
     public int ExpiringCount { get; set; }
     public IList<CertificationRequest> RecentRequests { get; set; } = default!;
+    public IList<CertificationRequest> CriticalActionItems { get; set; } = default!;
 
     [BindProperty(SupportsGet = true)]
     public int PageSize { get; set; } = 5;
@@ -47,6 +48,15 @@ public class IndexModel : PageModel
         // Expiring Soon: Passed AND Expires between today and threshold
         ExpiringCount = await _context.CertificationRequests
             .CountAsync(r => r.Status == RequestStatus.Passed && r.ExpirationDate >= today && r.ExpirationDate <= thresholdDate);
+
+        // Fetch Critical Action Items (Already expired OR expiring within threshold)
+        CriticalActionItems = await _context.CertificationRequests
+            .Include(r => r.Employee)
+            .Include(r => r.Certification)
+            .Where(r => r.Status == RequestStatus.Passed && r.ExpirationDate != null && r.ExpirationDate <= thresholdDate)
+            .OrderBy(r => r.ExpirationDate)
+            .Take(15)
+            .ToListAsync();
 
         // 3. Fetch Recent Requests
         var requestQuery = _context.CertificationRequests

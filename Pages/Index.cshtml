@@ -77,8 +77,10 @@
     </div>
 </div>
 
-<!-- Recent Requests Table -->
-<div class="card">
+<!-- Recent Requests Table & Critical Action Items Split -->
+<div class="row">
+    <div class="col-xl-8 col-lg-7 mb-4">
+        <div class="card">
     <div class="card-header d-flex align-items-center bg-white border-0">
         <h3 class="card-title">Recent Requests</h3>
         <div class="card-tools ms-auto d-flex gap-3 align-items-center">
@@ -138,9 +140,9 @@
                         }
                     </td>
                     <td>@item.RequestDate.ToString("yyyy-MM-dd")</td>
-                    <td>
-                        <a href="/Requests/Index?SearchString=@(item.Employee?.DisplayName ?? "")" class="btn btn-sm btn-outline-brand fw-bold d-inline-flex align-items-center">
-                            <i data-lucide="settings" class="me-1" style="width: 14px; height: 14px;"></i> Manage
+                    <td class="text-center">
+                        <a href="/Requests/Index?SearchString=@(item.Employee?.DisplayName ?? "")" class="text-muted" title="Manage Record">
+                            <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
                         </a>
                     </td>
                 </tr>
@@ -166,6 +168,53 @@
                     }
                 </select> entries
             </label>
+        </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-lg-5 mb-4">
+        <div class="card h-100 border-danger border-top border-3">
+            <div class="card-header bg-white border-0 py-3">
+                <h3 class="card-title text-danger fw-bold">
+                    <i data-lucide="alert-triangle" class="me-2" style="width: 20px;"></i> Critical Action Items
+                </h3>
+            </div>
+            <div class="card-body table-responsive p-0" style="max-height: 400px; overflow-y: auto;">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="bg-light sticky-top">
+                        <tr>
+                            <th>Employee</th>
+                            <th>Certification</th>
+                            <th class="text-end">Expires</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.CriticalActionItems)
+                        {
+                            bool isLapsed = item.ExpirationDate < DateTime.UtcNow;
+                            <tr>
+                                <td class="fw-bold">@item.Employee?.DisplayName</td>
+                                <td class="text-muted text-truncate" style="max-width: 120px;" title="@item.Certification?.Name">
+                                    @(item.Certification?.Name ?? "Custom")
+                                </td>
+                                <td class="text-end">
+                                    <span class="badge @(isLapsed ? "text-bg-danger" : "text-bg-warning")">
+                                        @(item.ExpirationDate?.ToString("MMM dd, yyyy"))
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.CriticalActionItems.Any())
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-4">
+                                    <i data-lucide="check-circle" class="text-success mb-2" style="width: 24px; height: 24px;"></i>
+                                    <br />No critical items pending.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
