@@ -3,30 +3,33 @@
 
 // Write your JavaScript code.
 
-// Native Fullscreen API Interceptor for Header Toggle
+// Native Fullscreen API Interceptor for Header Toggle (Lucide Icon Compatible)
 document.addEventListener('DOMContentLoaded', function () {
-    const fullscreenBtn = document.querySelector('[data-widget="fullscreen"]');
+    const fullscreenBtn = document.querySelector('[data-lte-toggle="fullscreen"]');
+
     if (fullscreenBtn) {
         fullscreenBtn.addEventListener('click', function (e) {
             e.preventDefault();
-            const icon = this.querySelector('i');
-            
+
             if (!document.fullscreenElement) {
+                // Enter Fullscreen
                 document.documentElement.requestFullscreen().catch(err => {
                     console.error(`Error attempting to enable fullscreen: ${err.message}`);
                 });
-                if (icon) {
-                    icon.classList.remove('fa-expand-arrows-alt');
-                    icon.classList.add('fa-compress-arrows-alt');
-                }
+                // Swap to minimize icon
+                fullscreenBtn.innerHTML = '<i data-lucide="minimize"></i>';
             } else {
+                // Exit Fullscreen
                 if (document.exitFullscreen) {
                     document.exitFullscreen();
-                    if (icon) {
-                        icon.classList.remove('fa-compress-arrows-alt');
-                        icon.classList.add('fa-expand-arrows-alt');
-                    }
+                    // Swap back to maximize icon
+                    fullscreenBtn.innerHTML = '<i data-lucide="maximize"></i>';
                 }
+            }
+
+            // Instruct Lucide to immediately re-draw the SVG inside the button
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons({ root: fullscreenBtn });
             }
         });
     }
