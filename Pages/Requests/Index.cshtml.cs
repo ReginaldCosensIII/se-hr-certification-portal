@@ -58,11 +58,14 @@ namespace SeHrCertificationPortal.Pages.Requests
 
         if (!string.IsNullOrWhiteSpace(SearchString))
         {
-            var searchLower = SearchString.ToLower();
+            var searchLower = SearchString.ToLower().Trim();
+            // Clean the search string so users can type "REQ-764" or "764" interchangeably
+            var idSearch = searchLower.Replace("req-", "").Trim();
+
             query = query.Where(c => 
                 (c.Employee != null && c.Employee.DisplayName.ToLower().Contains(searchLower)) ||
                 (c.ManagerName != null && c.ManagerName.ToLower().Contains(searchLower)) ||
-                c.Id.ToString() == searchLower);
+                c.Id.ToString() == idSearch);
         }
 
         TotalRecords = await query.CountAsync();

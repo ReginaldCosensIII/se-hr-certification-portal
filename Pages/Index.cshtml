@@ -139,7 +139,7 @@
                     </td>
                     <td>@item.RequestDate.ToString("yyyy-MM-dd")</td>
                     <td class="text-center">
-                        <a href="/Requests/Index?SearchString=@(item.Employee?.DisplayName ?? "")" class="text-warning" title="Manage Record">
+                        <a href="/Requests/Index?SearchString=@item.Id" class="text-warning" title="Manage Record">
                             <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
                         </a>
                     </td>
