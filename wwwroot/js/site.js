@@ -3,31 +3,34 @@
 
 // Write your JavaScript code.
 
-// Native Fullscreen API Interceptor for Header Toggle (Lucide Icon Compatible)
+// Native Fullscreen API Interceptor for Header Toggle (State-Synced)
 document.addEventListener('DOMContentLoaded', function () {
     const fullscreenBtn = document.querySelector('[data-lte-toggle="fullscreen"]');
 
     if (fullscreenBtn) {
+        // 1. Handle the Click Action
         fullscreenBtn.addEventListener('click', function (e) {
             e.preventDefault();
-
             if (!document.fullscreenElement) {
-                // Enter Fullscreen
                 document.documentElement.requestFullscreen().catch(err => {
                     console.error(`Error attempting to enable fullscreen: ${err.message}`);
                 });
-                // Swap to minimize icon
-                fullscreenBtn.innerHTML = '<i data-lucide="minimize"></i>';
             } else {
-                // Exit Fullscreen
                 if (document.exitFullscreen) {
                     document.exitFullscreen();
-                    // Swap back to maximize icon
-                    fullscreenBtn.innerHTML = '<i data-lucide="maximize"></i>';
                 }
             }
+        });
 
-            // Instruct Lucide to immediately re-draw the SVG inside the button
+        // 2. Handle the Icon Rendering (Listens for Button Clicks, F11, and Esc keys)
+        document.addEventListener('fullscreenchange', function () {
+            if (document.fullscreenElement) {
+                fullscreenBtn.innerHTML = '<i data-lucide="minimize"></i>';
+            } else {
+                fullscreenBtn.innerHTML = '<i data-lucide="maximize"></i>';
+            }
+
+            // Instruct Lucide to immediately re-draw the SVG
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons({ root: fullscreenBtn });
             }
