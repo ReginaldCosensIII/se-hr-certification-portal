@@ -391,16 +391,23 @@
             const collapseElement = document.getElementById('collapseNewRequest');
             const toggleButton = document.querySelector('[data-bs-target="#collapseNewRequest"]');
 
-            // 1. Restore State on Load
+            // 1. Restore State or Check URL Parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const forceOpen = urlParams.get('openNew') === 'true';
             const savedState = localStorage.getItem(storageKey);
-            
-            if (savedState === 'open') {
+
+            if (forceOpen || savedState === 'open') {
                 // Open it
                 collapseElement.classList.add('show');
                 toggleButton.classList.remove('collapsed');
                 toggleButton.setAttribute('aria-expanded', 'true');
+                if (forceOpen) {
+                    localStorage.setItem(storageKey, 'open'); // Save it for subsequent reloads
+                    // Clean up URL without refreshing
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
             } else {
-                // Ensure closed (default HTML might be open, so we enforce closed if not saved as open)
+                // Ensure closed
                 collapseElement.classList.remove('show');
                 toggleButton.classList.add('collapsed');
                 toggleButton.setAttribute('aria-expanded', 'false');
