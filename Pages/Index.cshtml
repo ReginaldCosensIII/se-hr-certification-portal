@@ -83,15 +83,7 @@
         <h3 class="card-title">Recent Requests</h3>
         <div class="card-tools ms-auto d-flex gap-3 align-items-center">
              <form method="get" id="dashboardControlsForm" class="d-flex gap-2 align-items-center m-0">
-                <div class="d-flex align-items-center">
-                    <label class="me-2 text-muted small fw-bold mb-0">SHOW:</label>
-                    <select name="PageSize" class="form-select form-select-sm" style="width: 70px;" onchange="this.form.submit()">
-                        <option value="5" selected="@(Model.PageSize == 5)">5</option>
-                        <option value="10" selected="@(Model.PageSize == 10)">10</option>
-                        <option value="15" selected="@(Model.PageSize == 15)">15</option>
-                        <option value="25" selected="@(Model.PageSize == 25)">25</option>
-                    </select>
-                </div>
+                <input type="hidden" name="PageSize" value="@Model.PageSize" />
                 <div class="input-group input-group-sm">
                     <input type="text" name="SearchString" value="@Model.SearchString" class="form-control" placeholder="Search..." style="max-width: 150px;">
                     <button class="btn btn-brand" type="submit">
@@ -156,6 +148,25 @@
             </tbody>
         </table>
     </div>
-
+    <div class="card-footer bg-transparent border-top-0 py-3">
+        <div class="d-flex justify-content-end align-items-center gap-3">
+            <label class="mb-0 text-muted small">
+                Show 
+                <select class="form-select form-select-sm d-inline-block w-auto mx-1 shadow-sm" onchange="window.location.href='?PageSize=' + this.value + '&SearchString=@Model.SearchString'">
+                    @foreach(var size in new[] { 5, 10, 15, 25, 50 })
+                    {
+                        if (size == Model.PageSize)
+                        {
+                            <option value="@size" selected>@size</option>
+                        }
+                        else
+                        {
+                            <option value="@size">@size</option>
+                        }
+                    }
+                </select> entries
+            </label>
+        </div>
+    </div>
 </div>
 
