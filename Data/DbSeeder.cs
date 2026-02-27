@@ -11,8 +11,8 @@ namespace SeHrCertificationPortal.Data
             if (!await context.Agencies.AnyAsync())
             {
 
-            // 1. Seed Agencies
-            var agencies = new List<Agency>
+                // 1. Seed Agencies
+                var agencies = new List<Agency>
             {
                 new Agency { Abbreviation = "ACI", FullName = "American Concrete Institute" },
                 new Agency { Abbreviation = "MARTCP", FullName = "Mid-Atlantic Region Technician Certification Program" },
@@ -27,14 +27,14 @@ namespace SeHrCertificationPortal.Data
                 new Agency { Abbreviation = "Others", FullName = "Other Agencies" }
             };
 
-            context.Agencies.AddRange(agencies);
-            await context.SaveChangesAsync();
+                context.Agencies.AddRange(agencies);
+                await context.SaveChangesAsync();
 
-            // Refetch agencies to get valid Ids
-            var agencyMap = await context.Agencies.ToDictionaryAsync(a => a.Abbreviation, a => a.Id);
+                // Refetch agencies to get valid Ids
+                var agencyMap = await context.Agencies.ToDictionaryAsync(a => a.Abbreviation, a => a.Id);
 
-            // 2. Seed Certifications
-            var rawCertNames = new List<string>
+                // 2. Seed Certifications
+                var rawCertNames = new List<string>
             {
                 "ACI Concrete Transportation Construction Inspector In Training",
                 "ACI Concrete Transportation Construction Inspector",
@@ -167,15 +167,15 @@ namespace SeHrCertificationPortal.Data
                 "WVDOH Transportation Engineering Technologist (TRETNO) Level V"
             };
 
-            var certifications = rawCertNames.Select(name => new Certification
-            {
-                Name = name,
-                AgencyId = DetermineAgencyId(name, agencyMap),
-                ValidityPeriodMonths = 36, // Default validity
-                IsActive = true
-            }).ToList();
+                var certifications = rawCertNames.Select(name => new Certification
+                {
+                    Name = name,
+                    AgencyId = DetermineAgencyId(name, agencyMap),
+                    ValidityPeriodMonths = 36, // Default validity
+                    IsActive = true
+                }).ToList();
 
-            context.Certifications.AddRange(certifications);
+                context.Certifications.AddRange(certifications);
                 await context.SaveChangesAsync();
             }
 
@@ -194,10 +194,10 @@ namespace SeHrCertificationPortal.Data
                     var first = firstNames[random.Next(firstNames.Length)];
                     var last = lastNames[random.Next(lastNames.Length)];
                     // Ensure unique emails roughly
-                    var email = $"{first.ToLower()}.{last.ToLower()}{random.Next(10,99)}@specializedengineering.com";
-                    
-                    employees.Add(new Employee 
-                    { 
+                    var email = $"{first.ToLower()}.{last.ToLower()}{random.Next(10, 99)}@specializedengineering.com";
+
+                    employees.Add(new Employee
+                    {
                         DisplayName = $"{first} {last}"
                     });
                 }
@@ -230,7 +230,7 @@ namespace SeHrCertificationPortal.Data
                     string? customCert = null;
 
                     // 10% Custom, 90% Catalog
-                    if (random.NextDouble() < 0.10) 
+                    if (random.NextDouble() < 0.10)
                     {
                         var customAgencies = new[] { "Maryland Dept of Environment", "Hagerstown Community College", "FEMA", "Red Cross" };
                         var customCerts = new[] { "Advanced Safety", "Water Quality", "First Aid", "Drone Pilot" };
@@ -253,18 +253,18 @@ namespace SeHrCertificationPortal.Data
                     // Re-fetching Certs with AgencyId to ensure consistency
                     // (Done efficiently outside loop below)
                 }
-                
+
                 // Optimized Loop with correct relational data
                 var certsWithAgency = await context.Certifications.Select(c => new { c.Id, c.AgencyId }).ToListAsync();
 
                 requests.Clear(); // Restart loop with better data
                 for (int i = 0; i < 750; i++)
                 {
-                     // Random Date (Last 10 years)
+                    // Random Date (Last 10 years)
                     var daysBack = random.Next(0, 3650);
                     var requestDate = DateTime.UtcNow.AddDays(-daysBack);
 
-                     // Status Logic
+                    // Status Logic
                     RequestStatus status;
                     bool isOlderThan60Days = daysBack > 60;
                     if (isOlderThan60Days)
@@ -297,9 +297,9 @@ namespace SeHrCertificationPortal.Data
                     // 10% Custom
                     if (random.NextDouble() < 0.10)
                     {
-                        req.CustomAgencyName = "External Training Provider"; 
+                        req.CustomAgencyName = "External Training Provider";
                         req.CustomCertificationName = "Specialized Workshop";
-                         // Add varitey
+                        // Add varitey
                         var customAgencies = new[] { "Maryland Dept of Environment", "Hagerstown Community College", "FEMA", "Red Cross" };
                         req.CustomAgencyName = customAgencies[random.Next(customAgencies.Length)];
                     }
@@ -331,7 +331,7 @@ namespace SeHrCertificationPortal.Data
             if (certName.StartsWith("OSHA")) return agencyMap["OSHA"];
             if (certName.StartsWith("WVDOH")) return agencyMap["WVDOH"];
             if (certName.StartsWith("AWS")) return agencyMap["AWS"];
-            
+
             return agencyMap["Others"];
         }
     }

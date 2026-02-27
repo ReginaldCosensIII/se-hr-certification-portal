@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using SeHrCertificationPortal.Models; 
+using SeHrCertificationPortal.Models;
 
 namespace SeHrCertificationPortal.Data
 {

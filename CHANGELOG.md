@@ -1,5 +1,13 @@
 # Changelog
 
+## [Branch Closeout: feat/dashboard-and-core-ui]
+### Added
+- **Epic 4: Dashboard & Core UI Polish**
+  - Integrated dynamic EF Core 10 KPIs mapped directly to `SystemSettings` threshold parameters.
+  - Intercepted the native browser F11 Fullscreen API and synced state directly into the unified theme header toggle.
+  - Refactored grid layouts for optimal UI space utilization and removed redundant UI inputs.
+  - Implemented advanced Request ID string stripping (e.g., parsing "REQ-123" input cleanly down to integer `123`).
+  - Standardized the core action icons across all pages to utilize a unified Lucide + Bootstrap semantic color language.
 ## [Branch Closeout: feat/certifications-management]
 ### Added
 - **Epic 2: Admin Management Module**

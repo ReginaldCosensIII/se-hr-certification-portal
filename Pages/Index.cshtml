@@ -35,7 +35,7 @@
             <div class="icon">
                 <i data-lucide="award"></i>
             </div>
-            <a href="/Certifications/Index?status=Active" class="small-box-footer">
+            <a href="/Certifications/Index?StatusFilter=Active" class="small-box-footer">
                 View Active <i data-lucide="arrow-right-circle"></i>
             </a>
         </div>
@@ -53,7 +53,7 @@
             <div class="icon">
                 <i data-lucide="hourglass"></i>
             </div>
-            <a href="/Requests/Index?status=Pending" class="small-box-footer">
+            <a href="/Requests/Index?StatusFilter=Pending" class="small-box-footer">
                 View Pending <i data-lucide="arrow-right-circle"></i>
             </a>
         </div>
@@ -70,7 +70,7 @@
             <div class="icon">
                 <i data-lucide="alert-triangle"></i>
             </div>
-            <a href="/Certifications/Index?filter=expiring" class="small-box-footer">
+            <a href="/Certifications/Index?StatusFilter=ExpiringSoon" class="small-box-footer">
                 View Expiring <i data-lucide="arrow-right-circle"></i>
             </a>
         </div>
@@ -78,23 +78,12 @@
 </div>
 
 <!-- Recent Requests Table -->
-<div class="card">
+<div class="card mb-4">
     <div class="card-header d-flex align-items-center bg-white border-0">
         <h3 class="card-title">Recent Requests</h3>
-        <div class="card-tools ms-auto d-flex gap-2">
-             <!-- Search Bar (Added) -->
-             <form method="get" class="d-flex align-items-center">
-                <div class="input-group input-group-sm">
-                    <input type="text" name="SearchString" class="form-control" placeholder="Search..." style="max-width: 150px;">
-                        <button class="btn btn-brand" type="submit">
-                        <i data-lucide="search" class="text-white" style="width: 14px;"></i>
-                    </button>
-                </div>
-            </form>
-
-            <!-- New Request Action Only -->
-            <a href="/Requests/Create" class="btn btn-tool btn-sm text-primary fw-bold">
-                <i data-lucide="plus-circle" class="me-1"></i> New Request
+        <div class="card-tools ms-auto d-flex gap-3 align-items-center">
+            <a href="/Requests/Index?openNew=true" class="btn btn-brand fw-bold px-3 shadow-sm d-flex align-items-center">
+                <i data-lucide="plus-circle" class="me-2 text-white" style="width: 18px;"></i> New Request
             </a>
         </div>
     </div>
@@ -108,7 +97,7 @@
                 <th>Agency</th> 
                 <th>Certification</th> 
                 <th>Type</th>
-                <th>Status</th>
+                <th class="text-center">Status</th>
                 <th>Request Date</th> <!-- Renamed Date -->
                 <th>Actions</th>
             </tr>
@@ -125,27 +114,24 @@
                     <td>@(item.Agency?.Abbreviation ?? item.CustomAgencyName ?? "Custom")</td>
                     <td>@(item.Certification?.Name ?? item.CustomCertificationName ?? "Custom")</td>
                     <td><span class="fw-bold">@item.RequestType</span></td>
-                    <td>
+                    <td class="text-center">
                         @if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Pending)
                         {
-                            <span class="badge text-bg-warning">Pending</span>
+                            <span class="badge text-bg-warning d-inline-flex align-items-center"><i data-lucide="clock" class="me-1" style="width: 12px; height: 12px;"></i> Pending</span>
                         }
-                        else if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Approved)
+                        else if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Approved || item.Status == SeHrCertificationPortal.Models.RequestStatus.Passed)
                         {
-                            <span class="badge text-bg-success">Approved</span>
+                            <span class="badge text-bg-success d-inline-flex align-items-center"><i data-lucide="check-circle" class="me-1" style="width: 12px; height: 12px;"></i> @item.Status</span>
                         }
                         else
                         {
-                            <span class="badge text-bg-danger">Rejected</span>
+                            <span class="badge text-bg-danger d-inline-flex align-items-center"><i data-lucide="x-circle" class="me-1" style="width: 12px; height: 12px;"></i> @item.Status</span>
                         }
                     </td>
                     <td>@item.RequestDate.ToString("yyyy-MM-dd")</td>
-                    <td>
-                        <a href="#" class="text-muted me-2" title="View">
-                            <i data-lucide="search" style="width: 16px; height: 16px;"></i>
-                        </a>
-                        <a href="#" class="text-muted me-2" title="Edit">
-                            <i data-lucide="pencil" style="width: 16px; height: 16px;"></i>
+                    <td class="text-center">
+                        <a href="/Requests/Index?SearchString=@item.Id" class="text-warning" title="Manage Record">
+                            <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
                         </a>
                     </td>
                 </tr>
@@ -154,16 +140,24 @@
         </table>
     </div>
     <div class="card-footer bg-transparent border-top-0 py-3">
-        <!-- Pagination Mock -->
-        <nav aria-label="Page navigation">
-            <ul class="pagination pagination-sm justify-content-end mb-0">
-                <li class="page-item disabled"><a class="page-link" href="#" aria-label="Previous">Previous</a></li>
-                <li class="page-item active"><a class="page-link shadow-sm" href="#">1</a></li>
-                <li class="page-item disabled"><a class="page-link text-muted" href="#">2</a></li>
-                <li class="page-item disabled"><a class="page-link text-muted" href="#">3</a></li>
-                <li class="page-item disabled"><a class="page-link" href="#" aria-label="Next">Next</a></li>
-            </ul>
-        </nav>
+        <div class="d-flex justify-content-end align-items-center gap-3">
+            <label class="mb-0 text-muted small">
+                Show 
+                <select class="form-select form-select-sm d-inline-block w-auto mx-1 shadow-sm" onchange="window.location.href='?PageSize=' + this.value + '&SearchString=@Model.SearchString'">
+                    @foreach(var size in new[] { 5, 10, 15 })
+                    {
+                        if (size == Model.PageSize)
+                        {
+                            <option value="@size" selected>@size</option>
+                        }
+                        else
+                        {
+                            <option value="@size">@size</option>
+                        }
+                    }
+                </select> entries
+            </label>
+        </div>
+        </div>
     </div>
-</div>
-
+    

@@ -4,7 +4,7 @@ This application is designed to be hosted on a Windows Server running Internet I
 
 ## Prerequisites
 - Windows Server with IIS enabled.
-- .NET 8 Hosting Bundle installed.
+- .NET 10 Hosting Bundle (LTS) installed.
 - PostgreSQL Server installed and accessible from the IIS server.
 - URL Rewrite Module for IIS (recommended).
 

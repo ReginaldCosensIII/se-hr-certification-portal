@@ -105,7 +105,7 @@
                     <input type="hidden" name="pageSize" value="@Model.PageSize" />
                     
                     <div class="input-group input-group-sm">
-                        <input type="text" asp-for="SearchString" class="form-control" placeholder="Search..." style="max-width: 200px;">
+                        <input type="text" asp-for="SearchString" class="form-control" placeholder="Search Name, Manager, or REQ ID..." style="max-width: 250px;">
                          <button class="btn btn-brand" type="submit">
                             <i data-lucide="search" class="text-white" style="width: 14px;"></i>
                         </button>
@@ -207,9 +207,19 @@
                                 </button>
                             }
                             <button type="button" class="btn btn-sm btn-link text-primary p-0 ml-2" onclick="$('#editModal-@item.Id').modal('show');" title="Edit Request">
-                                <i data-lucide="edit-2" style="width: 18px; height: 18px;"></i>
+                                <i data-lucide="edit" style="width: 18px; height: 18px;"></i>
                             </button>
                         </form>
+                    </td>
+                </tr>
+            }
+            @if (!Model.CertificationRequest.Any())
+            {
+                <tr>
+                    <td colspan="9" class="text-center text-muted py-5">
+                        <i data-lucide="search-x" class="mb-3 text-secondary" style="width: 32px; height: 32px;"></i>
+                        <h5 class="fw-bold">No Requests Found</h5>
+                        <p class="mb-0">We couldn't find any requests matching your current search or filter criteria.</p>
                     </td>
                 </tr>
             }
@@ -381,16 +391,24 @@
             const collapseElement = document.getElementById('collapseNewRequest');
             const toggleButton = document.querySelector('[data-bs-target="#collapseNewRequest"]');
 
-            // 1. Restore State on Load
+            // 1. Restore State or Check URL Parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const forceOpen = urlParams.get('openNew') === 'true';
+            const isSearch = urlParams.has('SearchString');
             const savedState = localStorage.getItem(storageKey);
-            
-            if (savedState === 'open') {
-                // Open it
+
+            // If forceOpen is true, open it. 
+            // If it's a search/manage action, FORCE close it.
+            // Otherwise, respect savedState.
+            if (forceOpen || (!isSearch && savedState === 'open')) {
                 collapseElement.classList.add('show');
                 toggleButton.classList.remove('collapsed');
                 toggleButton.setAttribute('aria-expanded', 'true');
+                if (forceOpen) {
+                    localStorage.setItem(storageKey, 'open'); 
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
             } else {
-                // Ensure closed (default HTML might be open, so we enforce closed if not saved as open)
                 collapseElement.classList.remove('show');
                 toggleButton.classList.add('collapsed');
                 toggleButton.setAttribute('aria-expanded', 'false');
