@@ -244,17 +244,15 @@
                     }
                 </select> entries
             </label>
-            <ul class="pagination pagination-sm mb-0">
-                <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
-                    <a class="page-link shadow-sm" asp-page="./Index" asp-route-p="@(Model.CurrentPage - 1)" asp-route-pageSize="@Model.PageSize" asp-route-SearchString="@Model.SearchString" asp-route-StatusFilter="@Model.StatusFilter">&laquo;</a>
-                </li>
-                <li class="page-item active">
-                    <span class="page-link shadow-sm border-brand bg-brand text-white">@Model.CurrentPage / @Math.Max(1, Model.TotalPages)</span>
-                </li>
-                <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
-                    <a class="page-link shadow-sm" asp-page="./Index" asp-route-p="@(Model.CurrentPage + 1)" asp-route-pageSize="@Model.PageSize" asp-route-SearchString="@Model.SearchString" asp-route-StatusFilter="@Model.StatusFilter">&raquo;</a>
-                </li>
-            </ul>
+            <partial name="_PaginationPartial" model='new SeHrCertificationPortal.Models.PaginationViewModel {
+                CurrentPage = Model.CurrentPage,
+                TotalPages = Model.TotalPages,
+                RouteParams = new Dictionary<string, string> {
+                    { "pageSize", Model.PageSize.ToString() },
+                    { "SearchString", Model.SearchString ?? "" },
+                    { "StatusFilter", Model.StatusFilter?.ToString() ?? "" }
+                }
+            }' />
         </nav>
     </div>
 </div>

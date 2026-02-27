@@ -1,0 +1,29 @@
+@model SeHrCertificationPortal.Models.PaginationViewModel
+
+<ul class="pagination pagination-sm mb-0">
+    <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+        <a class="page-link shadow-sm text-muted" asp-page="@Model.PageAction" asp-all-route-data="@Model.RouteParams" asp-route-p="1" title="First Page">
+            <i data-lucide="chevrons-left" style="width: 16px; height: 16px;"></i>
+        </a>
+    </li>
+    <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+        <a class="page-link shadow-sm text-muted" asp-page="@Model.PageAction" asp-all-route-data="@Model.RouteParams" asp-route-p="@(Model.CurrentPage - 1)" title="Previous Page">
+            <i data-lucide="chevron-left" style="width: 16px; height: 16px;"></i>
+        </a>
+    </li>
+    <li class="page-item active">
+        <span class="page-link shadow-sm border-brand bg-brand text-white fw-bold px-3">
+            @Model.CurrentPage / @Math.Max(1, Model.TotalPages)
+        </span>
+    </li>
+    <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+        <a class="page-link shadow-sm text-muted" asp-page="@Model.PageAction" asp-all-route-data="@Model.RouteParams" asp-route-p="@(Model.CurrentPage + 1)" title="Next Page">
+            <i data-lucide="chevron-right" style="width: 16px; height: 16px;"></i>
+        </a>
+    </li>
+    <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+        <a class="page-link shadow-sm text-muted" asp-page="@Model.PageAction" asp-all-route-data="@Model.RouteParams" asp-route-p="@Model.TotalPages" title="Last Page">
+            <i data-lucide="chevrons-right" style="width: 16px; height: 16px;"></i>
+        </a>
+    </li>
+</ul>
