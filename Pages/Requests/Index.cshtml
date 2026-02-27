@@ -394,20 +394,21 @@
             // 1. Restore State or Check URL Parameters
             const urlParams = new URLSearchParams(window.location.search);
             const forceOpen = urlParams.get('openNew') === 'true';
+            const isSearch = urlParams.has('SearchString');
             const savedState = localStorage.getItem(storageKey);
 
-            if (forceOpen || savedState === 'open') {
-                // Open it
+            // If forceOpen is true, open it. 
+            // If it's a search/manage action, FORCE close it.
+            // Otherwise, respect savedState.
+            if (forceOpen || (!isSearch && savedState === 'open')) {
                 collapseElement.classList.add('show');
                 toggleButton.classList.remove('collapsed');
                 toggleButton.setAttribute('aria-expanded', 'true');
                 if (forceOpen) {
-                    localStorage.setItem(storageKey, 'open'); // Save it for subsequent reloads
-                    // Clean up URL without refreshing
+                    localStorage.setItem(storageKey, 'open'); 
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
             } else {
-                // Ensure closed
                 collapseElement.classList.remove('show');
                 toggleButton.classList.add('collapsed');
                 toggleButton.setAttribute('aria-expanded', 'false');

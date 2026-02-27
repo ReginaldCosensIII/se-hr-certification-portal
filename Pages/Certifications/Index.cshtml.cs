@@ -37,13 +37,13 @@ namespace SeHrCertificationPortal.Pages.Certifications
         [BindProperty(SupportsGet = true)]
         public TrackerStatus? StatusFilter { get; set; }
 
-        [BindProperty] 
+        [BindProperty]
         public int TargetCertId { get; set; }
-        
-        [BindProperty] 
+
+        [BindProperty]
         public DateTime EditDatePassed { get; set; }
-        
-        [BindProperty] 
+
+        [BindProperty]
         public DateTime? EditExpiration { get; set; }
 
         public IList<CertificationRequest> PassedCertifications { get; set; } = default!;
@@ -87,7 +87,7 @@ namespace SeHrCertificationPortal.Pages.Certifications
 
             var employees = await _context.Employees.OrderBy(e => e.DisplayName).ToListAsync();
             EmployeeOptions = new SelectList(employees, "Id", "DisplayName");
-            
+
             AllCertifications = await _context.Certifications.Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync();
 
             // Npgsql Date Standard: Declare local variables for the query
@@ -132,14 +132,15 @@ namespace SeHrCertificationPortal.Pages.Certifications
 
             // --- ANALYTICS ENGINE ---
             // If true, use 'query' (URL filters applied). If false, use global DB dataset.
-            var analyticsBaseQuery = FilterAnalytics 
-                ? query 
+            var analyticsBaseQuery = FilterAnalytics
+                ? query
                 : _context.CertificationRequests
                     .Include(c => c.Agency)
                     .Include(c => c.Certification)
                     .Where(c => c.Status == RequestStatus.Passed);
 
-            var analyticsRaw = await analyticsBaseQuery.Select(c => new {
+            var analyticsRaw = await analyticsBaseQuery.Select(c => new
+            {
                 AgencyName = c.Agency != null ? c.Agency.Abbreviation : (c.CustomAgencyName ?? "Unknown"),
                 CertName = c.Certification != null ? c.Certification.Name : (c.CustomCertificationName ?? "Unknown"),
                 ExpDate = c.ExpirationDate
@@ -179,7 +180,8 @@ namespace SeHrCertificationPortal.Pages.Certifications
 
             var rawData = await query.ToListAsync(); // Materialize to memory first
 
-            var history = rawData.Select(r => new { // Apply C# formatting safely
+            var history = rawData.Select(r => new
+            { // Apply C# formatting safely
                 agency = r.Agency != null ? r.Agency.Abbreviation : r.CustomAgencyName,
                 certification = r.Certification != null ? r.Certification.Name : r.CustomCertificationName,
                 datePassed = r.RequestDate.ToString("MMM dd, yyyy"),
@@ -218,14 +220,14 @@ namespace SeHrCertificationPortal.Pages.Certifications
             // 1. Handle "Create New Employee" workflow on the fly
             if (NewEmployeeId == -1 && !string.IsNullOrWhiteSpace(NewEmployeeName))
             {
-                var newEmployee = new Employee 
-                { 
+                var newEmployee = new Employee
+                {
                     DisplayName = NewEmployeeName.Trim()
                 };
                 // Adding Employee without setting IsActive since it's not a property of Employee
                 _context.Employees.Add(newEmployee);
                 await _context.SaveChangesAsync(); // Save to generate the new ID
-                
+
                 NewEmployeeId = newEmployee.Id; // Map the new ID for the certification record
             }
 
@@ -233,8 +235,8 @@ namespace SeHrCertificationPortal.Pages.Certifications
             if (NewEmployeeId > 0 && NewAgencyId > 0 && NewCertificationId > 0)
             {
                 DateTime utcDatePassed = DateTime.SpecifyKind(NewDatePassed, DateTimeKind.Utc);
-                DateTime? utcExpirationDate = NewExpirationDate.HasValue 
-                    ? DateTime.SpecifyKind(NewExpirationDate.Value, DateTimeKind.Utc) 
+                DateTime? utcExpirationDate = NewExpirationDate.HasValue
+                    ? DateTime.SpecifyKind(NewExpirationDate.Value, DateTimeKind.Utc)
                     : null;
 
                 var newCert = new CertificationRequest
@@ -244,7 +246,7 @@ namespace SeHrCertificationPortal.Pages.Certifications
                     CertificationId = NewCertificationId,
                     RequestDate = utcDatePassed,
                     ExpirationDate = utcExpirationDate,
-                    Status = RequestStatus.Passed, 
+                    Status = RequestStatus.Passed,
                     // Bypass approval lifecycle, no ActionDate included based on previous error
                 };
 
@@ -272,7 +274,7 @@ namespace SeHrCertificationPortal.Pages.Certifications
 
             if (!string.IsNullOrWhiteSpace(searchString))
                 tableQuery = tableQuery.Where(c => c.Employee != null && c.Employee.DisplayName.ToLower().Contains(searchString.ToLower()));
-            
+
             if (agencyFilter.HasValue && agencyFilter.Value > 0)
                 tableQuery = tableQuery.Where(c => c.AgencyId == agencyFilter.Value);
 
@@ -327,17 +329,20 @@ namespace SeHrCertificationPortal.Pages.Certifications
                     {
                         col.Item().PaddingBottom(15).Row(row =>
                         {
-                            row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten2).Background(Colors.Green.Darken1).Padding(10).Column(c => {
+                            row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten2).Background(Colors.Green.Darken1).Padding(10).Column(c =>
+                            {
                                 c.Item().Text("TOTAL ACTIVE").FontColor(Colors.White).FontSize(8).SemiBold();
                                 c.Item().Text(totalActive.ToString()).FontColor(Colors.White).FontSize(18).Bold();
                             });
                             row.ConstantItem(10);
-                            row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten2).Background(Colors.Orange.Medium).Padding(10).Column(c => {
+                            row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten2).Background(Colors.Orange.Medium).Padding(10).Column(c =>
+                            {
                                 c.Item().Text("EXPIRING SOON").FontColor(Colors.Black).FontSize(8).SemiBold();
                                 c.Item().Text(expiringSoon.ToString()).FontColor(Colors.Black).FontSize(18).Bold();
                             });
                             row.ConstantItem(10);
-                            row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten2).Background(Colors.Red.Medium).Padding(10).Column(c => {
+                            row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten2).Background(Colors.Red.Medium).Padding(10).Column(c =>
+                            {
                                 c.Item().Text("CRITICAL LAPSES").FontColor(Colors.White).FontSize(8).SemiBold();
                                 c.Item().Text(criticalLapses.ToString()).FontColor(Colors.White).FontSize(18).Bold();
                             });
@@ -354,7 +359,7 @@ namespace SeHrCertificationPortal.Pages.Certifications
                         }
 
                         col.Item().PaddingBottom(5).Text("Coverage Breakdown").FontSize(14).SemiBold().FontColor("#a19482");
-                        
+
                         if (!groupedByCert.Any())
                         {
                             col.Item().PaddingTop(10).Text("No records match the current filter criteria.").Italic().FontColor(Colors.Grey.Medium);

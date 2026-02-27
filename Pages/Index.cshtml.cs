@@ -38,13 +38,13 @@ public class IndexModel : PageModel
 
         // 2. Execute KPI Queries
         TotalRequests = await _context.CertificationRequests.CountAsync();
-        
+
         PendingCount = await _context.CertificationRequests.CountAsync(r => r.Status == RequestStatus.Pending);
-        
+
         // Active: Passed AND (Permanent OR Expires strictly after today)
         ActiveCertifications = await _context.CertificationRequests
             .CountAsync(r => r.Status == RequestStatus.Passed && (r.ExpirationDate == null || r.ExpirationDate > today));
-            
+
         // Expiring Soon: Passed AND Expires between today and threshold
         ExpiringCount = await _context.CertificationRequests
             .CountAsync(r => r.Status == RequestStatus.Passed && r.ExpirationDate >= today && r.ExpirationDate <= thresholdDate);
@@ -67,8 +67,8 @@ public class IndexModel : PageModel
 
         if (!string.IsNullOrWhiteSpace(SearchString))
         {
-            requestQuery = requestQuery.Where(r => 
-                (r.Employee != null && r.Employee.DisplayName.ToLower().Contains(SearchString.ToLower())) || 
+            requestQuery = requestQuery.Where(r =>
+                (r.Employee != null && r.Employee.DisplayName.ToLower().Contains(SearchString.ToLower())) ||
                 r.Id.ToString() == SearchString);
         }
 
