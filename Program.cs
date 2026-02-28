@@ -25,9 +25,9 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
-        // Ensure database is created (optional but good for local dev if we were doing EnsuredCreated, but we maintain migrations)
-        // await context.Database.MigrateAsync(); // Uncomment if auto-migration is desired, but requested task is just Seeding.
-        await DbSeeder.SeedAsync(context);
+        var env = services.GetRequiredService<IWebHostEnvironment>();
+        var seeder = new DbSeeder(context, env);
+        await seeder.SeedAsync();
     }
     catch (Exception ex)
     {
