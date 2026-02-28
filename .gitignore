@@ -19,3 +19,7 @@ skills/
 .env
 .env.local
 .env.*.local
+
+# Application Settings (Keep local secrets out of source control)
+appsettings.Development.json
+appsettings.*.json
