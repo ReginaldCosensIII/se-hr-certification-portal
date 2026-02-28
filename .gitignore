@@ -1,12 +1,21 @@
 # Build results
 [Bb]in/
 [Oo]bj/
+*.lock.json
+
+# Visual Studio & Local IDE Cache
 .vs/
 .vscode/
 *.user
+*.userosscache
+*.sln.docstates
 *.suo
-*.lock.json
 
 # Agent and AI IDE specific files
 .agent/
 skills/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
