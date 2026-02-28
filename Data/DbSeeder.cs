@@ -1,14 +1,25 @@
 using Microsoft.EntityFrameworkCore;
 using SeHrCertificationPortal.Models;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace SeHrCertificationPortal.Data
 {
-    public static class DbSeeder
+    public class DbSeeder
     {
-        public static async Task SeedAsync(ApplicationDbContext context)
+        private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _env;
+
+        public DbSeeder(ApplicationDbContext context, IWebHostEnvironment env)
+        {
+            _context = context;
+            _env = env;
+        }
+
+        public async Task SeedAsync()
         {
             // 1. Seed Agencies & Certifications
-            if (!await context.Agencies.AnyAsync())
+            if (!await _context.Agencies.AnyAsync())
             {
 
                 // 1. Seed Agencies
@@ -27,11 +38,11 @@ namespace SeHrCertificationPortal.Data
                 new Agency { Abbreviation = "Others", FullName = "Other Agencies" }
             };
 
-                context.Agencies.AddRange(agencies);
-                await context.SaveChangesAsync();
+                _context.Agencies.AddRange(agencies);
+                await _context.SaveChangesAsync();
 
                 // Refetch agencies to get valid Ids
-                var agencyMap = await context.Agencies.ToDictionaryAsync(a => a.Abbreviation, a => a.Id);
+                var agencyMap = await _context.Agencies.ToDictionaryAsync(a => a.Abbreviation, a => a.Id);
 
                 // 2. Seed Certifications
                 var rawCertNames = new List<string>
@@ -175,12 +186,12 @@ namespace SeHrCertificationPortal.Data
                     IsActive = true
                 }).ToList();
 
-                context.Certifications.AddRange(certifications);
-                await context.SaveChangesAsync();
+                _context.Certifications.AddRange(certifications);
+                await _context.SaveChangesAsync();
             }
 
             // 3. Seed Enterprise Mock Data (35 Employees, ~750 Requests)
-            if (!await context.Employees.AnyAsync())
+            if (_env.IsDevelopment() && !await _context.Employees.AnyAsync())
             {
                 var random = new Random();
 
@@ -201,13 +212,13 @@ namespace SeHrCertificationPortal.Data
                         DisplayName = $"{first} {last}"
                     });
                 }
-                context.Employees.AddRange(employees);
-                await context.SaveChangesAsync(); // IDs generated
+                _context.Employees.AddRange(employees);
+                await _context.SaveChangesAsync(); // IDs generated
 
                 // --- Fetch Catalog for Reference ---
-                var agencyIds = await context.Agencies.Select(a => a.Id).ToListAsync();
-                var certIds = await context.Certifications.Select(c => c.Id).ToListAsync();
-                var employeeIds = await context.Employees.Select(e => e.Id).ToListAsync();
+                var agencyIds = await _context.Agencies.Select(a => a.Id).ToListAsync();
+                var certIds = await _context.Certifications.Select(c => c.Id).ToListAsync();
+                var employeeIds = await _context.Employees.Select(e => e.Id).ToListAsync();
 
                 var managers = new[] { "Sarah Connor", "Kyle Reese", "John Doe", "Ellen Ripley", "Carter Burke" };
                 var requests = new List<CertificationRequest>();
@@ -255,7 +266,7 @@ namespace SeHrCertificationPortal.Data
                 }
 
                 // Optimized Loop with correct relational data
-                var certsWithAgency = await context.Certifications.Select(c => new { c.Id, c.AgencyId }).ToListAsync();
+                var certsWithAgency = await _context.Certifications.Select(c => new { c.Id, c.AgencyId }).ToListAsync();
 
                 requests.Clear(); // Restart loop with better data
                 for (int i = 0; i < 750; i++)
@@ -314,8 +325,8 @@ namespace SeHrCertificationPortal.Data
                     requests.Add(req);
                 }
 
-                context.CertificationRequests.AddRange(requests);
-                await context.SaveChangesAsync();
+                _context.CertificationRequests.AddRange(requests);
+                await _context.SaveChangesAsync();
             }
         }
 

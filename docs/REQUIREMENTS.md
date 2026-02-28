@@ -122,3 +122,5 @@ Before final production handoff, a dedicated sprint must be executed to ensure s
 * **Global CSS Styling:** Verify all pages, sections, and tables utilize shared, reusable CSS classes/variables. Eliminate hard-coded, one-off inline styles.
 * **Component Standardization:** Ensure header titles, action icons, and table layouts share a unified visual design language.
 * **Backend Logic Reusability:** Audit the C# search, filtering, and pagination logic across all pages (Requests, Certifications, Admin). Abstract duplicate backend filtering logic into reusable services, extensions, or base classes where applicable.
+
+- [ ] **UX Polish (Admin Page):** Implement auto-scroll to the top of the data grid (`window.scrollTo` or `element.scrollIntoView`) when client-side JavaScript pagination is triggered. This will ensure the UX matches the server-side paginated tables (Requests/Certifications) which natively reset to the top of the page on load.

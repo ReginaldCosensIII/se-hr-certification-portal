@@ -639,22 +639,54 @@
             renderPagination(totalPages) {
                 if(!this.paginationContainer) return;
                 let html = '';
-                html += `<li class="page-item ${this.currentPage === 1 ? 'disabled' : ''}">
-                            <a class="page-link shadow-sm" href="javascript:void(0)" data-page="${this.currentPage - 1}">&laquo;</a>
+                
+                // First Page
+                html += `<li class="page-item ${this.currentPage <= 1 ? 'disabled' : ''}">
+                            <a class="page-link shadow-sm text-muted" href="javascript:void(0)" data-page="1" title="First Page">
+                                <i data-lucide="chevrons-left" style="width: 16px; height: 16px;"></i>
+                            </a>
                          </li>`;
+                // Previous Page
+                html += `<li class="page-item ${this.currentPage <= 1 ? 'disabled' : ''}">
+                            <a class="page-link shadow-sm text-muted" href="javascript:void(0)" data-page="${this.currentPage - 1}" title="Previous Page">
+                                <i data-lucide="chevron-left" style="width: 16px; height: 16px;"></i>
+                            </a>
+                         </li>`;
+                // Active Page Indicator
                 html += `<li class="page-item active">
-                            <span class="page-link shadow-sm border-brand bg-brand text-white" style="pointer-events: none;">${this.currentPage} / ${totalPages}</span>
+                            <span class="page-link shadow-sm border-brand bg-brand text-white fw-bold px-3" style="pointer-events: none;">
+                                ${this.currentPage} / ${Math.max(1, totalPages)}
+                            </span>
                          </li>`;
-                html += `<li class="page-item ${this.currentPage === totalPages ? 'disabled' : ''}">
-                            <a class="page-link shadow-sm" href="javascript:void(0)" data-page="${this.currentPage + 1}">&raquo;</a>
+                // Next Page
+                html += `<li class="page-item ${this.currentPage >= totalPages ? 'disabled' : ''}">
+                            <a class="page-link shadow-sm text-muted" href="javascript:void(0)" data-page="${this.currentPage + 1}" title="Next Page">
+                                <i data-lucide="chevron-right" style="width: 16px; height: 16px;"></i>
+                            </a>
                          </li>`;
+                // Last Page
+                html += `<li class="page-item ${this.currentPage >= totalPages ? 'disabled' : ''}">
+                            <a class="page-link shadow-sm text-muted" href="javascript:void(0)" data-page="${totalPages}" title="Last Page">
+                                <i data-lucide="chevrons-right" style="width: 16px; height: 16px;"></i>
+                            </a>
+                         </li>`;
+
                 this.paginationContainer.innerHTML = html;
+                
+                // Instruct Lucide to draw the newly injected SVGs
+                if(typeof lucide !== 'undefined') {
+                    lucide.createIcons({ root: this.paginationContainer });
+                }
+
+                // Add click listeners to the anchor tags
                 this.paginationContainer.querySelectorAll('a.page-link').forEach(link => {
                     link.addEventListener('click', (e) => {
                         e.preventDefault();
                         const parentLi = e.target.closest('.page-item');
-                        if (!parentLi.classList.contains('disabled')) {
-                            this.currentPage = parseInt(e.target.getAttribute('data-page'));
+                        const anchor = e.target.closest('a[data-page]');
+                        
+                        if (!parentLi.classList.contains('disabled') && anchor) {
+                            this.currentPage = parseInt(anchor.getAttribute('data-page'));
                             this.render();
                         }
                     });
