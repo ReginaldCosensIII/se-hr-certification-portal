@@ -212,17 +212,11 @@ namespace SeHrCertificationPortal.Pages.Admin
             return RedirectToPage();
         }
 
-        public async Task<IActionResult> OnGetExportListAsync()
+        public async Task<IActionResult> OnGetExportAgenciesAsync()
         {
             var agencies = await _context.Agencies
                 .Include(a => a.Certifications)
                 .OrderBy(a => a.Abbreviation)
-                .ToListAsync();
-
-            var employees = await _context.Employees
-                .Include(e => e.CertificationRequests)
-                .ThenInclude(cr => cr.Certification)
-                .OrderBy(e => e.DisplayName)
                 .ToListAsync();
 
             var logoPath = Path.Combine(_env.WebRootPath, "img", "branding-assets", "Specialized-Engineering-Logo-white.webp");
@@ -294,11 +288,52 @@ namespace SeHrCertificationPortal.Pages.Admin
                                 }
                             });
                         }
+                    });
 
-                        // Append Employee Roster on a new page
-                        col.Item().PageBreak();
-                        col.Item().PaddingTop(10).PaddingBottom(15).Text("Employee Roster & Active Certifications").FontColor(Colors.Black).FontSize(16).SemiBold();
-                        
+                    // Footer
+                    page.Footer().AlignCenter().Text(x =>
+                    {
+                        x.Span("Page ");
+                        x.CurrentPageNumber();
+                        x.Span(" of ");
+                        x.TotalPages();
+                    });
+                });
+            });
+
+            byte[] pdfBytes = document.GeneratePdf();
+            return File(pdfBytes, "application/pdf", $"SPE_Agencies_Roster_{DateTime.Now:yyyyMMdd}.pdf");
+        }
+
+        public async Task<IActionResult> OnGetExportEmployeesAsync()
+        {
+            var employees = await _context.Employees
+                .Include(e => e.CertificationRequests)
+                .ThenInclude(cr => cr.Certification)
+                .OrderBy(e => e.DisplayName)
+                .ToListAsync();
+
+            var logoPath = Path.Combine(_env.WebRootPath, "img", "branding-assets", "Specialized-Engineering-Logo-white.webp");
+            byte[]? logoBytes = null;
+            if (System.IO.File.Exists(logoPath)) logoBytes = await System.IO.File.ReadAllBytesAsync(logoPath);
+
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.Letter);
+                    page.Margin(1, Unit.Centimetre);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(10).FontFamily(Fonts.Arial));
+
+                    page.Header().Background("#66615c").Padding(10).Row(row =>
+                    {
+                        if (logoBytes != null) row.ConstantItem(150).Image(logoBytes);
+                        row.RelativeItem().AlignRight().AlignMiddle().Text("Employee Roster & Certifications").FontColor(Colors.White).FontSize(16).SemiBold();
+                    });
+
+                    page.Content().PaddingVertical(1, Unit.Centimetre).Column(col =>
+                    {
                         col.Item().Table(table =>
                         {
                             table.ColumnsDefinition(columns =>
@@ -333,10 +368,9 @@ namespace SeHrCertificationPortal.Pages.Admin
                         });
                     });
 
-                    // Footer
                     page.Footer().AlignCenter().Text(x =>
                     {
-                        x.Span("Page ");
+                        x.Span("Generated on " + DateTime.Now.ToString("g") + " | Page ");
                         x.CurrentPageNumber();
                         x.Span(" of ");
                         x.TotalPages();
@@ -345,7 +379,7 @@ namespace SeHrCertificationPortal.Pages.Admin
             });
 
             byte[] pdfBytes = document.GeneratePdf();
-            return File(pdfBytes, "application/pdf", $"SPE_Admin_Export_{DateTime.Now:yyyyMMdd}.pdf");
+            return File(pdfBytes, "application/pdf", $"SPE_Employee_Roster_{DateTime.Now:yyyyMMdd}.pdf");
         }
         public async Task<IActionResult> OnPostAddEmployeeAsync()
         {
