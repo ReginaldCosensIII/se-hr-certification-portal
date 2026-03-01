@@ -723,10 +723,10 @@
                 this.container = document.getElementById(containerId);
                 if (!this.container) return;
 
-                // Unique storage keys per grid instance
                 this.storageKeySearch = containerId + '_search';
                 this.storageKeyFilter = containerId + '_filter';
-                this.storageKeyPage = containerId + '_page'; // NEW
+                this.storageKeyPage = containerId + '_page';
+                this.storageKeyLimit = containerId + '_limit'; // NEW
 
                 this.searchInput = this.container.querySelector('.grid-search-input');
                 this.searchBtn = this.container.querySelector('.grid-search-btn');
@@ -737,8 +737,9 @@
                 this.rows = Array.from(this.tableBody.querySelectorAll('tr'));
                 this.paginationContainer = this.container.querySelector('.grid-pagination');
                 
-                this.rowsPerPage = defaultRowsPerPage;
-                this.currentPage = parseInt(sessionStorage.getItem(this.storageKeyPage)) || 1; // NEW
+                // Pull limit from storage, fallback to default
+                this.rowsPerPage = parseInt(sessionStorage.getItem(this.storageKeyLimit)) || defaultRowsPerPage; // UPDATED
+                this.currentPage = parseInt(sessionStorage.getItem(this.storageKeyPage)) || 1;
                 this.filteredRows = [...this.rows];
 
                 // Load state from sessionStorage
@@ -776,7 +777,9 @@
                 if (this.perPageSelect) {
                     this.perPageSelect.addEventListener('change', (e) => {
                         this.rowsPerPage = parseInt(e.target.value);
+                        sessionStorage.setItem(this.storageKeyLimit, this.rowsPerPage); // NEW
                         this.currentPage = 1;
+                        sessionStorage.setItem(this.storageKeyPage, this.currentPage);
                         this.render();
                     });
                 }
