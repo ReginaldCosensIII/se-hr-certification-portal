@@ -209,7 +209,7 @@ namespace SeHrCertificationPortal.Pages.Certifications
             var record = await _context.CertificationRequests.FindAsync(TargetCertId);
             if (record != null)
             {
-                _context.CertificationRequests.Remove(record);
+                record.Status = RequestStatus.Rejected;
                 await _context.SaveChangesAsync();
             }
             return RedirectToPage(new { p, pageSize, SearchString = searchString, AgencyFilter = agencyFilter, StatusFilter = statusFilter, FilterAnalytics = filterAnalytics });
