@@ -21,6 +21,17 @@ namespace SeHrCertificationPortal.Pages.Admin
         public IList<SeHrCertificationPortal.Models.Agency> Agency { get; set; } = default!;
         public IList<SeHrCertificationPortal.Models.Certification> Certifications { get; set; } = default!;
 
+        public IList<SeHrCertificationPortal.Models.Employee> Employees { get; set; } = default!;
+
+        [BindProperty]
+        public SeHrCertificationPortal.Models.Employee NewEmployee { get; set; } = new() { DisplayName = "" };
+
+        [BindProperty]
+        public int EmployeeId { get; set; }
+
+        [BindProperty]
+        public string? EmployeeName { get; set; }
+
         [BindProperty]
         public SeHrCertificationPortal.Models.Agency NewAgency { get; set; } = new() { Abbreviation = "", FullName = "" };
 
@@ -65,6 +76,11 @@ namespace SeHrCertificationPortal.Pages.Admin
                 .Include(c => c.Agency)
                 .OrderBy(c => c.Agency!.Abbreviation)
                 .ThenBy(c => c.Name)
+                .ToListAsync();
+
+            Employees = await _context.Employees
+                .Include(e => e.CertificationRequests)
+                .OrderBy(e => e.DisplayName)
                 .ToListAsync();
 
             var thresholdSetting = await _context.SystemSettings.FindAsync("ExpiringSoonThresholdDays");
@@ -278,6 +294,47 @@ namespace SeHrCertificationPortal.Pages.Admin
 
             byte[] pdfBytes = document.GeneratePdf();
             return File(pdfBytes, "application/pdf", $"SPE_Admin_Export_{DateTime.Now:yyyyMMdd}.pdf");
+        }
+        public async Task<IActionResult> OnPostAddEmployeeAsync()
+        {
+            if (string.IsNullOrWhiteSpace(NewEmployee.DisplayName)) return RedirectToPage();
+            NewEmployee.IsActive = true;
+            _context.Employees.Add(NewEmployee);
+            await _context.SaveChangesAsync();
+            return RedirectToPage();
+        }
+
+        public async Task<IActionResult> OnPostEditEmployeeAsync()
+        {
+            var emp = await _context.Employees.FindAsync(EmployeeId);
+            if (emp != null && !string.IsNullOrWhiteSpace(EmployeeName))
+            {
+                emp.DisplayName = EmployeeName;
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToPage();
+        }
+
+        public async Task<IActionResult> OnPostDeactivateEmployeeAsync()
+        {
+            var emp = await _context.Employees.FindAsync(EmployeeId);
+            if (emp != null)
+            {
+                emp.IsActive = false;
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToPage();
+        }
+
+        public async Task<IActionResult> OnPostReactivateEmployeeAsync()
+        {
+            var emp = await _context.Employees.FindAsync(EmployeeId);
+            if (emp != null)
+            {
+                emp.IsActive = true;
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToPage();
         }
     }
 }
