@@ -294,43 +294,43 @@ namespace SeHrCertificationPortal.Pages.Admin
                                 }
                             });
                         }
-                    });
 
-                    // Append Employee Roster on a new page
-                    col.Item().PageBreak();
-                    col.Item().PaddingTop(10).PaddingBottom(15).Text("Employee Roster & Active Certifications").FontColor(Colors.Black).FontSize(16).SemiBold();
-                    
-                    col.Item().Table(table =>
-                    {
-                        table.ColumnsDefinition(columns =>
+                        // Append Employee Roster on a new page
+                        col.Item().PageBreak();
+                        col.Item().PaddingTop(10).PaddingBottom(15).Text("Employee Roster & Active Certifications").FontColor(Colors.Black).FontSize(16).SemiBold();
+                        
+                        col.Item().Table(table =>
                         {
-                            columns.RelativeColumn(2); // Name
-                            columns.RelativeColumn(1); // ID
-                            columns.RelativeColumn(1.5f); // Role
-                            columns.RelativeColumn(1.5f); // Dept
-                            columns.RelativeColumn(1); // Active Certs
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(2); // Name
+                                columns.RelativeColumn(1); // ID
+                                columns.RelativeColumn(1.5f); // Role
+                                columns.RelativeColumn(1.5f); // Dept
+                                columns.RelativeColumn(1); // Active Certs
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Employee Name").SemiBold();
+                                header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Emp ID").SemiBold();
+                                header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Role").SemiBold();
+                                header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Department").SemiBold();
+                                header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Active Certs").SemiBold();
+                            });
+
+                            foreach (var emp in employees)
+                            {
+                                var rowTextColor = emp.IsActive ? Colors.Black : Colors.Grey.Medium;
+                                var activeCertsCount = emp.CertificationRequests.Count(c => c.Status == SeHrCertificationPortal.Models.RequestStatus.Passed && (c.ExpirationDate == null || c.ExpirationDate > DateTime.UtcNow));
+
+                                table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(emp.DisplayName + (emp.IsActive ? "" : " [INACTIVE]")).FontColor(rowTextColor);
+                                table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(emp.EmployeeIdNumber ?? "-").FontColor(rowTextColor);
+                                table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(emp.Role ?? "-").FontColor(rowTextColor);
+                                table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(emp.Department ?? "-").FontColor(rowTextColor);
+                                table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(activeCertsCount.ToString()).FontColor(rowTextColor);
+                            }
                         });
-
-                        table.Header(header =>
-                        {
-                            header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Employee Name").SemiBold();
-                            header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Emp ID").SemiBold();
-                            header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Role").SemiBold();
-                            header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Department").SemiBold();
-                            header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Active Certs").SemiBold();
-                        });
-
-                        foreach (var emp in employees)
-                        {
-                            var rowTextColor = emp.IsActive ? Colors.Black : Colors.Grey.Medium;
-                            var activeCertsCount = emp.CertificationRequests.Count(c => c.Status == SeHrCertificationPortal.Models.RequestStatus.Passed && (c.ExpirationDate == null || c.ExpirationDate > DateTime.UtcNow));
-
-                            table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(emp.DisplayName + (emp.IsActive ? "" : " [INACTIVE]")).FontColor(rowTextColor);
-                            table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(emp.EmployeeIdNumber ?? "-").FontColor(rowTextColor);
-                            table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(emp.Role ?? "-").FontColor(rowTextColor);
-                            table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(emp.Department ?? "-").FontColor(rowTextColor);
-                            table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(activeCertsCount.ToString()).FontColor(rowTextColor);
-                        }
                     });
 
                     // Footer
