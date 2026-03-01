@@ -793,8 +793,7 @@
                 sessionStorage.setItem(this.storageKeySearch, this.activeSearchTerm);
                 sessionStorage.setItem(this.storageKeyFilter, this.activeFilterVal);
 
-                this.currentPage = 1;
-                sessionStorage.setItem(this.storageKeyPage, this.currentPage);
+                this.currentPage = 1; // RESET PAGE ONLY ON NEW SEARCH
                 this.executeFilter();
             }
 
@@ -808,8 +807,7 @@
                 sessionStorage.removeItem(this.storageKeySearch);
                 sessionStorage.removeItem(this.storageKeyFilter);
 
-                this.currentPage = 1;
-                sessionStorage.setItem(this.storageKeyPage, this.currentPage);
+                this.currentPage = 1; // RESET PAGE ON CLEAR
                 this.executeFilter();
             }
 
@@ -829,8 +827,6 @@
                     }
                 }
 
-                this.currentPage = 1;
-                sessionStorage.setItem(this.storageKeyPage, this.currentPage);
                 this.render();
             }
 
