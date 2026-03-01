@@ -27,6 +27,9 @@ namespace SeHrCertificationPortal.Models
     {
         public int Id { get; set; }
         public required string DisplayName { get; set; }
+        public string? EmployeeIdNumber { get; set; }
+        public string? Role { get; set; }
+        public string? Department { get; set; }
         public bool IsActive { get; set; } = true;
         public ICollection<CertificationRequest> CertificationRequests { get; set; } = new List<CertificationRequest>();
     }

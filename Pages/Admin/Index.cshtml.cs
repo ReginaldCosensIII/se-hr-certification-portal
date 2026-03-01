@@ -33,6 +33,15 @@ namespace SeHrCertificationPortal.Pages.Admin
         public string? EmployeeName { get; set; }
 
         [BindProperty]
+        public string? EmployeeIdNumberInput { get; set; }
+
+        [BindProperty]
+        public string? EmployeeRoleInput { get; set; }
+
+        [BindProperty]
+        public string? EmployeeDepartmentInput { get; set; }
+
+        [BindProperty]
         public SeHrCertificationPortal.Models.Agency NewAgency { get; set; } = new() { Abbreviation = "", FullName = "" };
 
         [BindProperty]
@@ -203,7 +212,7 @@ namespace SeHrCertificationPortal.Pages.Admin
             return RedirectToPage();
         }
 
-        public async Task<IActionResult> OnGetExportListAsync()
+        public async Task<IActionResult> OnGetExportAgenciesAsync()
         {
             var agencies = await _context.Agencies
                 .Include(a => a.Certifications)
@@ -293,12 +302,90 @@ namespace SeHrCertificationPortal.Pages.Admin
             });
 
             byte[] pdfBytes = document.GeneratePdf();
-            return File(pdfBytes, "application/pdf", $"SPE_Admin_Export_{DateTime.Now:yyyyMMdd}.pdf");
+            return File(pdfBytes, "application/pdf", $"SPE_Agencies_Roster_{DateTime.Now:yyyyMMdd}.pdf");
+        }
+
+        public async Task<IActionResult> OnGetExportEmployeesAsync()
+        {
+            var employees = await _context.Employees
+                .Include(e => e.CertificationRequests)
+                .ThenInclude(cr => cr.Certification)
+                .OrderBy(e => e.DisplayName)
+                .ToListAsync();
+
+            var logoPath = Path.Combine(_env.WebRootPath, "img", "branding-assets", "Specialized-Engineering-Logo-white.webp");
+            byte[]? logoBytes = null;
+            if (System.IO.File.Exists(logoPath)) logoBytes = await System.IO.File.ReadAllBytesAsync(logoPath);
+
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.Letter);
+                    page.Margin(1, Unit.Centimetre);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(10).FontFamily(Fonts.Arial));
+
+                    page.Header().Background("#66615c").Padding(10).Row(row =>
+                    {
+                        if (logoBytes != null) row.ConstantItem(150).Image(logoBytes);
+                        row.RelativeItem().AlignRight().AlignMiddle().Text("Employee Roster & Certifications").FontColor(Colors.White).FontSize(16).SemiBold();
+                    });
+
+                    page.Content().PaddingVertical(1, Unit.Centimetre).Column(col =>
+                    {
+                        col.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(2); // Name
+                                columns.RelativeColumn(1); // ID
+                                columns.RelativeColumn(1.5f); // Role
+                                columns.RelativeColumn(1.5f); // Dept
+                                columns.RelativeColumn(1); // Active Certs
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Employee Name").SemiBold();
+                                header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Emp ID").SemiBold();
+                                header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Role").SemiBold();
+                                header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Department").SemiBold();
+                                header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Active Certs").SemiBold();
+                            });
+
+                            foreach (var emp in employees)
+                            {
+                                var rowTextColor = emp.IsActive ? Colors.Black : Colors.Grey.Medium;
+                                var activeCertsCount = emp.CertificationRequests.Count(c => c.Status == SeHrCertificationPortal.Models.RequestStatus.Passed && (c.ExpirationDate == null || c.ExpirationDate > DateTime.UtcNow));
+
+                                table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(emp.DisplayName + (emp.IsActive ? "" : " [INACTIVE]")).FontColor(rowTextColor);
+                                table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(emp.EmployeeIdNumber ?? "-").FontColor(rowTextColor);
+                                table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(emp.Role ?? "-").FontColor(rowTextColor);
+                                table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(emp.Department ?? "-").FontColor(rowTextColor);
+                                table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(activeCertsCount.ToString()).FontColor(rowTextColor);
+                            }
+                        });
+                    });
+
+                    page.Footer().AlignCenter().Text(x =>
+                    {
+                        x.Span("Generated on " + DateTime.Now.ToString("g") + " | Page ");
+                        x.CurrentPageNumber();
+                        x.Span(" of ");
+                        x.TotalPages();
+                    });
+                });
+            });
+
+            byte[] pdfBytes = document.GeneratePdf();
+            return File(pdfBytes, "application/pdf", $"SPE_Employee_Roster_{DateTime.Now:yyyyMMdd}.pdf");
         }
         public async Task<IActionResult> OnPostAddEmployeeAsync()
         {
             if (string.IsNullOrWhiteSpace(NewEmployee.DisplayName)) return RedirectToPage();
             NewEmployee.IsActive = true;
+            // The frontend will bind EmployeeIdNumber, Role, and Department directly to NewEmployee
             _context.Employees.Add(NewEmployee);
             await _context.SaveChangesAsync();
             return RedirectToPage();
@@ -310,6 +397,9 @@ namespace SeHrCertificationPortal.Pages.Admin
             if (emp != null && !string.IsNullOrWhiteSpace(EmployeeName))
             {
                 emp.DisplayName = EmployeeName;
+                emp.EmployeeIdNumber = EmployeeIdNumberInput;
+                emp.Role = EmployeeRoleInput;
+                emp.Department = EmployeeDepartmentInput;
                 await _context.SaveChangesAsync();
             }
             return RedirectToPage();

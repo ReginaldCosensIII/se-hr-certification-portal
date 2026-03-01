@@ -32,7 +32,7 @@
                     Manage Agencies
                 </h5>
                 <div class="d-flex gap-2">
-                    <a asp-page-handler="ExportList" class="btn btn-sm btn-outline-brand fw-bold d-inline-flex align-items-center">
+                    <a asp-page-handler="ExportAgencies" class="btn btn-sm btn-outline-brand fw-bold d-inline-flex align-items-center">
                         <i data-lucide="download" class="me-1" style="width: 14px; height: 14px;"></i> Export List
                     </a>
                     <button class="btn btn-sm btn-brand fw-bold text-white" data-bs-toggle="modal" data-bs-target="#addAgencyModal">
@@ -140,7 +140,7 @@
                     Manage Certifications
                 </h5>
                 <div class="d-flex gap-2">
-                    <a asp-page-handler="ExportList" class="btn btn-sm btn-outline-brand fw-bold d-inline-flex align-items-center">
+                    <a asp-page-handler="ExportAgencies" class="btn btn-sm btn-outline-brand fw-bold d-inline-flex align-items-center">
                         <i data-lucide="download" class="me-1" style="width: 14px; height: 14px;"></i> Export List
                     </a>
                     <button class="btn btn-sm btn-brand fw-bold text-white" data-bs-toggle="modal" data-bs-target="#addCertificationModal">
@@ -260,6 +260,9 @@
             <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
                  <h5 class="card-title fw-bold mb-0 text-dark">Manage Employees</h5>
                 <div class="d-flex gap-2">
+                    <a asp-page-handler="ExportEmployees" class="btn btn-sm btn-outline-brand fw-bold d-inline-flex align-items-center">
+                        <i data-lucide="download" class="me-1" style="width: 14px; height: 14px;"></i> Export List
+                    </a>
                     <button class="btn btn-sm btn-brand fw-bold text-white" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
                         <i data-lucide="plus" class="me-1" style="width: 14px;"></i> Add Employee
                     </button>
@@ -279,22 +282,28 @@
                         </div>
                     </div>
                     <div class="table-responsive">
-                         <table class="table table-striped table-hover align-middle mb-0" id="employeeTable">
+                             <table class="table table-striped table-hover align-middle mb-0" id="employeeTable">
                             <thead class="bg-light">
                                 <tr>
                                     <th class="ps-3" style="width: 60px;">ID</th>
                                     <th>Display Name</th>
-                                    <th class="text-center" style="width: 170px;">Total Requests</th>
+                                    <th>Department</th>
+                                    <th class="text-center" style="width: 170px;">Active Certifications</th>
                                     <th class="text-center" style="width: 120px;">Status</th>
                                     <th class="text-center" style="width: 100px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody style="visibility: hidden;">
                             @foreach (var emp in Model.Employees) {
+                                var activeCerts = emp.CertificationRequests.Count(c => c.Status == SeHrCertificationPortal.Models.RequestStatus.Passed && (c.ExpirationDate == null || c.ExpirationDate > DateTime.UtcNow));
                                 <tr>
                                     <td class="ps-3 text-muted">@emp.Id</td>
-                                    <td class="fw-bold">@emp.DisplayName</td>
-                                    <td class="text-center text-muted">@(emp.CertificationRequests.Count) Requests</td>
+                                    <td class="fw-bold">
+                                        @emp.DisplayName
+                                        @if(!string.IsNullOrEmpty(emp.Role)) { <span class="d-block small text-muted fw-normal">@emp.Role</span> }
+                                    </td>
+                                    <td class="text-muted">@(emp.Department ?? "-")</td>
+                                    <td class="text-center text-muted">@activeCerts Active</td>
                                     <td class="text-center">
                                         @if(emp.IsActive) {
                                             <span class="badge text-bg-success d-inline-flex align-items-center px-2 py-1"><i data-lucide="check-circle" style="width: 14px; height: 14px;" class="me-1"></i> Active</span>
@@ -303,7 +312,9 @@
                                         }
                                     </td>
                                     <td class="text-center border-start">
-                                        <a href="javascript:void(0)" class="text-primary text-decoration-none me-2 edit-emp-btn" data-id="@emp.Id" data-name="@emp.DisplayName" title="Edit Employee"><i data-lucide="edit" style="width: 18px; height: 18px;"></i></a>
+                                        <a href="javascript:void(0)" class="text-primary text-decoration-none me-2 edit-emp-btn" 
+                                           data-id="@emp.Id" data-name="@emp.DisplayName" data-empno="@emp.EmployeeIdNumber" data-role="@emp.Role" data-dept="@emp.Department" 
+                                           title="Edit Employee"><i data-lucide="edit" style="width: 18px; height: 18px;"></i></a>
                                         @if(emp.IsActive) {
                                             <a href="javascript:void(0)" class="text-danger text-decoration-none deactivate-emp-btn" data-id="@emp.Id" data-name="@emp.DisplayName" title="Deactivate Employee"><i data-lucide="trash-2" style="width: 18px; height: 18px;"></i></a>
                                         } else {
@@ -597,8 +608,22 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Display Name <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="NewEmployee.DisplayName" placeholder="e.g. John Doe" required />
+                        <label asp-for="NewEmployee.DisplayName" class="form-label fw-bold">Employee Full Name <span class="text-danger">*</span></label>
+                        <input asp-for="NewEmployee.DisplayName" class="form-control" required />
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="NewEmployee.EmployeeIdNumber" class="form-label fw-bold">Employee ID (Optional)</label>
+                            <input asp-for="NewEmployee.EmployeeIdNumber" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="NewEmployee.Department" class="form-label fw-bold">Department (Optional)</label>
+                            <input asp-for="NewEmployee.Department" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="NewEmployee.Role" class="form-label fw-bold">Role / Job Title (Optional)</label>
+                        <input asp-for="NewEmployee.Role" class="form-control" />
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
@@ -621,8 +646,22 @@
                 <div class="modal-body">
                     <input type="hidden" name="EmployeeId" id="editEmployeeId" />
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Display Name</label>
+                        <label class="form-label fw-bold">Display Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="EmployeeName" id="editEmployeeName" required />
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Employee ID</label>
+                            <input type="text" class="form-control" name="EmployeeIdNumberInput" id="editEmployeeIdNumber" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Department</label>
+                            <input type="text" class="form-control" name="EmployeeDepartmentInput" id="editEmployeeDepartment" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Role / Job Title</label>
+                        <input type="text" class="form-control" name="EmployeeRoleInput" id="editEmployeeRole" />
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
@@ -684,9 +723,10 @@
                 this.container = document.getElementById(containerId);
                 if (!this.container) return;
 
-                // Unique storage keys per grid instance
                 this.storageKeySearch = containerId + '_search';
                 this.storageKeyFilter = containerId + '_filter';
+                this.storageKeyPage = containerId + '_page';
+                this.storageKeyLimit = containerId + '_limit'; // NEW
 
                 this.searchInput = this.container.querySelector('.grid-search-input');
                 this.searchBtn = this.container.querySelector('.grid-search-btn');
@@ -697,8 +737,9 @@
                 this.rows = Array.from(this.tableBody.querySelectorAll('tr'));
                 this.paginationContainer = this.container.querySelector('.grid-pagination');
                 
-                this.rowsPerPage = defaultRowsPerPage;
-                this.currentPage = 1;
+                // Pull limit from storage, fallback to default
+                this.rowsPerPage = parseInt(sessionStorage.getItem(this.storageKeyLimit)) || defaultRowsPerPage; // UPDATED
+                this.currentPage = parseInt(sessionStorage.getItem(this.storageKeyPage)) || 1;
                 this.filteredRows = [...this.rows];
 
                 // Load state from sessionStorage
@@ -736,7 +777,9 @@
                 if (this.perPageSelect) {
                     this.perPageSelect.addEventListener('change', (e) => {
                         this.rowsPerPage = parseInt(e.target.value);
+                        sessionStorage.setItem(this.storageKeyLimit, this.rowsPerPage); // NEW
                         this.currentPage = 1;
+                        sessionStorage.setItem(this.storageKeyPage, this.currentPage);
                         this.render();
                     });
                 }
@@ -753,6 +796,7 @@
                 sessionStorage.setItem(this.storageKeySearch, this.activeSearchTerm);
                 sessionStorage.setItem(this.storageKeyFilter, this.activeFilterVal);
 
+                this.currentPage = 1; // RESET PAGE ONLY ON NEW SEARCH
                 this.executeFilter();
             }
 
@@ -766,6 +810,7 @@
                 sessionStorage.removeItem(this.storageKeySearch);
                 sessionStorage.removeItem(this.storageKeyFilter);
 
+                this.currentPage = 1; // RESET PAGE ON CLEAR
                 this.executeFilter();
             }
 
@@ -785,11 +830,12 @@
                     }
                 }
 
-                this.currentPage = 1;
                 this.render();
             }
 
             render() {
+                sessionStorage.setItem(this.storageKeyPage, this.currentPage); // Save state
+                
                 this.rows.forEach(row => row.style.display = 'none');
                 const totalPages = Math.ceil(this.filteredRows.length / this.rowsPerPage) || 1;
                 if (this.currentPage > totalPages) this.currentPage = totalPages;
@@ -800,6 +846,13 @@
                 this.renderPagination(totalPages);
                 if(window.lucide) { window.lucide.createIcons(); } 
                 if(this.tableBody) this.tableBody.style.visibility = 'visible';
+
+                // Auto-scroll UX Fix
+                if (this.container) {
+                    const yOffset = -80; // offset for fixed headers
+                    const y = this.container.getBoundingClientRect().top + window.scrollY + yOffset;
+                    window.scrollTo({top: y, behavior: 'smooth'});
+                }
             }
 
             renderPagination(totalPages) {
@@ -862,6 +915,21 @@
 
         // 2. PAGE INITIALIZATION
         document.addEventListener('DOMContentLoaded', function() {
+            
+            // Intelligent State Reset: Clear grid memory if arriving from a different page
+            var currentPath = window.location.pathname.toLowerCase();
+            var referrerPath = document.referrer ? new URL(document.referrer).pathname.toLowerCase() : '';
+
+            if (referrerPath !== currentPath) {
+                var grids = ['agencyGridContainer', 'certGridContainer', 'employeeGridContainer'];
+                grids.forEach(function(id) {
+                    sessionStorage.removeItem(id + '_search');
+                    sessionStorage.removeItem(id + '_filter');
+                    sessionStorage.removeItem(id + '_page');
+                    sessionStorage.removeItem(id + '_limit');
+                });
+            }
+
             // Instantiate reusable grids
             new ClientSideDataGrid('agencyGridContainer', 25);
             new ClientSideDataGrid('certGridContainer', 25);
@@ -953,6 +1021,9 @@
                 e.preventDefault();
                 document.getElementById('editEmployeeId').value = editEmpBtn.getAttribute('data-id');
                 document.getElementById('editEmployeeName').value = editEmpBtn.getAttribute('data-name');
+                document.getElementById('editEmployeeIdNumber').value = editEmpBtn.getAttribute('data-empno') || '';
+                document.getElementById('editEmployeeRole').value = editEmpBtn.getAttribute('data-role') || '';
+                document.getElementById('editEmployeeDepartment').value = editEmpBtn.getAttribute('data-dept') || '';
                 new bootstrap.Modal(document.getElementById('editEmployeeModal')).show();
                 return;
             }
