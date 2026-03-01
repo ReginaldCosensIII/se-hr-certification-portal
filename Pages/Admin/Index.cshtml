@@ -915,6 +915,21 @@
 
         // 2. PAGE INITIALIZATION
         document.addEventListener('DOMContentLoaded', function() {
+            
+            // Intelligent State Reset: Clear grid memory if arriving from a different page
+            var currentPath = window.location.pathname.toLowerCase();
+            var referrerPath = document.referrer ? new URL(document.referrer).pathname.toLowerCase() : '';
+
+            if (referrerPath !== currentPath) {
+                var grids = ['agencyGridContainer', 'certGridContainer', 'employeeGridContainer'];
+                grids.forEach(function(id) {
+                    sessionStorage.removeItem(id + '_search');
+                    sessionStorage.removeItem(id + '_filter');
+                    sessionStorage.removeItem(id + '_page');
+                    sessionStorage.removeItem(id + '_limit');
+                });
+            }
+
             // Instantiate reusable grids
             new ClientSideDataGrid('agencyGridContainer', 25);
             new ClientSideDataGrid('certGridContainer', 25);
