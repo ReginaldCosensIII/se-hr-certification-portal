@@ -59,6 +59,13 @@ namespace SeHrCertificationPortal.Pages.Certifications
         public int AnalyticsTotalActive { get; set; }
         public int AnalyticsExpiringSoon { get; set; }
         public int AnalyticsExpired { get; set; }
+        public string AgencyChartDataJson { get; set; } = "[]";
+        public string AgencyChartLabelsJson { get; set; } = "[]";
+        public Dictionary<string, int> TopAgenciesList { get; set; } = new Dictionary<string, int>();
+
+        public string CertChartDataJson { get; set; } = "[]";
+        public string CertChartLabelsJson { get; set; } = "[]";
+        public Dictionary<string, int> TopCertsList { get; set; } = new Dictionary<string, int>();
         public string AgencyChartLabels { get; set; } = "[]";
         public string AgencyChartData { get; set; } = "[]";
         public string CertChartLabels { get; set; } = "[]";
@@ -98,7 +105,7 @@ namespace SeHrCertificationPortal.Pages.Certifications
                 .Include(c => c.Employee)
                 .Include(c => c.Agency)
                 .Include(c => c.Certification)
-                .Where(c => c.Status == RequestStatus.Passed);
+                .Where(c => c.Status == RequestStatus.Passed || c.Status == RequestStatus.Revoked);
 
             if (!string.IsNullOrWhiteSpace(SearchString))
             {
@@ -137,7 +144,7 @@ namespace SeHrCertificationPortal.Pages.Certifications
                 : _context.CertificationRequests
                     .Include(c => c.Agency)
                     .Include(c => c.Certification)
-                    .Where(c => c.Status == RequestStatus.Passed);
+                    .Where(c => c.Status == RequestStatus.Passed || c.Status == RequestStatus.Revoked);
 
             var analyticsRaw = await analyticsBaseQuery.Select(c => new
             {
@@ -154,9 +161,19 @@ namespace SeHrCertificationPortal.Pages.Certifications
             AgencyChartLabels = System.Text.Json.JsonSerializer.Serialize(topAgencies.Select(g => g.Key));
             AgencyChartData = System.Text.Json.JsonSerializer.Serialize(topAgencies.Select(g => g.Count()));
 
-            var topCerts = analyticsRaw.GroupBy(c => c.CertName).OrderByDescending(g => g.Count()).Take(5).ToList();
-            CertChartLabels = System.Text.Json.JsonSerializer.Serialize(topCerts.Select(g => g.Key));
-            CertChartData = System.Text.Json.JsonSerializer.Serialize(topCerts.Select(g => g.Count()));
+            var topCerts = analyticsRaw
+                .GroupBy(c => c.CertName)
+                .OrderByDescending(g => g.Count())
+                .Take(5)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            AgencyChartDataJson = JsonSerializer.Serialize(topAgencies.Select(g => g.Count()));
+            AgencyChartLabelsJson = JsonSerializer.Serialize(topAgencies.Select(g => g.Key));
+            TopAgenciesList = topAgencies.ToDictionary(g => g.Key, g => g.Count());
+
+            CertChartDataJson = JsonSerializer.Serialize(topCerts.Values);
+            CertChartLabelsJson = JsonSerializer.Serialize(topCerts.Keys);
+            TopCertsList = topCerts;
             // ------------------------
 
             TotalRecords = await query.CountAsync();
@@ -173,7 +190,7 @@ namespace SeHrCertificationPortal.Pages.Certifications
         public async Task<IActionResult> OnGetEmployeeHistoryAsync(int employeeId)
         {
             var query = _context.CertificationRequests
-                .Where(c => c.EmployeeId == employeeId && c.Status == RequestStatus.Passed)
+                .Where(c => c.EmployeeId == employeeId && (c.Status == RequestStatus.Passed || c.Status == RequestStatus.Revoked))
                 .Include(c => c.Agency)
                 .Include(c => c.Certification)
                 .AsNoTracking();
@@ -209,7 +226,29 @@ namespace SeHrCertificationPortal.Pages.Certifications
             var record = await _context.CertificationRequests.FindAsync(TargetCertId);
             if (record != null)
             {
-                record.Status = RequestStatus.Rejected;
+                record.Status = RequestStatus.Revoked;
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToPage(new { p, pageSize, SearchString = searchString, AgencyFilter = agencyFilter, StatusFilter = statusFilter, FilterAnalytics = filterAnalytics });
+        }
+
+        public async Task<IActionResult> OnPostRestoreCertAsync(int p = 1, int pageSize = 25, string? searchString = null, int? agencyFilter = null, string? statusFilter = null, bool filterAnalytics = true)
+        {
+            var record = await _context.CertificationRequests.FindAsync(TargetCertId);
+            if (record != null)
+            {
+                record.Status = RequestStatus.Passed;
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToPage(new { p, pageSize, SearchString = searchString, AgencyFilter = agencyFilter, StatusFilter = statusFilter, FilterAnalytics = filterAnalytics });
+        }
+
+        public async Task<IActionResult> OnPostArchiveCertAsync(int p = 1, int pageSize = 25, string? searchString = null, int? agencyFilter = null, string? statusFilter = null, bool filterAnalytics = true)
+        {
+            var record = await _context.CertificationRequests.FindAsync(TargetCertId);
+            if (record != null)
+            {
+                record.Status = RequestStatus.Archived;
                 await _context.SaveChangesAsync();
             }
             return RedirectToPage(new { p, pageSize, SearchString = searchString, AgencyFilter = agencyFilter, StatusFilter = statusFilter, FilterAnalytics = filterAnalytics });
@@ -268,7 +307,7 @@ namespace SeHrCertificationPortal.Pages.Certifications
                 .Include(c => c.Employee)
                 .Include(c => c.Agency)
                 .Include(c => c.Certification)
-                .Where(c => c.Status == RequestStatus.Passed);
+                .Where(c => c.Status == RequestStatus.Passed || c.Status == RequestStatus.Revoked);
 
             var tableQuery = baseQuery;
 

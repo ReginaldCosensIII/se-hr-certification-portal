@@ -1,7 +1,7 @@
 namespace SeHrCertificationPortal.Models
 {
     public enum RequestType { ReviewSession, WrittenExam, PracticalExam, Reciprocity, Recertification, Other }
-    public enum RequestStatus { Pending, Approved, Rejected, Passed, Failed }
+    public enum RequestStatus { Pending, Approved, Rejected, Passed, Failed, Revoked, Archived }
     public enum TrackerStatus { Active, ExpiringSoon, Expired, Permanent }
 
     public class Agency
