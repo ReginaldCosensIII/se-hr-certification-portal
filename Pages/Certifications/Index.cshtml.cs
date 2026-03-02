@@ -350,6 +350,12 @@ namespace SeHrCertificationPortal.Pages.Certifications
             var logoPath = Path.Combine(_env.WebRootPath, "img", "branding-assets", "Specialized-Engineering-Logo-white.webp");
             byte[]? logoBytes = System.IO.File.Exists(logoPath) ? await System.IO.File.ReadAllBytesAsync(logoPath) : null;
 
+            var topAgenciesList = analyticsRaw.GroupBy(c => c.Agency != null ? c.Agency.Abbreviation : (c.CustomAgencyName ?? "Unknown"))
+                .OrderByDescending(g => g.Count()).Take(5).ToList();
+            
+            var topCertsList = analyticsRaw.GroupBy(c => c.Certification != null ? c.Certification.Name : (c.CustomCertificationName ?? "Unknown"))
+                .OrderByDescending(g => g.Count()).Take(5).ToList();
+
             var document = Document.Create(container =>
             {
                 container.Page(page =>
@@ -397,6 +403,26 @@ namespace SeHrCertificationPortal.Pages.Certifications
                                 if (certChartBytes != null) row.RelativeItem().Image(certChartBytes);
                             });
                         }
+
+                        // Inject Raw Data Tables below charts
+                        col.Item().PaddingBottom(15).Row(dataRow =>
+                        {
+                            dataRow.RelativeItem().Column(c =>
+                            {
+                                c.Item().PaddingBottom(5).Text("Top Agency Distribution").FontSize(11).SemiBold().FontColor(Colors.Grey.Darken3);
+                                foreach(var item in topAgenciesList) {
+                                    c.Item().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).PaddingVertical(2).Text($"{item.Key}: {item.Count()}").FontSize(9);
+                                }
+                            });
+                            dataRow.ConstantItem(20);
+                            dataRow.RelativeItem().Column(c =>
+                            {
+                                c.Item().PaddingBottom(5).Text("Skill Void Tracker (Top 5)").FontSize(11).SemiBold().FontColor(Colors.Grey.Darken3);
+                                foreach(var item in topCertsList) {
+                                    c.Item().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).PaddingVertical(2).Text($"{item.Key}: {item.Count()}").FontSize(9);
+                                }
+                            });
+                        });
 
                         col.Item().PaddingBottom(5).Text("Coverage Breakdown").FontSize(14).SemiBold().FontColor("#a19482");
 
