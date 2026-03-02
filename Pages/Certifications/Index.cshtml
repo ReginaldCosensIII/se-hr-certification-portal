@@ -720,7 +720,9 @@
             }
 
             // 3. RENDER CHART.JS (Keep your existing Html.Raw C# injections here)
-            setTimeout(function() {
+            // Use requestAnimationFrame to ensure the browser has fully calculated DOM layout and CSS styles 
+            // before Chart.js takes its initial measurement, preventing the "DevTools only" resize race condition.
+            requestAnimationFrame(function() {
                 var agencyCtx = document.getElementById('agencyChart').getContext('2d');
                 new Chart(agencyCtx, {
                     type: 'doughnut',
@@ -774,7 +776,7 @@
                         }
                     }
                 });
-            }, 100);
+            });
 
             if(window.lucide) { window.lucide.createIcons(); }
         });

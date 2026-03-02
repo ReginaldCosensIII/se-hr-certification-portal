@@ -592,12 +592,13 @@ a:focus {
 /*                            MODERN ACTIVE SIDEBAR                           */
 /* -------------------------------------------------------------------------- */
 
-.sidebar .nav-link.active {
+.sidebar-menu .nav-link.active {
     background-color: rgba(var(--bs-primary-rgb, 13, 110, 253), 0.1);
     border-left: 4px solid var(--bs-primary, #0d6efd);
     color: var(--bs-primary, #0d6efd) !important;
     font-weight: 600;
 }
-.sidebar .nav-link.active i {
+
+.sidebar-menu .nav-link.active i {
     color: var(--bs-primary, #0d6efd) !important;
 }
