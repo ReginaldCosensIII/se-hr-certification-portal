@@ -587,3 +587,17 @@ a:focus {
     /* Often browser default is enough, but if custom focus is needed: */
     /* box-shadow: 0 0 0 0.25rem rgba(161, 148, 130, 0.25); */
 }
+
+/* -------------------------------------------------------------------------- */
+/*                            MODERN ACTIVE SIDEBAR                           */
+/* -------------------------------------------------------------------------- */
+
+.sidebar .nav-link.active {
+    background-color: rgba(var(--bs-primary-rgb, 13, 110, 253), 0.1);
+    border-left: 4px solid var(--bs-primary, #0d6efd);
+    color: var(--bs-primary, #0d6efd) !important;
+    font-weight: 600;
+}
+.sidebar .nav-link.active i {
+    color: var(--bs-primary, #0d6efd) !important;
+}
