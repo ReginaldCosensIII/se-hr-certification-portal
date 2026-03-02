@@ -175,6 +175,9 @@ namespace SeHrCertificationPortal.Pages.Certifications
             CertChartDataJson = JsonSerializer.Serialize(topCerts.Values);
             CertChartLabelsJson = JsonSerializer.Serialize(topCerts.Keys);
             TopCertsList = topCerts;
+
+            CertChartData = CertChartDataJson;
+            CertChartLabels = CertChartLabelsJson;
             // ------------------------
 
             TotalRecords = await query.CountAsync();
