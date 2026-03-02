@@ -620,7 +620,8 @@
             }
 
             // 1. MASTER TABLE CONTROLLER (Handles Actions AND Row Clicks)
-            var tableBody = document.querySelector('tbody');
+            var certTable = document.getElementById('certificationsTable');
+            var tableBody = certTable ? certTable.querySelector('tbody') : null;
             if (tableBody) {
                 tableBody.addEventListener('click', function(e) {
                     
