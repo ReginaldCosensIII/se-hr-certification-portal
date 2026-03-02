@@ -737,7 +737,28 @@
                     labels: @Html.Raw(Model.CertChartLabels),
                     datasets: [{ label: 'Active Employees', data: @Html.Raw(Model.CertChartData), backgroundColor: '#0d6efd' }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        },
+                        y: {
+                            ticks: {
+                                callback: function(value) {
+                                    var lbl = this.getLabelForValue(value) || '';
+                                    return lbl.length > 25 ? lbl.substring(0, 25) + '...' : lbl;
+                                }
+                            }
+                        }
+                    }
+                }
             });
 
             if(window.lucide) { window.lucide.createIcons(); }
