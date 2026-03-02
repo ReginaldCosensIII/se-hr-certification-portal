@@ -68,6 +68,9 @@
             <div class="card-body position-relative z-1">
                 <h6 class="text-uppercase fw-bold mb-1"><i data-lucide="alert-triangle" class="me-1" style="width: 18px;"></i> Expiring Soon</h6>
                 <h2 class="mb-0">@Model.AnalyticsExpiringSoon</h2>
+                <div class="mt-2" title="@string.Join("\n", Model.ExpiringSoonDetails.Take(15))">
+                    <small class="text-white-50" style="cursor: help;"><i data-lucide="info" class="me-1" style="width: 12px;"></i>Hover for details</small>
+                </div>
                 <i data-lucide="clock" class="position-absolute opacity-25" style="width: 50px; height: 50px; right: 15px; top: 15px; z-index: 0;"></i>
             </div>
         </div>
@@ -77,6 +80,9 @@
             <div class="card-body position-relative z-1">
                 <h6 class="text-uppercase fw-bold mb-1">Critical Lapses</h6>
                 <h2 class="mb-0">@Model.AnalyticsExpired</h2>
+                <div class="mt-2" title="@string.Join("\n", Model.ExpiredDetails.Take(15))">
+                    <small class="text-white-50" style="cursor: help;"><i data-lucide="info" class="me-1" style="width: 12px;"></i>Hover for details</small>
+                </div>
                 <i data-lucide="x-circle" class="position-absolute opacity-25" style="width: 50px; height: 50px; right: 15px; top: 15px; z-index: 0;"></i>
             </div>
         </div>
@@ -109,7 +115,7 @@
     </div>
     <div class="col-md-6">
         <div class="card shadow-sm h-100">
-            <div class="card-header bg-white"><h6 class="mb-0 fw-bold">Skill Void Tracker (Top 5)</h6></div>
+            <div class="card-header bg-white"><h6 class="mb-0 fw-bold">Top 5 Certifications Held</h6></div>
             <div class="card-body">
                 <div class="position-relative w-100 mb-3" style="height: 250px;">
                     <canvas id="certChart"></canvas>
@@ -413,6 +419,12 @@
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="TargetCertId" id="editCertId" />
+                    <input type="hidden" name="p" value="@Model.CurrentPage" />
+                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                    <input type="hidden" name="searchString" value="@Model.SearchString" />
+                    <input type="hidden" name="agencyFilter" value="@Model.AgencyFilter" />
+                    <input type="hidden" name="statusFilter" value="@Model.StatusFilter" />
+                    <input type="hidden" name="filterAnalytics" value="@Model.FilterAnalytics.ToString().ToLower()" />
                     <div class="mb-3">
                         <label class="form-label">Date Passed</label>
                         <input type="date" class="form-control" name="EditDatePassed" id="editDatePassed" required />
@@ -442,6 +454,12 @@
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="TargetCertId" id="revokeCertId" />
+                    <input type="hidden" name="p" value="@Model.CurrentPage" />
+                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                    <input type="hidden" name="searchString" value="@Model.SearchString" />
+                    <input type="hidden" name="agencyFilter" value="@Model.AgencyFilter" />
+                    <input type="hidden" name="statusFilter" value="@Model.StatusFilter" />
+                    <input type="hidden" name="filterAnalytics" value="@Model.FilterAnalytics.ToString().ToLower()" />
                     <p>Are you sure you want to revoke this certification? It will remain visible but be marked as inactive.</p>
                 </div>
                 <div class="modal-footer">
@@ -463,6 +481,12 @@
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="TargetCertId" id="restoreCertId" />
+                    <input type="hidden" name="p" value="@Model.CurrentPage" />
+                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                    <input type="hidden" name="searchString" value="@Model.SearchString" />
+                    <input type="hidden" name="agencyFilter" value="@Model.AgencyFilter" />
+                    <input type="hidden" name="statusFilter" value="@Model.StatusFilter" />
+                    <input type="hidden" name="filterAnalytics" value="@Model.FilterAnalytics.ToString().ToLower()" />
                     <p>Are you sure you want to restore this certification to active status?</p>
                 </div>
                 <div class="modal-footer">
@@ -484,6 +508,12 @@
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="TargetCertId" id="archiveCertId" />
+                    <input type="hidden" name="p" value="@Model.CurrentPage" />
+                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                    <input type="hidden" name="searchString" value="@Model.SearchString" />
+                    <input type="hidden" name="agencyFilter" value="@Model.AgencyFilter" />
+                    <input type="hidden" name="statusFilter" value="@Model.StatusFilter" />
+                    <input type="hidden" name="filterAnalytics" value="@Model.FilterAnalytics.ToString().ToLower()" />
                     <p>Are you sure you want to archive this certification? It will be removed from the active roster but preserved in the database history.</p>
                 </div>
                 <div class="modal-footer">
@@ -736,14 +766,9 @@
                                 datasets: [{ data: @Html.Raw(Model.AgencyChartData), backgroundColor: ['#0d6efd', '#6c757d', '#198754', '#ffc107', '#dc3545'] }]
                             },
                             options: { 
+                                animation: false,
                                 responsive: true, 
-                                maintainAspectRatio: false,
-                                animation: {
-                                    duration: 1500,
-                                    easing: 'easeOutQuart',
-                                    animateScale: true,
-                                    animateRotate: true
-                                }
+                                maintainAspectRatio: false
                             }
                         });
 
@@ -755,13 +780,10 @@
                                 datasets: [{ label: 'Active Employees', data: @Html.Raw(Model.CertChartData), backgroundColor: '#0d6efd' }]
                             },
                             options: { 
+                                animation: false,
                                 responsive: true, 
                                 maintainAspectRatio: false, 
                                 indexAxis: 'y',
-                                animation: {
-                                    duration: 1500,
-                                    easing: 'easeOutQuart'
-                                },
                                 plugins: {
                                     legend: { display: false }
                                 },

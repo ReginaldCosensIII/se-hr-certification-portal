@@ -58,6 +58,8 @@ namespace SeHrCertificationPortal.Pages.Certifications
         public int ThresholdDays { get; set; } = 30;
 
         public int AnalyticsTotalActive { get; set; }
+        public List<string> ExpiredDetails { get; set; } = new();
+        public List<string> ExpiringSoonDetails { get; set; } = new();
         public int AnalyticsExpiringSoon { get; set; }
         public int AnalyticsExpired { get; set; }
         public string AgencyChartDataJson { get; set; } = "[]";
@@ -149,6 +151,7 @@ namespace SeHrCertificationPortal.Pages.Certifications
 
             var analyticsRaw = await analyticsBaseQuery.Select(c => new
             {
+                EmployeeName = c.Employee != null ? c.Employee.DisplayName : "Unknown",
                 AgencyName = c.Agency != null ? c.Agency.Abbreviation : (c.CustomAgencyName ?? "Unknown"),
                 CertName = c.Certification != null ? c.Certification.Name : (c.CustomCertificationName ?? "Unknown"),
                 ExpDate = c.ExpirationDate
@@ -157,6 +160,11 @@ namespace SeHrCertificationPortal.Pages.Certifications
             AnalyticsExpired = analyticsRaw.Count(c => c.ExpDate.HasValue && c.ExpDate.Value < today);
             AnalyticsExpiringSoon = analyticsRaw.Count(c => c.ExpDate.HasValue && c.ExpDate.Value >= today && c.ExpDate.Value <= thresholdDate);
             AnalyticsTotalActive = analyticsRaw.Count(c => !c.ExpDate.HasValue || c.ExpDate.Value > thresholdDate);
+
+            ExpiredDetails = analyticsRaw.Where(c => c.ExpDate.HasValue && c.ExpDate.Value < today)
+                .Select(c => $"{c.EmployeeName} ({c.CertName})").ToList();
+            ExpiringSoonDetails = analyticsRaw.Where(c => c.ExpDate.HasValue && c.ExpDate.Value >= today && c.ExpDate.Value <= thresholdDate)
+                .Select(c => $"{c.EmployeeName} ({c.CertName})").ToList();
 
             var topAgencies = analyticsRaw.GroupBy(c => c.AgencyName).OrderByDescending(g => g.Count()).Take(5).ToList();
             AgencyChartLabels = System.Text.Json.JsonSerializer.Serialize(topAgencies.Select(g => g.Key));
@@ -397,6 +405,17 @@ namespace SeHrCertificationPortal.Pages.Certifications
                             });
                         });
 
+                        var expiredList = analyticsRaw.Where(c => c.ExpirationDate.HasValue && c.ExpirationDate.Value < today).ToList();
+                        if (expiredList.Any())
+                        {
+                            col.Item().PaddingTop(15).PaddingBottom(5).Text("⚠️ Action Required: Critical Lapses").FontSize(12).SemiBold().FontColor(Colors.Red.Medium);
+                            foreach(var lapse in expiredList) {
+                                var empName = lapse.Employee != null ? lapse.Employee.DisplayName : "Unknown";
+                                var certName = lapse.Certification != null ? lapse.Certification.Name : (lapse.CustomCertificationName ?? "Unknown");
+                                col.Item().Text($"• {empName} - {certName} (Expired: {lapse.ExpirationDate!.Value:MMM dd, yyyy})").FontSize(10);
+                            }
+                        }
+
                         if (agencyChartBytes != null || certChartBytes != null)
                         {
                             col.Item().PaddingBottom(20).Row(row =>
@@ -420,7 +439,7 @@ namespace SeHrCertificationPortal.Pages.Certifications
                             dataRow.ConstantItem(20);
                             dataRow.RelativeItem().Column(c =>
                             {
-                                c.Item().PaddingBottom(5).Text("Skill Void Tracker (Top 5)").FontSize(11).SemiBold().FontColor(Colors.Grey.Darken3);
+                                c.Item().PaddingBottom(5).Text("Top 5 Certifications").FontSize(11).SemiBold().FontColor(Colors.Grey.Darken3);
                                 foreach(var item in topCertsList) {
                                     c.Item().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).PaddingVertical(2).Text($"{item.Key}: {item.Count()}").FontSize(9);
                                 }
