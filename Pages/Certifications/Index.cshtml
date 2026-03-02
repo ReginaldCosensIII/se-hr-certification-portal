@@ -727,7 +727,16 @@
                     labels: @Html.Raw(Model.AgencyChartLabels),
                     datasets: [{ data: @Html.Raw(Model.AgencyChartData), backgroundColor: ['#0d6efd', '#6c757d', '#198754', '#ffc107', '#dc3545'] }]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart',
+                        animateScale: true,
+                        animateRotate: true
+                    }
+                }
             });
 
             var certCtx = document.getElementById('certChart').getContext('2d');
@@ -741,6 +750,10 @@
                     responsive: true, 
                     maintainAspectRatio: false, 
                     indexAxis: 'y',
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    },
                     plugins: {
                         legend: { display: false }
                     },
