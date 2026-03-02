@@ -720,59 +720,61 @@
             }
 
             // 3. RENDER CHART.JS (Keep your existing Html.Raw C# injections here)
-            var agencyCtx = document.getElementById('agencyChart').getContext('2d');
-            new Chart(agencyCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: @Html.Raw(Model.AgencyChartLabels),
-                    datasets: [{ data: @Html.Raw(Model.AgencyChartData), backgroundColor: ['#0d6efd', '#6c757d', '#198754', '#ffc107', '#dc3545'] }]
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 1500,
-                        easing: 'easeOutQuart',
-                        animateScale: true,
-                        animateRotate: true
+            setTimeout(function() {
+                var agencyCtx = document.getElementById('agencyChart').getContext('2d');
+                new Chart(agencyCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: @Html.Raw(Model.AgencyChartLabels),
+                        datasets: [{ data: @Html.Raw(Model.AgencyChartData), backgroundColor: ['#0d6efd', '#6c757d', '#198754', '#ffc107', '#dc3545'] }]
+                    },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 1500,
+                            easing: 'easeOutQuart',
+                            animateScale: true,
+                            animateRotate: true
+                        }
                     }
-                }
-            });
+                });
 
-            var certCtx = document.getElementById('certChart').getContext('2d');
-            new Chart(certCtx, {
-                type: 'bar',
-                data: {
-                    labels: @Html.Raw(Model.CertChartLabels),
-                    datasets: [{ label: 'Active Employees', data: @Html.Raw(Model.CertChartData), backgroundColor: '#0d6efd' }]
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    indexAxis: 'y',
-                    animation: {
-                        duration: 1500,
-                        easing: 'easeOutQuart'
+                var certCtx = document.getElementById('certChart').getContext('2d');
+                new Chart(certCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: @Html.Raw(Model.CertChartLabels),
+                        datasets: [{ label: 'Active Employees', data: @Html.Raw(Model.CertChartData), backgroundColor: '#0d6efd' }]
                     },
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            ticks: { stepSize: 1 }
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        indexAxis: 'y',
+                        animation: {
+                            duration: 1500,
+                            easing: 'easeOutQuart'
                         },
-                        y: {
-                            ticks: {
-                                callback: function(value) {
-                                    var lbl = this.getLabelForValue(value) || '';
-                                    return lbl.length > 25 ? lbl.substring(0, 25) + '...' : lbl;
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 }
+                            },
+                            y: {
+                                ticks: {
+                                    callback: function(value) {
+                                        var lbl = this.getLabelForValue(value) || '';
+                                        return lbl.length > 25 ? lbl.substring(0, 25) + '...' : lbl;
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            });
+                });
+            }, 100);
 
             if(window.lucide) { window.lucide.createIcons(); }
         });

@@ -23,25 +23,25 @@
         <nav class="mt-2">
             <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation" aria-label="Main navigation">
                 <li class="nav-item">
-                    <a asp-page="/Index" class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/Index" ? "active" : "")">
+                    <a asp-page="/Index" class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString().Equals("/Index", StringComparison.OrdinalIgnoreCase) == true ? "active" : "")">
                         <i data-lucide="layout-dashboard" class="nav-icon"></i>
                         <p>Dashboard</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a asp-page="/Requests/Index" class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/Requests/Index" ? "active" : "")">
+                    <a asp-page="/Requests/Index" class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString().StartsWith("/Requests", StringComparison.OrdinalIgnoreCase) == true ? "active" : "")">
                         <i data-lucide="clipboard-list" class="nav-icon"></i>
                         <p>Requests</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a asp-page="/Certifications/Index" class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/Certifications/Index" ? "active" : "")">
+                    <a asp-page="/Certifications/Index" class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString().StartsWith("/Certifications", StringComparison.OrdinalIgnoreCase) == true ? "active" : "")">
                         <i data-lucide="award" class="nav-icon"></i>
                         <p>Certifications</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a asp-page="/Admin/Index" class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/Admin/Index" ? "active" : "")">
+                    <a asp-page="/Admin/Index" class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString().StartsWith("/Admin", StringComparison.OrdinalIgnoreCase) == true ? "active" : "")">
                         <i data-lucide="settings" class="nav-icon"></i>
                         <p>Admin</p>
                     </a>
