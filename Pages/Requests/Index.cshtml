@@ -97,7 +97,7 @@
 <div class="card shadow-sm">
     <div class="card-header border-0 bg-transparent py-3">
         <div class="d-flex justify-content-between align-items-center">
-            <h3 class="card-title mb-0 fw-bold text-dark">Manage Requests</h3>
+            <h5 class="card-title fs-5 fw-bold text-dark mb-0">Manage Requests</h5>
             
             <div class="card-tools d-flex align-items-center gap-2">
                 <!-- Search & Filter -->
@@ -140,7 +140,7 @@
                     <th>Agency</th>
                     <th>Certification</th>
                     <th>Type</th>
-                    <th>Status</th>
+                    <th class="text-center" style="width: 170px;">Status</th>
                     <th>Request Date</th>
                     <th class="text-center" style="min-width: 100px;">Actions</th>
                 </tr>
@@ -158,26 +158,26 @@
                     <td>@(item.Agency?.Abbreviation ?? item.CustomAgencyName ?? "Custom")</td>
                     <td>@(item.Certification?.Name ?? item.CustomCertificationName ?? "Custom")</td>
                     <td><span class="fw-bold">@item.RequestType</span></td>
-                    <td>
+                    <td class="text-center">
                         @if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Pending)
                         {
-                            <span class="badge text-bg-warning">Pending</span>
+                            <span class="badge text-bg-warning d-inline-flex align-items-center"><i data-lucide="clock" class="me-1" style="width: 12px; height: 12px;"></i>Pending</span>
                         }
                         else if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Approved)
                         {
-                            <span class="badge text-bg-info text-white">Approved</span>
+                            <span class="badge text-bg-info text-white d-inline-flex align-items-center"><i data-lucide="check-circle-2" class="me-1" style="width: 12px; height: 12px;"></i>Approved</span>
                         }
                         else if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Passed)
                         {
-                            <span class="badge text-bg-success">Passed</span>
+                            <span class="badge text-bg-success d-inline-flex align-items-center"><i data-lucide="check-circle" class="me-1" style="width: 12px; height: 12px;"></i>Passed</span>
                         }
                         else if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Failed)
                         {
-                            <span class="badge text-bg-dark">Failed</span>
+                            <span class="badge text-bg-dark d-inline-flex align-items-center"><i data-lucide="x-circle" class="me-1" style="width: 12px; height: 12px;"></i>Failed</span>
                         }
                         else
                         {
-                            <span class="badge text-bg-danger">Rejected</span>
+                            <span class="badge text-bg-danger d-inline-flex align-items-center"><i data-lucide="alert-triangle" class="me-1" style="width: 12px; height: 12px;"></i>Rejected</span>
                         }
                     </td>
                     <td>@item.RequestDate.ToString("MMM dd, yyyy")</td>

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SeHrCertificationPortal.Data;
 using SeHrCertificationPortal.Models;
+using System.Text.Json;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -57,8 +58,17 @@ namespace SeHrCertificationPortal.Pages.Certifications
         public int ThresholdDays { get; set; } = 30;
 
         public int AnalyticsTotalActive { get; set; }
+        public List<string> ExpiredDetails { get; set; } = new();
+        public List<string> ExpiringSoonDetails { get; set; } = new();
         public int AnalyticsExpiringSoon { get; set; }
         public int AnalyticsExpired { get; set; }
+        public string AgencyChartDataJson { get; set; } = "[]";
+        public string AgencyChartLabelsJson { get; set; } = "[]";
+        public Dictionary<string, int> TopAgenciesList { get; set; } = new Dictionary<string, int>();
+
+        public string CertChartDataJson { get; set; } = "[]";
+        public string CertChartLabelsJson { get; set; } = "[]";
+        public Dictionary<string, int> TopCertsList { get; set; } = new Dictionary<string, int>();
         public string AgencyChartLabels { get; set; } = "[]";
         public string AgencyChartData { get; set; } = "[]";
         public string CertChartLabels { get; set; } = "[]";
@@ -98,7 +108,7 @@ namespace SeHrCertificationPortal.Pages.Certifications
                 .Include(c => c.Employee)
                 .Include(c => c.Agency)
                 .Include(c => c.Certification)
-                .Where(c => c.Status == RequestStatus.Passed);
+                .Where(c => c.Status == RequestStatus.Passed || c.Status == RequestStatus.Revoked);
 
             if (!string.IsNullOrWhiteSpace(SearchString))
             {
@@ -137,10 +147,11 @@ namespace SeHrCertificationPortal.Pages.Certifications
                 : _context.CertificationRequests
                     .Include(c => c.Agency)
                     .Include(c => c.Certification)
-                    .Where(c => c.Status == RequestStatus.Passed);
+                    .Where(c => c.Status == RequestStatus.Passed || c.Status == RequestStatus.Revoked);
 
             var analyticsRaw = await analyticsBaseQuery.Select(c => new
             {
+                EmployeeName = c.Employee != null ? c.Employee.DisplayName : "Unknown",
                 AgencyName = c.Agency != null ? c.Agency.Abbreviation : (c.CustomAgencyName ?? "Unknown"),
                 CertName = c.Certification != null ? c.Certification.Name : (c.CustomCertificationName ?? "Unknown"),
                 ExpDate = c.ExpirationDate
@@ -150,13 +161,31 @@ namespace SeHrCertificationPortal.Pages.Certifications
             AnalyticsExpiringSoon = analyticsRaw.Count(c => c.ExpDate.HasValue && c.ExpDate.Value >= today && c.ExpDate.Value <= thresholdDate);
             AnalyticsTotalActive = analyticsRaw.Count(c => !c.ExpDate.HasValue || c.ExpDate.Value > thresholdDate);
 
+            ExpiredDetails = analyticsRaw.Where(c => c.ExpDate.HasValue && c.ExpDate.Value < today)
+                .Select(c => $"{c.EmployeeName} ({c.CertName})").ToList();
+            ExpiringSoonDetails = analyticsRaw.Where(c => c.ExpDate.HasValue && c.ExpDate.Value >= today && c.ExpDate.Value <= thresholdDate)
+                .Select(c => $"{c.EmployeeName} ({c.CertName})").ToList();
+
             var topAgencies = analyticsRaw.GroupBy(c => c.AgencyName).OrderByDescending(g => g.Count()).Take(5).ToList();
             AgencyChartLabels = System.Text.Json.JsonSerializer.Serialize(topAgencies.Select(g => g.Key));
             AgencyChartData = System.Text.Json.JsonSerializer.Serialize(topAgencies.Select(g => g.Count()));
 
-            var topCerts = analyticsRaw.GroupBy(c => c.CertName).OrderByDescending(g => g.Count()).Take(5).ToList();
-            CertChartLabels = System.Text.Json.JsonSerializer.Serialize(topCerts.Select(g => g.Key));
-            CertChartData = System.Text.Json.JsonSerializer.Serialize(topCerts.Select(g => g.Count()));
+            var topCerts = analyticsRaw
+                .GroupBy(c => c.CertName)
+                .OrderByDescending(g => g.Count())
+                .Take(5)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            AgencyChartDataJson = JsonSerializer.Serialize(topAgencies.Select(g => g.Count()));
+            AgencyChartLabelsJson = JsonSerializer.Serialize(topAgencies.Select(g => g.Key));
+            TopAgenciesList = topAgencies.ToDictionary(g => g.Key, g => g.Count());
+
+            CertChartDataJson = JsonSerializer.Serialize(topCerts.Values);
+            CertChartLabelsJson = JsonSerializer.Serialize(topCerts.Keys);
+            TopCertsList = topCerts;
+
+            CertChartData = CertChartDataJson;
+            CertChartLabels = CertChartLabelsJson;
             // ------------------------
 
             TotalRecords = await query.CountAsync();
@@ -173,7 +202,7 @@ namespace SeHrCertificationPortal.Pages.Certifications
         public async Task<IActionResult> OnGetEmployeeHistoryAsync(int employeeId)
         {
             var query = _context.CertificationRequests
-                .Where(c => c.EmployeeId == employeeId && c.Status == RequestStatus.Passed)
+                .Where(c => c.EmployeeId == employeeId && (c.Status == RequestStatus.Passed || c.Status == RequestStatus.Revoked))
                 .Include(c => c.Agency)
                 .Include(c => c.Certification)
                 .AsNoTracking();
@@ -209,7 +238,29 @@ namespace SeHrCertificationPortal.Pages.Certifications
             var record = await _context.CertificationRequests.FindAsync(TargetCertId);
             if (record != null)
             {
-                record.Status = RequestStatus.Rejected;
+                record.Status = RequestStatus.Revoked;
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToPage(new { p, pageSize, SearchString = searchString, AgencyFilter = agencyFilter, StatusFilter = statusFilter, FilterAnalytics = filterAnalytics });
+        }
+
+        public async Task<IActionResult> OnPostRestoreCertAsync(int p = 1, int pageSize = 25, string? searchString = null, int? agencyFilter = null, string? statusFilter = null, bool filterAnalytics = true)
+        {
+            var record = await _context.CertificationRequests.FindAsync(TargetCertId);
+            if (record != null)
+            {
+                record.Status = RequestStatus.Passed;
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToPage(new { p, pageSize, SearchString = searchString, AgencyFilter = agencyFilter, StatusFilter = statusFilter, FilterAnalytics = filterAnalytics });
+        }
+
+        public async Task<IActionResult> OnPostArchiveCertAsync(int p = 1, int pageSize = 25, string? searchString = null, int? agencyFilter = null, string? statusFilter = null, bool filterAnalytics = true)
+        {
+            var record = await _context.CertificationRequests.FindAsync(TargetCertId);
+            if (record != null)
+            {
+                record.Status = RequestStatus.Archived;
                 await _context.SaveChangesAsync();
             }
             return RedirectToPage(new { p, pageSize, SearchString = searchString, AgencyFilter = agencyFilter, StatusFilter = statusFilter, FilterAnalytics = filterAnalytics });
@@ -268,7 +319,7 @@ namespace SeHrCertificationPortal.Pages.Certifications
                 .Include(c => c.Employee)
                 .Include(c => c.Agency)
                 .Include(c => c.Certification)
-                .Where(c => c.Status == RequestStatus.Passed);
+                .Where(c => c.Status == RequestStatus.Passed || c.Status == RequestStatus.Revoked);
 
             var tableQuery = baseQuery;
 
@@ -310,6 +361,12 @@ namespace SeHrCertificationPortal.Pages.Certifications
             var logoPath = Path.Combine(_env.WebRootPath, "img", "branding-assets", "Specialized-Engineering-Logo-white.webp");
             byte[]? logoBytes = System.IO.File.Exists(logoPath) ? await System.IO.File.ReadAllBytesAsync(logoPath) : null;
 
+            var topAgenciesList = analyticsRaw.GroupBy(c => c.Agency != null ? c.Agency.Abbreviation : (c.CustomAgencyName ?? "Unknown"))
+                .OrderByDescending(g => g.Count()).Take(5).ToList();
+            
+            var topCertsList = analyticsRaw.GroupBy(c => c.Certification != null ? c.Certification.Name : (c.CustomCertificationName ?? "Unknown"))
+                .OrderByDescending(g => g.Count()).Take(5).ToList();
+
             var document = Document.Create(container =>
             {
                 container.Page(page =>
@@ -348,6 +405,17 @@ namespace SeHrCertificationPortal.Pages.Certifications
                             });
                         });
 
+                        var expiredList = analyticsRaw.Where(c => c.ExpirationDate.HasValue && c.ExpirationDate.Value < today).ToList();
+                        if (expiredList.Any())
+                        {
+                            col.Item().PaddingTop(15).PaddingBottom(5).Text("⚠️ Action Required: Critical Lapses").FontSize(12).SemiBold().FontColor(Colors.Red.Medium);
+                            foreach(var lapse in expiredList) {
+                                var empName = lapse.Employee != null ? lapse.Employee.DisplayName : "Unknown";
+                                var certName = lapse.Certification != null ? lapse.Certification.Name : (lapse.CustomCertificationName ?? "Unknown");
+                                col.Item().Text($"• {empName} - {certName} (Expired: {lapse.ExpirationDate!.Value:MMM dd, yyyy})").FontSize(10);
+                            }
+                        }
+
                         if (agencyChartBytes != null || certChartBytes != null)
                         {
                             col.Item().PaddingBottom(20).Row(row =>
@@ -357,6 +425,26 @@ namespace SeHrCertificationPortal.Pages.Certifications
                                 if (certChartBytes != null) row.RelativeItem().Image(certChartBytes);
                             });
                         }
+
+                        // Inject Raw Data Tables below charts
+                        col.Item().PaddingBottom(15).Row(dataRow =>
+                        {
+                            dataRow.RelativeItem().Column(c =>
+                            {
+                                c.Item().PaddingBottom(5).Text("Top Agency Distribution").FontSize(11).SemiBold().FontColor(Colors.Grey.Darken3);
+                                foreach(var item in topAgenciesList) {
+                                    c.Item().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).PaddingVertical(2).Text($"{item.Key}: {item.Count()}").FontSize(9);
+                                }
+                            });
+                            dataRow.ConstantItem(20);
+                            dataRow.RelativeItem().Column(c =>
+                            {
+                                c.Item().PaddingBottom(5).Text("Top 5 Certifications").FontSize(11).SemiBold().FontColor(Colors.Grey.Darken3);
+                                foreach(var item in topCertsList) {
+                                    c.Item().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).PaddingVertical(2).Text($"{item.Key}: {item.Count()}").FontSize(9);
+                                }
+                            });
+                        });
 
                         col.Item().PaddingBottom(5).Text("Coverage Breakdown").FontSize(14).SemiBold().FontColor("#a19482");
 

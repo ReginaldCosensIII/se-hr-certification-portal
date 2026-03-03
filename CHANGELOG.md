@@ -1,5 +1,21 @@
 # Changelog
 
+## [Unreleased]
+### Added
+- Three-State Data Lifecycle for Certifications (Passed -> Revoked -> Archived), preserving historical audit trails.
+- Raw data table fallbacks and explicit "Critical Lapse" lists injected into QuestPDF exports.
+- Modern persistent active-state styling for the sidebar navigation.
+
+### Changed
+- Standardized global typography (fs-4, fs-5) across all major module indexes.
+- Enforced Semantic UI colors on all action modals (Blue for Save, Green for Pass/Restore, Red/Yellow for Revoke/Archive).
+
+### Fixed
+- Chart.js canvas height collapse and label truncation.
+
+### Removed
+- Deprecated HTML notification bell mockup from the main layout header.
+
 ## [Branch Closeout: feat/dashboard-and-core-ui]
 ### Added
 - **Epic 4: Dashboard & Core UI Polish**
