@@ -16,11 +16,13 @@ namespace SeHrCertificationPortal.Pages.Certifications
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _env;
+        private readonly ILogger<IndexModel> _logger;
 
-        public IndexModel(ApplicationDbContext context, IWebHostEnvironment env)
+        public IndexModel(ApplicationDbContext context, IWebHostEnvironment env, ILogger<IndexModel> logger)
         {
             _context = context;
             _env = env;
+            _logger = logger;
         }
 
         [BindProperty(SupportsGet = true)]
@@ -223,86 +225,131 @@ namespace SeHrCertificationPortal.Pages.Certifications
 
         public async Task<IActionResult> OnPostEditCertAsync(int p = 1, int pageSize = 25, string? searchString = null, int? agencyFilter = null, string? statusFilter = null, bool filterAnalytics = true)
         {
-            var record = await _context.CertificationRequests.FindAsync(TargetCertId);
-            if (record != null)
+            try
             {
-                record.RequestDate = EditDatePassed;
-                record.ExpirationDate = EditExpiration;
-                await _context.SaveChangesAsync();
+                var record = await _context.CertificationRequests.FindAsync(TargetCertId);
+                if (record != null)
+                {
+                    record.RequestDate = EditDatePassed;
+                    record.ExpirationDate = EditExpiration;
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Certification edited successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error editing certification.");
+                TempData["ErrorMessage"] = "An unexpected error occurred while saving. Please try again or contact IT.";
             }
             return RedirectToPage(new { p, pageSize, SearchString = searchString, AgencyFilter = agencyFilter, StatusFilter = statusFilter, FilterAnalytics = filterAnalytics });
         }
 
         public async Task<IActionResult> OnPostRevokeCertAsync(int p = 1, int pageSize = 25, string? searchString = null, int? agencyFilter = null, string? statusFilter = null, bool filterAnalytics = true)
         {
-            var record = await _context.CertificationRequests.FindAsync(TargetCertId);
-            if (record != null)
+            try
             {
-                record.Status = RequestStatus.Revoked;
-                await _context.SaveChangesAsync();
+                var record = await _context.CertificationRequests.FindAsync(TargetCertId);
+                if (record != null)
+                {
+                    record.Status = RequestStatus.Revoked;
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Certification revoked.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error revoking certification.");
+                TempData["ErrorMessage"] = "An unexpected error occurred while saving. Please try again or contact IT.";
             }
             return RedirectToPage(new { p, pageSize, SearchString = searchString, AgencyFilter = agencyFilter, StatusFilter = statusFilter, FilterAnalytics = filterAnalytics });
         }
 
         public async Task<IActionResult> OnPostRestoreCertAsync(int p = 1, int pageSize = 25, string? searchString = null, int? agencyFilter = null, string? statusFilter = null, bool filterAnalytics = true)
         {
-            var record = await _context.CertificationRequests.FindAsync(TargetCertId);
-            if (record != null)
+            try
             {
-                record.Status = RequestStatus.Passed;
-                await _context.SaveChangesAsync();
+                var record = await _context.CertificationRequests.FindAsync(TargetCertId);
+                if (record != null)
+                {
+                    record.Status = RequestStatus.Passed;
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Certification restored successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error restoring certification.");
+                TempData["ErrorMessage"] = "An unexpected error occurred while saving. Please try again or contact IT.";
             }
             return RedirectToPage(new { p, pageSize, SearchString = searchString, AgencyFilter = agencyFilter, StatusFilter = statusFilter, FilterAnalytics = filterAnalytics });
         }
 
         public async Task<IActionResult> OnPostArchiveCertAsync(int p = 1, int pageSize = 25, string? searchString = null, int? agencyFilter = null, string? statusFilter = null, bool filterAnalytics = true)
         {
-            var record = await _context.CertificationRequests.FindAsync(TargetCertId);
-            if (record != null)
+            try
             {
-                record.Status = RequestStatus.Archived;
-                await _context.SaveChangesAsync();
+                var record = await _context.CertificationRequests.FindAsync(TargetCertId);
+                if (record != null)
+                {
+                    record.Status = RequestStatus.Archived;
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Certification archived.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error archiving certification.");
+                TempData["ErrorMessage"] = "An unexpected error occurred while saving. Please try again or contact IT.";
             }
             return RedirectToPage(new { p, pageSize, SearchString = searchString, AgencyFilter = agencyFilter, StatusFilter = statusFilter, FilterAnalytics = filterAnalytics });
         }
 
         public async Task<IActionResult> OnPostAddDirectCertAsync(int NewEmployeeId, string? NewEmployeeName, int NewAgencyId, int NewCertificationId, DateTime NewDatePassed, DateTime? NewExpirationDate, int p = 1, int pageSize = 25, string? searchString = null, int? agencyFilter = null, string? statusFilter = null, bool filterAnalytics = true)
         {
-            // 1. Handle "Create New Employee" workflow on the fly
-            if (NewEmployeeId == -1 && !string.IsNullOrWhiteSpace(NewEmployeeName))
+            try
             {
-                var newEmployee = new Employee
+                // 1. Handle "Create New Employee" workflow on the fly
+                if (NewEmployeeId == -1 && !string.IsNullOrWhiteSpace(NewEmployeeName))
                 {
-                    DisplayName = NewEmployeeName.Trim()
-                };
-                // Adding Employee without setting IsActive since it's not a property of Employee
-                _context.Employees.Add(newEmployee);
-                await _context.SaveChangesAsync(); // Save to generate the new ID
+                    var newEmployee = new Employee
+                    {
+                        DisplayName = NewEmployeeName.Trim()
+                    };
+                    // Adding Employee without setting IsActive since it's not a property of Employee
+                    _context.Employees.Add(newEmployee);
+                    await _context.SaveChangesAsync(); // Save to generate the new ID
 
-                NewEmployeeId = newEmployee.Id; // Map the new ID for the certification record
+                    NewEmployeeId = newEmployee.Id; // Map the new ID for the certification record
+                }
+
+                // 2. Standard Certification Save Workflow
+                if (NewEmployeeId > 0 && NewAgencyId > 0 && NewCertificationId > 0)
+                {
+                    DateTime utcDatePassed = DateTime.SpecifyKind(NewDatePassed, DateTimeKind.Utc);
+                    DateTime? utcExpirationDate = NewExpirationDate.HasValue
+                        ? DateTime.SpecifyKind(NewExpirationDate.Value, DateTimeKind.Utc)
+                        : null;
+
+                    var newCert = new CertificationRequest
+                    {
+                        EmployeeId = NewEmployeeId,
+                        AgencyId = NewAgencyId,
+                        CertificationId = NewCertificationId,
+                        RequestDate = utcDatePassed,
+                        ExpirationDate = utcExpirationDate,
+                        Status = RequestStatus.Passed,
+                        // Bypass approval lifecycle, no ActionDate included based on previous error
+                    };
+
+                    _context.CertificationRequests.Add(newCert);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "New certification added successfully.";
+                }
             }
-
-            // 2. Standard Certification Save Workflow
-            if (NewEmployeeId > 0 && NewAgencyId > 0 && NewCertificationId > 0)
+            catch (Exception ex)
             {
-                DateTime utcDatePassed = DateTime.SpecifyKind(NewDatePassed, DateTimeKind.Utc);
-                DateTime? utcExpirationDate = NewExpirationDate.HasValue
-                    ? DateTime.SpecifyKind(NewExpirationDate.Value, DateTimeKind.Utc)
-                    : null;
-
-                var newCert = new CertificationRequest
-                {
-                    EmployeeId = NewEmployeeId,
-                    AgencyId = NewAgencyId,
-                    CertificationId = NewCertificationId,
-                    RequestDate = utcDatePassed,
-                    ExpirationDate = utcExpirationDate,
-                    Status = RequestStatus.Passed,
-                    // Bypass approval lifecycle, no ActionDate included based on previous error
-                };
-
-                _context.CertificationRequests.Add(newCert);
-                await _context.SaveChangesAsync();
+                _logger.LogError(ex, "Error adding direct certification.");
+                TempData["ErrorMessage"] = "An unexpected error occurred while saving. Please try again or contact IT.";
             }
 
             return RedirectToPage(new { p, pageSize, SearchString = searchString, AgencyFilter = agencyFilter, StatusFilter = statusFilter, FilterAnalytics = filterAnalytics });
