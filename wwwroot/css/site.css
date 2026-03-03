@@ -593,12 +593,14 @@ a:focus {
 /* -------------------------------------------------------------------------- */
 
 .sidebar-menu .nav-link.active {
-    background-color: rgba(var(--bs-primary-rgb, 13, 110, 253), 0.1);
-    border-left: 4px solid var(--bs-primary, #0d6efd);
-    color: var(--bs-primary, #0d6efd) !important;
+    background-color: rgba(161, 148, 130, 0.15);
+    /* Brand Tan with opacity */
+    border-left: 4px solid #a19482;
+    /* Brand Tan */
+    color: #a19482 !important;
     font-weight: 600;
 }
 
 .sidebar-menu .nav-link.active i {
-    color: var(--bs-primary, #0d6efd) !important;
+    color: #a19482 !important;
 }
