@@ -751,14 +751,21 @@
 
             var analyticsCollapse = document.getElementById('analyticsCollapse');
             var analyticsChevron = document.getElementById('analyticsChevron');
+            
             if (analyticsCollapse && analyticsChevron) {
+                // Add smooth CSS transition
+                analyticsChevron.style.transition = 'transform 0.3s ease';
+
                 // Check stored state on load
                 var isExpanded = sessionStorage.getItem('analyticsExpanded');
                 if (isExpanded === 'false') {
                     analyticsCollapse.classList.remove('show');
                     analyticsChevron.style.transform = 'rotate(-90deg)';
+                } else {
+                    analyticsChevron.style.transform = 'rotate(0deg)';
                 }
 
+                // Fire instantly when the user clicks
                 analyticsCollapse.addEventListener('hide.bs.collapse', function () { 
                     analyticsChevron.style.transform = 'rotate(-90deg)'; 
                     sessionStorage.setItem('analyticsExpanded', 'false');

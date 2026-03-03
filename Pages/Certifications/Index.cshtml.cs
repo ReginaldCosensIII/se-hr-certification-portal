@@ -84,121 +84,132 @@ namespace SeHrCertificationPortal.Pages.Certifications
             return TrackerStatus.Active;
         }
 
-        public async Task OnGetAsync(int p = 1)
+        public async Task<IActionResult> OnGetAsync(int p = 1)
         {
-            CurrentPage = p < 1 ? 1 : p;
+            try {
+                CurrentPage = p < 1 ? 1 : p;
 
-            var thresholdSetting = await _context.SystemSettings.FindAsync("ExpiringSoonThresholdDays");
-            if (thresholdSetting != null && int.TryParse(thresholdSetting.Value, out int explicitThreshold))
-            {
-                ThresholdDays = explicitThreshold;
-            }
-
-            var agencies = await _context.Agencies.Where(a => a.IsActive).ToListAsync();
-            AgencyOptions = new SelectList(agencies, "Id", "Abbreviation");
-
-            var employees = await _context.Employees.OrderBy(e => e.DisplayName).ToListAsync();
-            EmployeeOptions = new SelectList(employees, "Id", "DisplayName");
-
-            AllCertifications = await _context.Certifications.Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync();
-
-            // Npgsql Date Standard: Declare local variables for the query
-            DateTime today = DateTime.UtcNow;
-            DateTime thresholdDate = today.AddDays(ThresholdDays);
-
-            var query = _context.CertificationRequests
-                .Include(c => c.Employee)
-                .Include(c => c.Agency)
-                .Include(c => c.Certification)
-                .Where(c => c.Status == RequestStatus.Passed || c.Status == RequestStatus.Revoked);
-
-            if (!string.IsNullOrWhiteSpace(SearchString))
-            {
-                var searchLower = SearchString.ToLower();
-                query = query.Where(c => c.Employee != null && c.Employee.DisplayName.ToLower().Contains(searchLower));
-            }
-
-            if (AgencyFilter.HasValue && AgencyFilter.Value > 0)
-            {
-                query = query.Where(c => c.AgencyId == AgencyFilter.Value);
-            }
-
-            if (StatusFilter.HasValue)
-            {
-                switch (StatusFilter.Value)
+                var thresholdSetting = await _context.SystemSettings.FindAsync("ExpiringSoonThresholdDays");
+                if (thresholdSetting != null && int.TryParse(thresholdSetting.Value, out int explicitThreshold))
                 {
-                    case TrackerStatus.Expired:
-                        query = query.Where(c => c.ExpirationDate.HasValue && c.ExpirationDate.Value < today);
-                        break;
-                    case TrackerStatus.ExpiringSoon:
-                        query = query.Where(c => c.ExpirationDate.HasValue && c.ExpirationDate.Value >= today && c.ExpirationDate.Value <= thresholdDate);
-                        break;
-                    case TrackerStatus.Active:
-                        query = query.Where(c => c.ExpirationDate.HasValue && c.ExpirationDate.Value > thresholdDate);
-                        break;
-                    case TrackerStatus.Permanent:
-                        query = query.Where(c => c.ExpirationDate == null);
-                        break;
+                    ThresholdDays = explicitThreshold;
                 }
-            }
 
-            // --- ANALYTICS ENGINE ---
-            // If true, use 'query' (URL filters applied). If false, use global DB dataset.
-            var analyticsBaseQuery = FilterAnalytics
-                ? query
-                : _context.CertificationRequests
+                var agencies = await _context.Agencies.Where(a => a.IsActive).ToListAsync();
+                AgencyOptions = new SelectList(agencies, "Id", "Abbreviation");
+
+                var employees = await _context.Employees.OrderBy(e => e.DisplayName).ToListAsync();
+                EmployeeOptions = new SelectList(employees, "Id", "DisplayName");
+
+                AllCertifications = await _context.Certifications.Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync();
+
+                // Npgsql Date Standard: Declare local variables for the query
+                DateTime today = DateTime.UtcNow;
+                DateTime thresholdDate = today.AddDays(ThresholdDays);
+
+                var query = _context.CertificationRequests
+                    .Include(c => c.Employee)
                     .Include(c => c.Agency)
                     .Include(c => c.Certification)
                     .Where(c => c.Status == RequestStatus.Passed || c.Status == RequestStatus.Revoked);
 
-            var analyticsRaw = await analyticsBaseQuery.Select(c => new
-            {
-                EmployeeName = c.Employee != null ? c.Employee.DisplayName : "Unknown",
-                AgencyName = c.Agency != null ? c.Agency.Abbreviation : (c.CustomAgencyName ?? "Unknown"),
-                CertName = c.Certification != null ? c.Certification.Name : (c.CustomCertificationName ?? "Unknown"),
-                ExpDate = c.ExpirationDate
-            }).ToListAsync();
+                if (!string.IsNullOrWhiteSpace(SearchString))
+                {
+                    var searchLower = SearchString.ToLower();
+                    query = query.Where(c => c.Employee != null && c.Employee.DisplayName.ToLower().Contains(searchLower));
+                }
 
-            AnalyticsExpired = analyticsRaw.Count(c => c.ExpDate.HasValue && c.ExpDate.Value < today);
-            AnalyticsExpiringSoon = analyticsRaw.Count(c => c.ExpDate.HasValue && c.ExpDate.Value >= today && c.ExpDate.Value <= thresholdDate);
-            AnalyticsTotalActive = analyticsRaw.Count(c => !c.ExpDate.HasValue || c.ExpDate.Value > thresholdDate);
+                if (AgencyFilter.HasValue && AgencyFilter.Value > 0)
+                {
+                    query = query.Where(c => c.AgencyId == AgencyFilter.Value);
+                }
 
-            ExpiredDetails = analyticsRaw.Where(c => c.ExpDate.HasValue && c.ExpDate.Value < today)
-                .Select(c => $"{c.EmployeeName} ({c.CertName})").ToList();
-            ExpiringSoonDetails = analyticsRaw.Where(c => c.ExpDate.HasValue && c.ExpDate.Value >= today && c.ExpDate.Value <= thresholdDate)
-                .Select(c => $"{c.EmployeeName} ({c.CertName})").ToList();
+                if (StatusFilter.HasValue)
+                {
+                    switch (StatusFilter.Value)
+                    {
+                        case TrackerStatus.Expired:
+                            query = query.Where(c => c.ExpirationDate.HasValue && c.ExpirationDate.Value < today);
+                            break;
+                        case TrackerStatus.ExpiringSoon:
+                            query = query.Where(c => c.ExpirationDate.HasValue && c.ExpirationDate.Value >= today && c.ExpirationDate.Value <= thresholdDate);
+                            break;
+                        case TrackerStatus.Active:
+                            query = query.Where(c => c.ExpirationDate.HasValue && c.ExpirationDate.Value > thresholdDate);
+                            break;
+                        case TrackerStatus.Permanent:
+                            query = query.Where(c => c.ExpirationDate == null);
+                            break;
+                    }
+                }
 
-            var topAgencies = analyticsRaw.GroupBy(c => c.AgencyName).OrderByDescending(g => g.Count()).Take(5).ToList();
-            AgencyChartLabels = System.Text.Json.JsonSerializer.Serialize(topAgencies.Select(g => g.Key));
-            AgencyChartData = System.Text.Json.JsonSerializer.Serialize(topAgencies.Select(g => g.Count()));
+                // --- ANALYTICS ENGINE ---
+                // If true, use 'query' (URL filters applied). If false, use global DB dataset.
+                var analyticsBaseQuery = FilterAnalytics
+                    ? query
+                    : _context.CertificationRequests
+                        .Include(c => c.Agency)
+                        .Include(c => c.Certification)
+                        .Where(c => c.Status == RequestStatus.Passed || c.Status == RequestStatus.Revoked);
 
-            var topCerts = analyticsRaw
-                .GroupBy(c => c.CertName)
-                .OrderByDescending(g => g.Count())
-                .Take(5)
-                .ToDictionary(g => g.Key, g => g.Count());
+                var analyticsRaw = await analyticsBaseQuery.Select(c => new
+                {
+                    EmployeeName = c.Employee != null ? c.Employee.DisplayName : "Unknown",
+                    AgencyName = c.Agency != null ? c.Agency.Abbreviation : (c.CustomAgencyName ?? "Unknown"),
+                    CertName = c.Certification != null ? c.Certification.Name : (c.CustomCertificationName ?? "Unknown"),
+                    ExpDate = c.ExpirationDate
+                }).ToListAsync();
 
-            AgencyChartDataJson = JsonSerializer.Serialize(topAgencies.Select(g => g.Count()));
-            AgencyChartLabelsJson = JsonSerializer.Serialize(topAgencies.Select(g => g.Key));
-            TopAgenciesList = topAgencies.ToDictionary(g => g.Key, g => g.Count());
+                AnalyticsExpired = analyticsRaw.Count(c => c.ExpDate.HasValue && c.ExpDate.Value < today);
+                AnalyticsExpiringSoon = analyticsRaw.Count(c => c.ExpDate.HasValue && c.ExpDate.Value >= today && c.ExpDate.Value <= thresholdDate);
+                AnalyticsTotalActive = analyticsRaw.Count(c => !c.ExpDate.HasValue || c.ExpDate.Value > thresholdDate);
 
-            CertChartDataJson = JsonSerializer.Serialize(topCerts.Values);
-            CertChartLabelsJson = JsonSerializer.Serialize(topCerts.Keys);
-            TopCertsList = topCerts;
+                ExpiredDetails = analyticsRaw.Where(c => c.ExpDate.HasValue && c.ExpDate.Value < today)
+                    .Select(c => $"{c.EmployeeName} ({c.CertName})").ToList();
+                ExpiringSoonDetails = analyticsRaw.Where(c => c.ExpDate.HasValue && c.ExpDate.Value >= today && c.ExpDate.Value <= thresholdDate)
+                    .Select(c => $"{c.EmployeeName} ({c.CertName})").ToList();
 
-            CertChartData = CertChartDataJson;
-            CertChartLabels = CertChartLabelsJson;
-            // ------------------------
+                var topAgencies = analyticsRaw.GroupBy(c => c.AgencyName).OrderByDescending(g => g.Count()).Take(5).ToList();
+                AgencyChartLabels = System.Text.Json.JsonSerializer.Serialize(topAgencies.Select(g => g.Key));
+                AgencyChartData = System.Text.Json.JsonSerializer.Serialize(topAgencies.Select(g => g.Count()));
 
-            TotalRecords = await query.CountAsync();
-            TotalPages = (int)Math.Ceiling(TotalRecords / (double)PageSize);
+                var topCerts = analyticsRaw
+                    .GroupBy(c => c.CertName)
+                    .OrderByDescending(g => g.Count())
+                    .Take(5)
+                    .ToDictionary(g => g.Key, g => g.Count());
 
-            PassedCertifications = await query
-                .OrderByDescending(c => c.ExpirationDate)
-                .Skip((CurrentPage - 1) * PageSize)
-                .Take(PageSize)
-                .AsNoTracking()
-                .ToListAsync();
+                AgencyChartDataJson = JsonSerializer.Serialize(topAgencies.Select(g => g.Count()));
+                AgencyChartLabelsJson = JsonSerializer.Serialize(topAgencies.Select(g => g.Key));
+                TopAgenciesList = topAgencies.ToDictionary(g => g.Key, g => g.Count());
+
+                CertChartDataJson = JsonSerializer.Serialize(topCerts.Values);
+                CertChartLabelsJson = JsonSerializer.Serialize(topCerts.Keys);
+                TopCertsList = topCerts;
+
+                CertChartData = CertChartDataJson;
+                CertChartLabels = CertChartLabelsJson;
+                // ------------------------
+
+                TotalRecords = await query.CountAsync();
+                TotalPages = (int)Math.Ceiling(TotalRecords / (double)PageSize);
+
+                PassedCertifications = await query
+                    .OrderByDescending(c => c.ExpirationDate)
+                    .Skip((CurrentPage - 1) * PageSize)
+                    .Take(PageSize)
+                    .AsNoTracking()
+                    .ToListAsync();
+            } catch (Exception ex) {
+                _logger.LogError(ex, "Error fetching data for page load.");
+                TempData["ErrorMessage"] = "Unable to connect to the database to load records. The system may be experiencing an outage.";
+                
+                PassedCertifications = new List<CertificationRequest>();
+                AllCertifications = new List<Certification>();
+                AgencyOptions = new SelectList(new List<Agency>(), "Id", "Abbreviation");
+                EmployeeOptions = new SelectList(new List<Employee>(), "Id", "DisplayName");
+            }
+            return Page();
         }
 
         public async Task<IActionResult> OnGetEmployeeHistoryAsync(int employeeId)

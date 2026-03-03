@@ -39,56 +39,65 @@ namespace SeHrCertificationPortal.Pages.Requests
         [BindProperty(SupportsGet = true)]
         public SeHrCertificationPortal.Models.RequestStatus? StatusFilter { get; set; }
 
-        public async Task OnGetAsync(int p = 1, int? pageSize = null)
+        public async Task<IActionResult> OnGetAsync(int p = 1, int? pageSize = null)
         {
-            CurrentPage = p < 1 ? 1 : p;
+            try {
+                CurrentPage = p < 1 ? 1 : p;
 
-            // Restrict PageSize to valid options, default to 25
-            int[] validSizes = { 10, 15, 20, 25, 50 };
-            PageSize = pageSize.HasValue && validSizes.Contains(pageSize.Value) ? pageSize.Value : 25;
+                // Restrict PageSize to valid options, default to 25
+                int[] validSizes = { 10, 15, 20, 25, 50 };
+                PageSize = pageSize.HasValue && validSizes.Contains(pageSize.Value) ? pageSize.Value : 25;
 
-            var query = _context.CertificationRequests
-                .Include(c => c.Agency)
-                .Include(c => c.Certification)
-                .Include(c => c.Employee)
-                .AsQueryable();
+                var query = _context.CertificationRequests
+                    .Include(c => c.Agency)
+                    .Include(c => c.Certification)
+                    .Include(c => c.Employee)
+                    .AsQueryable();
 
-            if (StatusFilter.HasValue)
-            {
-                query = query.Where(c => c.Status == StatusFilter.Value);
+                if (StatusFilter.HasValue)
+                {
+                    query = query.Where(c => c.Status == StatusFilter.Value);
+                }
+
+                if (!string.IsNullOrWhiteSpace(SearchString))
+                {
+                    var searchLower = SearchString.ToLower().Trim();
+                    // Clean the search string so users can type "REQ-764" or "764" interchangeably
+                    var idSearch = searchLower.Replace("req-", "").Trim();
+
+                    query = query.Where(c =>
+                        (c.Employee != null && c.Employee.DisplayName.ToLower().Contains(searchLower)) ||
+                        (c.ManagerName != null && c.ManagerName.ToLower().Contains(searchLower)) ||
+                        c.Id.ToString() == idSearch);
+                }
+
+                TotalRecords = await query.CountAsync();
+                TotalPages = (int)Math.Ceiling(TotalRecords / (double)PageSize);
+
+                CertificationRequest = await query
+                    .OrderByDescending(c => c.RequestDate)
+                    .ThenByDescending(c => c.Id)
+                    .Skip((CurrentPage - 1) * PageSize)
+                    .Take(PageSize)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                Agencies = await _context.Agencies
+                    .Where(a => a.IsActive)
+                    .OrderBy(a => a.Abbreviation)
+                    .ToListAsync();
+
+                Employees = await _context.Employees
+                    .OrderBy(e => e.DisplayName)
+                    .ToListAsync();
+            } catch (Exception ex) {
+                _logger.LogError(ex, "Error fetching data for page load.");
+                TempData["ErrorMessage"] = "Unable to connect to the database to load records. The system may be experiencing an outage.";
+                CertificationRequest = new List<SeHrCertificationPortal.Models.CertificationRequest>();
+                Agencies = new List<SeHrCertificationPortal.Models.Agency>();
+                Employees = new List<SeHrCertificationPortal.Models.Employee>();
             }
-
-            if (!string.IsNullOrWhiteSpace(SearchString))
-            {
-                var searchLower = SearchString.ToLower().Trim();
-                // Clean the search string so users can type "REQ-764" or "764" interchangeably
-                var idSearch = searchLower.Replace("req-", "").Trim();
-
-                query = query.Where(c =>
-                    (c.Employee != null && c.Employee.DisplayName.ToLower().Contains(searchLower)) ||
-                    (c.ManagerName != null && c.ManagerName.ToLower().Contains(searchLower)) ||
-                    c.Id.ToString() == idSearch);
-            }
-
-            TotalRecords = await query.CountAsync();
-            TotalPages = (int)Math.Ceiling(TotalRecords / (double)PageSize);
-
-            CertificationRequest = await query
-                .OrderByDescending(c => c.RequestDate)
-                .ThenByDescending(c => c.Id)
-                .Skip((CurrentPage - 1) * PageSize)
-                .Take(PageSize)
-                .AsNoTracking()
-                .ToListAsync();
-
-            Agencies = await _context.Agencies
-                .Where(a => a.IsActive)
-                .OrderBy(a => a.Abbreviation)
-                .ToListAsync();
-
-            Employees = await _context.Employees
-                .OrderBy(e => e.DisplayName)
-                .ToListAsync();
+            return Page();
         }
 
         public IActionResult OnGetCertificationsByAgency(int agencyId)

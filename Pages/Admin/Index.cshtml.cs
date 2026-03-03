@@ -76,29 +76,38 @@ namespace SeHrCertificationPortal.Pages.Admin
         [BindProperty]
         public string AdminEmail { get; set; } = string.Empty;
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
-            Agency = await _context.Agencies
-                .Include(a => a.Certifications)
-                .OrderBy(a => a.Abbreviation)
-                .ToListAsync();
+            try {
+                Agency = await _context.Agencies
+                    .Include(a => a.Certifications)
+                    .OrderBy(a => a.Abbreviation)
+                    .ToListAsync();
 
-            Certifications = await _context.Certifications
-                .Include(c => c.Agency)
-                .OrderBy(c => c.Agency!.Abbreviation)
-                .ThenBy(c => c.Name)
-                .ToListAsync();
+                Certifications = await _context.Certifications
+                    .Include(c => c.Agency)
+                    .OrderBy(c => c.Agency!.Abbreviation)
+                    .ThenBy(c => c.Name)
+                    .ToListAsync();
 
-            Employees = await _context.Employees
-                .Include(e => e.CertificationRequests)
-                .OrderBy(e => e.DisplayName)
-                .ToListAsync();
+                Employees = await _context.Employees
+                    .Include(e => e.CertificationRequests)
+                    .OrderBy(e => e.DisplayName)
+                    .ToListAsync();
 
-            var thresholdSetting = await _context.SystemSettings.FindAsync("ExpiringSoonThresholdDays");
-            ExpiringSoonThresholdDays = thresholdSetting != null && int.TryParse(thresholdSetting.Value, out int days) ? days : 30;
+                var thresholdSetting = await _context.SystemSettings.FindAsync("ExpiringSoonThresholdDays");
+                ExpiringSoonThresholdDays = thresholdSetting != null && int.TryParse(thresholdSetting.Value, out int days) ? days : 30;
 
-            var emailSetting = await _context.SystemSettings.FindAsync("AdminEmail");
-            AdminEmail = emailSetting?.Value ?? "";
+                var emailSetting = await _context.SystemSettings.FindAsync("AdminEmail");
+                AdminEmail = emailSetting?.Value ?? "";
+            } catch (Exception ex) {
+                _logger.LogError(ex, "Error fetching data for page load.");
+                TempData["ErrorMessage"] = "Unable to connect to the database to load records. The system may be experiencing an outage.";
+                Agency = new List<SeHrCertificationPortal.Models.Agency>();
+                Certifications = new List<SeHrCertificationPortal.Models.Certification>();
+                Employees = new List<SeHrCertificationPortal.Models.Employee>();
+            }
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAddAgencyAsync()
