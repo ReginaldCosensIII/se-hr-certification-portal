@@ -5,6 +5,7 @@
 - Three-State Data Lifecycle for Certifications (Passed -> Revoked -> Archived), preserving historical audit trails.
 - Raw data table fallbacks and explicit "Critical Lapse" lists injected into QuestPDF exports.
 - Modern persistent active-state styling for the sidebar navigation.
+- **Epic SRE**: Forensic implementation of `ILogger<T>`, safe `try-catch` collection initialization, UI exception alerts (`TempData`), and configuration of Global Exception Middleware for graceful fallback UI.
 
 ### Changed
 - Standardized global typography (fs-4, fs-5) across all major module indexes.
