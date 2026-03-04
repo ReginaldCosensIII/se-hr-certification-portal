@@ -396,17 +396,20 @@
             const isSearch = urlParams.has('SearchString');
             const savedState = localStorage.getItem(storageKey);
 
-            // If forceOpen is true, open it. 
-            // If it's a search/manage action, FORCE close it.
-            // Otherwise, respect savedState.
-            if (forceOpen || (!isSearch && savedState === 'open')) {
+            if (forceOpen) {
+                // Delay slightly to let the browser paint the closed state, then animate open
+                setTimeout(function() {
+                    var bsCollapse = new bootstrap.Collapse(collapseElement, { toggle: false });
+                    bsCollapse.show();
+                }, 150);
+                
+                localStorage.setItem(storageKey, 'open');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (!isSearch && savedState === 'open') {
+                // Instant open for returning users (prevents annoying animation bounce on refresh)
                 collapseElement.classList.add('show');
                 toggleButton.classList.remove('collapsed');
                 toggleButton.setAttribute('aria-expanded', 'true');
-                if (forceOpen) {
-                    localStorage.setItem(storageKey, 'open'); 
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                }
             } else {
                 collapseElement.classList.remove('show');
                 toggleButton.classList.add('collapsed');
