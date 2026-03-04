@@ -103,6 +103,16 @@
             </tr>
             </thead>
             <tbody>
+            @if (!Model.RecentRequests.Any())
+            {
+                <tr>
+                    <td colspan="12" class="text-center py-5 text-muted">
+                        <i data-lucide="search-x" class="mb-2" style="width: 32px; height: 32px; opacity: 0.5;"></i>
+                        <h5 class="fw-bold text-secondary mb-1">No Records Found</h5>
+                        <p class="mb-0 small">We couldn't find any recent requests.</p>
+                    </td>
+                </tr>
+            }
             @foreach (var item in Model.RecentRequests)
             {
                 <tr>
