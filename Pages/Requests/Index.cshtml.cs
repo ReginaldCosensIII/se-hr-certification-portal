@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using QuestPDF.Fluent;
-using QuestPDF.Helpers;
-using QuestPDF.Infrastructure;
+
 
 namespace SeHrCertificationPortal.Pages.Requests
 {
@@ -229,74 +227,6 @@ namespace SeHrCertificationPortal.Pages.Requests
             return RedirectToPage(new { p, pageSize, SearchString = searchString, StatusFilter = statusFilter });
         }
 
-        public IActionResult OnPostDownloadBlankForm()
-        {
-            var logoPath = Path.Combine(_env.WebRootPath, "img", "branding-assets", "Specialized-Engineering-Logo-white.webp");
-            byte[]? logoBytes = System.IO.File.Exists(logoPath) ? System.IO.File.ReadAllBytes(logoPath) : null;
 
-            var document = Document.Create(container =>
-            {
-                container.Page(page =>
-                {
-                    page.Size(PageSizes.Letter);
-                    page.Margin(1, Unit.Centimetre);
-                    page.PageColor(Colors.White);
-                    page.DefaultTextStyle(x => x.FontSize(11).FontFamily(Fonts.Arial));
-
-                    page.Header().Background("#66615c").Padding(10).Row(row =>
-                    {
-                        if (logoBytes != null)
-                        {
-                            row.ConstantItem(150).Image(logoBytes);
-                        }
-                        row.RelativeItem().AlignRight().AlignMiddle().Text("Employee Certification Request Form").FontColor(Colors.White).FontSize(16).SemiBold();
-                    });
-
-                    page.Content().PaddingVertical(20).PaddingHorizontal(20).Column(col =>
-                    {
-                        col.Spacing(15);
-                        col.Item().Text("Please complete all fields and obtain manager signature.").Italic().FontSize(12).FontColor(Colors.Grey.Medium);
-
-                        col.Item().Text("Employee Name: _____________________________________________________    Request Date: ___________________________").FontSize(12);
-
-                        col.Item().Text("Manager: ___________________________________________________________    [  ] Recertification").FontSize(12);
-
-                        col.Item().Text("Certification Agency: ___________________________________    Certification Desired: ___________________________________").FontSize(12);
-
-                        col.Item().PaddingTop(10).Text("Exam Type:").SemiBold().FontSize(12);
-                        col.Item().Text("[  ] Review Session        [  ] Written Exam        [  ] Practical Exam        [  ] Reciprocity").FontSize(12);
-
-                        col.Item().PaddingTop(10).Text("Need to purchase study material?").SemiBold().FontSize(12);
-                        col.Item().Text("[  ] YES        [  ] NO").FontSize(12);
-
-                        col.Item().PaddingTop(10).Text("Date Needed: ___________________________________________    Date Offered: ___________________________________________").FontSize(12);
-                        col.Item().Text("Location of Exam: ______________________________________________________________________________________________").FontSize(12);
-
-                        col.Item().PaddingTop(20).Text("Approved By (Manager Signature): ___________________________________________    Date: ___________________________").FontSize(12);
-
-                        col.Item().PaddingTop(30).Border(1).BorderColor(Colors.Black).Padding(10).Column(ac =>
-                        {
-                            ac.Item().PaddingBottom(10).Text("For Administrative Use Only").SemiBold().FontSize(12);
-                            
-                            ac.Item().Text("[  ] Registration Submitted                 [  ] Confirmation Received").FontSize(12);
-                            ac.Item().Text("[  ] Added to Tracking Spreadsheet          [  ] Confirmation Forwarded").FontSize(12);
-                            ac.Item().Text("[  ] Cert / License Rec'd                   [  ] Added to Calendar").FontSize(12);
-                            ac.Item().Text("[  ] Added to DB                            Lodging Needed?    [  ] Yes    [  ] No").FontSize(12);
-                            
-                            ac.Item().PaddingTop(15).Text("Written Exam Date: ______________________________________________________________________________________________").FontSize(12);
-                        });
-                    });
-
-                    page.Footer().AlignCenter().Text(x =>
-                    {
-                        x.Span("John Harrison | Corporate Director of Training & Facilities | Email: jharrison@specializedengineering.com | Mobile: 240-674-0250").FontSize(9).FontColor(Colors.Grey.Darken1);
-                    });
-                });
-            });
-
-            var pdfBytes = document.GeneratePdf();
-            Response.Headers.Append("Content-Disposition", "inline; filename=\"Certification_Request_Form.pdf\"");
-            return File(pdfBytes, "application/pdf");
-        }
     }
 }

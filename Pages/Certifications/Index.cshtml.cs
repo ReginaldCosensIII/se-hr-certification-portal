@@ -212,27 +212,7 @@ namespace SeHrCertificationPortal.Pages.Certifications
             return Page();
         }
 
-        public async Task<IActionResult> OnGetEmployeeHistoryAsync(int employeeId)
-        {
-            var query = _context.CertificationRequests
-                .Where(c => c.EmployeeId == employeeId && (c.Status == RequestStatus.Passed || c.Status == RequestStatus.Revoked))
-                .Include(c => c.Agency)
-                .Include(c => c.Certification)
-                .AsNoTracking();
 
-            var rawData = await query.ToListAsync(); // Materialize to memory first
-
-            var history = rawData.Select(r => new
-            { // Apply C# formatting safely
-                agency = r.Agency != null ? r.Agency.Abbreviation : r.CustomAgencyName,
-                certification = r.Certification != null ? r.Certification.Name : r.CustomCertificationName,
-                datePassed = r.RequestDate.ToString("MMM dd, yyyy"),
-                expirationDate = r.ExpirationDate.HasValue ? r.ExpirationDate.Value.ToString("MMM dd, yyyy") : "Permanent",
-                status = GetComputedStatus(r.ExpirationDate).ToString()
-            }).ToList();
-
-            return new JsonResult(history);
-        }
 
         public async Task<IActionResult> OnPostEditCertAsync(int p = 1, int pageSize = 25, string? searchString = null, int? agencyFilter = null, string? statusFilter = null, bool filterAnalytics = true)
         {
@@ -548,105 +528,6 @@ namespace SeHrCertificationPortal.Pages.Certifications
             return File(document.GeneratePdf(), "application/pdf", $"SPE_Analytics_Report_{DateTime.Now:yyyyMMdd}.pdf");
         }
 
-        public async Task<IActionResult> OnPostDownloadEmployeeHistoryPdfAsync(int employeeId)
-        {
-            try
-            {
-                var employee = await _context.Employees.FindAsync(employeeId);
-                if (employee == null) return NotFound();
 
-                var userCerts = await _context.CertificationRequests
-                    .Include(c => c.Agency)
-                    .Include(c => c.Certification)
-                    .Where(c => c.EmployeeId == employeeId && (c.Status == RequestStatus.Passed || c.Status == RequestStatus.Revoked || c.Status == RequestStatus.Archived))
-                    .OrderByDescending(c => c.RequestDate)
-                    .AsNoTracking()
-                    .ToListAsync();
-
-                var logoPath = Path.Combine(_env.WebRootPath, "img", "branding-assets", "Specialized-Engineering-Logo-white.webp");
-                byte[]? logoBytes = System.IO.File.Exists(logoPath) ? await System.IO.File.ReadAllBytesAsync(logoPath) : null;
-
-                var document = Document.Create(container =>
-                {
-                    container.Page(page =>
-                    {
-                        page.Size(PageSizes.Letter);
-                        page.Margin(1, Unit.Centimetre);
-                        page.PageColor(Colors.White);
-                        page.DefaultTextStyle(x => x.FontSize(10).FontFamily(Fonts.Arial));
-
-                        page.Header().Background("#66615c").Padding(10).Row(row =>
-                        {
-                            if (logoBytes != null) row.ConstantItem(150).Image(logoBytes);
-                            row.RelativeItem().AlignRight().AlignMiddle().Text("Employee Certification History").FontColor(Colors.White).FontSize(16).SemiBold();
-                        });
-
-                        page.Content().PaddingVertical(20).Column(col =>
-                        {
-                            col.Spacing(20);
-
-                            col.Item().Text($"Employee: {employee.DisplayName}").FontSize(14).SemiBold().FontColor(Colors.Grey.Darken3);
-
-                            if (!userCerts.Any())
-                            {
-                                col.Item().Text("No certification history found for this employee.").Italic().FontColor(Colors.Grey.Medium);
-                            }
-                            else
-                            {
-                                col.Item().Table(table =>
-                                {
-                                    table.ColumnsDefinition(columns =>
-                                    {
-                                        columns.RelativeColumn(3); columns.RelativeColumn(2); columns.RelativeColumn(2); columns.RelativeColumn(2); columns.RelativeColumn(2);
-                                    });
-
-                                    table.Header(header =>
-                                    {
-                                        header.Cell().BorderBottom(1).PaddingBottom(5).Text("Certification").SemiBold();
-                                        header.Cell().BorderBottom(1).PaddingBottom(5).Text("Agency").SemiBold();
-                                        header.Cell().BorderBottom(1).PaddingBottom(5).Text("Date Passed").SemiBold();
-                                        header.Cell().BorderBottom(1).PaddingBottom(5).Text("Expiration Date").SemiBold();
-                                        header.Cell().BorderBottom(1).PaddingBottom(5).Text("Status").SemiBold();
-                                    });
-
-                                    foreach (var cert in userCerts)
-                                    {
-                                        var certName = cert.Certification?.Name ?? cert.CustomCertificationName ?? "Custom";
-                                        var agencyName = cert.Agency?.Abbreviation ?? cert.CustomAgencyName ?? "Custom";
-                                        var passedDate = cert.RequestDate.ToString("MMM dd, yyyy");
-                                        var expDate = cert.ExpirationDate.HasValue ? cert.ExpirationDate.Value.ToString("MMM dd, yyyy") : "None";
-                                        var statusText = cert.Status == RequestStatus.Passed && cert.ExpirationDate.HasValue && cert.ExpirationDate.Value < DateTime.UtcNow ? "Expired" : cert.Status.ToString();
-
-                                        table.Cell().PaddingVertical(5).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(certName);
-                                        table.Cell().PaddingVertical(5).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(agencyName);
-                                        table.Cell().PaddingVertical(5).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(passedDate);
-                                        table.Cell().PaddingVertical(5).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(expDate);
-                                        table.Cell().PaddingVertical(5).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(statusText);
-                                    }
-                                });
-                            }
-                        });
-
-                        page.Footer().AlignCenter().Text(x =>
-                        {
-                            x.Span($"Generated {DateTime.Now:g} | Page ");
-                            x.CurrentPageNumber();
-                            x.Span(" of ");
-                            x.TotalPages();
-                        });
-                    });
-                });
-
-                var pdfBytes = document.GeneratePdf();
-                Response.Headers.Append("Content-Disposition", $"inline; filename=\"History_{employee.DisplayName.Replace(" ", "_")}.pdf\"");
-                return File(pdfBytes, "application/pdf");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error generating employee history PDF.");
-                TempData["ErrorMessage"] = "Failed to generate history report.";
-                return RedirectToPage();
-            }
-        }
     }
 }

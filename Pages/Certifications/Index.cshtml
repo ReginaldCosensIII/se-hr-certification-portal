@@ -206,7 +206,7 @@
                 }
                 @foreach (var item in Model.PassedCertifications)
                 {
-                    <tr class="clickable-row" style="cursor: pointer;" data-employee-id="@item.EmployeeId" title="Click to view certification history">
+                    <tr>
                         <td>@item.Employee?.DisplayName</td>
                         <td>@(item.Agency?.Abbreviation ?? item.CustomAgencyName ?? "Custom")</td>
                         <td>@(item.Certification?.Name ?? item.CustomCertificationName ?? "Custom")</td>
@@ -254,11 +254,7 @@
                         </td>
                         <td class="text-end">
                             <div class="d-flex justify-content-end gap-3 align-items-center">
-                                <form method="post" class="m-0 p-0">
-                                    <button type="submit" formtarget="_blank" asp-page-handler="DownloadEmployeeHistoryPdf" asp-route-employeeId="@item.EmployeeId" class="btn btn-link p-0 m-0 border-0 text-info action-btn text-decoration-none" title="Print History">
-                                        <i data-lucide="printer" style="width: 18px; height: 18px;"></i>
-                                    </button>
-                                </form>
+
                                 @if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Revoked)
                                 {
                                     <a href="javascript:void(0)" class="text-success action-btn restore-cert-btn" data-request-id="@item.Id" title="Restore Certification">
@@ -391,38 +387,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="employeeHistoryModal" tabindex="-1" aria-labelledby="employeeHistoryModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title" id="employeeHistoryModalLabel">
-                    <i data-lucide="user" class="me-2"></i><span id="modalEmployeeName">Employee History</span>
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover align-middle mb-0" id="modalHistoryTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Agency</th>
-                                <th>Certification</th>
-                                <th>Date Passed</th>
-                                <th>Expiration</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="modalHistoryBody">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <div class="modal fade" id="editCertModal" tabindex="-1">
     <div class="modal-dialog">
@@ -712,46 +677,7 @@
                         return;
                     }
 
-                    // C. If neither action was clicked, handle the ROW CLICK (Employee Modal)
-                    var row = e.target.closest('.clickable-row');
-                    if (row) {
-                        console.log('--- ROW TRIGGERED ---');
-                        var requestId = row.getAttribute('data-request-id');
-                        
-                        // Set Modal Title
-                        var employeeName = row.querySelector('td:first-child')?.textContent.trim() || 'Employee';
-                        document.getElementById('modalEmployeeName').textContent = employeeName + "'s Certifications";
 
-                        // Fetch Data
-                        fetch('?handler=EmployeeHistory&employeeId=' + row.getAttribute('data-employee-id'))
-                            .then(response => response.json())
-                            .then(data => {
-                                var tbodyHtml = '';
-                                if (data.length === 0) {
-                                    tbodyHtml = '<tr><td colspan="5" class="text-center text-muted fst-italic py-4">No certification history found.</td></tr>';
-                                } else {
-                                    data.forEach(function(item) {
-                                        var badgeClass = 'bg-secondary';
-                                        if (item.status === 'Active') badgeClass = 'bg-success';
-                                        else if (item.status === 'ExpiringSoon') badgeClass = 'bg-warning text-dark';
-                                        else if (item.status === 'Expired') badgeClass = 'bg-danger';
-                                        else if (item.status === 'Permanent') badgeClass = 'bg-info text-dark';
-
-                                        tbodyHtml += `<tr>
-                                            <td>${item.agency}</td>
-                                            <td>${item.certification}</td>
-                                            <td>${item.datePassed}</td>
-                                            <td>${item.expirationDate}</td>
-                                            <td><span class="badge ${badgeClass}">${item.status}</span></td>
-                                        </tr>`;
-                                    });
-                                }
-                                document.getElementById('modalHistoryBody').innerHTML = tbodyHtml;
-                                if(window.lucide) { window.lucide.createIcons(); }
-                                new bootstrap.Modal(document.getElementById('employeeHistoryModal')).show();
-                            })
-                            .catch(err => console.error('Fetch error:', err));
-                    }
                 });
             }
 
