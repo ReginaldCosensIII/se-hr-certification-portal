@@ -11,11 +11,13 @@ namespace SeHrCertificationPortal.Pages.Admin
     {
         private readonly SeHrCertificationPortal.Data.ApplicationDbContext _context;
         private readonly IWebHostEnvironment _env;
+        private readonly ILogger<SettingsModel> _logger;
 
-        public SettingsModel(SeHrCertificationPortal.Data.ApplicationDbContext context, IWebHostEnvironment env)
+        public SettingsModel(SeHrCertificationPortal.Data.ApplicationDbContext context, IWebHostEnvironment env, ILogger<SettingsModel> logger)
         {
             _context = context;
             _env = env;
+            _logger = logger;
         }
 
         public IList<SeHrCertificationPortal.Models.Agency> Agency { get; set; } = default!;
@@ -74,145 +76,200 @@ namespace SeHrCertificationPortal.Pages.Admin
         [BindProperty]
         public string AdminEmail { get; set; } = string.Empty;
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
-            Agency = await _context.Agencies
-                .Include(a => a.Certifications)
-                .OrderBy(a => a.Abbreviation)
-                .ToListAsync();
+            try {
+                Agency = await _context.Agencies
+                    .Include(a => a.Certifications)
+                    .OrderBy(a => a.Abbreviation)
+                    .ToListAsync();
 
-            Certifications = await _context.Certifications
-                .Include(c => c.Agency)
-                .OrderBy(c => c.Agency!.Abbreviation)
-                .ThenBy(c => c.Name)
-                .ToListAsync();
+                Certifications = await _context.Certifications
+                    .Include(c => c.Agency)
+                    .OrderBy(c => c.Agency!.Abbreviation)
+                    .ThenBy(c => c.Name)
+                    .ToListAsync();
 
-            Employees = await _context.Employees
-                .Include(e => e.CertificationRequests)
-                .OrderBy(e => e.DisplayName)
-                .ToListAsync();
+                Employees = await _context.Employees
+                    .Include(e => e.CertificationRequests)
+                    .OrderBy(e => e.DisplayName)
+                    .ToListAsync();
 
-            var thresholdSetting = await _context.SystemSettings.FindAsync("ExpiringSoonThresholdDays");
-            ExpiringSoonThresholdDays = thresholdSetting != null && int.TryParse(thresholdSetting.Value, out int days) ? days : 30;
+                var thresholdSetting = await _context.SystemSettings.FindAsync("ExpiringSoonThresholdDays");
+                ExpiringSoonThresholdDays = thresholdSetting != null && int.TryParse(thresholdSetting.Value, out int days) ? days : 30;
 
-            var emailSetting = await _context.SystemSettings.FindAsync("AdminEmail");
-            AdminEmail = emailSetting?.Value ?? "";
+                var emailSetting = await _context.SystemSettings.FindAsync("AdminEmail");
+                AdminEmail = emailSetting?.Value ?? "";
+            } catch (Exception ex) {
+                _logger.LogError(ex, "Error fetching data for page load.");
+                TempData["ErrorMessage"] = "Unable to connect to the database to load records. The system may be experiencing an outage.";
+                Agency = new List<SeHrCertificationPortal.Models.Agency>();
+                Certifications = new List<SeHrCertificationPortal.Models.Certification>();
+                Employees = new List<SeHrCertificationPortal.Models.Employee>();
+            }
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAddAgencyAsync()
         {
             if (string.IsNullOrWhiteSpace(NewAgency.Abbreviation)) return RedirectToPage();
-            NewAgency.IsActive = true;
-            _context.Agencies.Add(NewAgency);
-            await _context.SaveChangesAsync();
+            try {
+                NewAgency.IsActive = true;
+                _context.Agencies.Add(NewAgency);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Agency added successfully.";
+            } catch (Exception ex) {
+                _logger.LogError(ex, "Error adding agency.");
+                TempData["ErrorMessage"] = "An unexpected error occurred. Please try again or contact IT.";
+            }
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostAddCertificationAsync()
         {
             if (string.IsNullOrWhiteSpace(NewCertification.Name) || NewCertification.AgencyId == 0) return RedirectToPage();
-            NewCertification.IsActive = true;
-            _context.Certifications.Add(NewCertification);
-            await _context.SaveChangesAsync();
+            try {
+                NewCertification.IsActive = true;
+                _context.Certifications.Add(NewCertification);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Certification added successfully.";
+            } catch (Exception ex) {
+                _logger.LogError(ex, "Error adding certification.");
+                TempData["ErrorMessage"] = "An unexpected error occurred. Please try again or contact IT.";
+            }
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostSaveSettingsAsync()
         {
-            var thresholdSetting = await _context.SystemSettings.FindAsync("ExpiringSoonThresholdDays");
-            if (thresholdSetting == null)
-            {
-                _context.SystemSettings.Add(new SeHrCertificationPortal.Models.SystemSetting { Key = "ExpiringSoonThresholdDays", Value = ExpiringSoonThresholdDays.ToString() });
-            }
-            else
-            {
-                thresholdSetting.Value = ExpiringSoonThresholdDays.ToString();
-            }
+            try {
+                var thresholdSetting = await _context.SystemSettings.FindAsync("ExpiringSoonThresholdDays");
+                if (thresholdSetting == null)
+                    _context.SystemSettings.Add(new SeHrCertificationPortal.Models.SystemSetting { Key = "ExpiringSoonThresholdDays", Value = ExpiringSoonThresholdDays.ToString() });
+                else
+                    thresholdSetting.Value = ExpiringSoonThresholdDays.ToString();
 
-            var emailSetting = await _context.SystemSettings.FindAsync("AdminEmail");
-            if (emailSetting == null)
-            {
-                _context.SystemSettings.Add(new SeHrCertificationPortal.Models.SystemSetting { Key = "AdminEmail", Value = AdminEmail });
-            }
-            else
-            {
-                emailSetting.Value = AdminEmail;
-            }
+                var emailSetting = await _context.SystemSettings.FindAsync("AdminEmail");
+                if (emailSetting == null)
+                    _context.SystemSettings.Add(new SeHrCertificationPortal.Models.SystemSetting { Key = "AdminEmail", Value = AdminEmail });
+                else
+                    emailSetting.Value = AdminEmail;
 
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Settings saved successfully.";
+            } catch (Exception ex) {
+                _logger.LogError(ex, "Error saving settings.");
+                TempData["ErrorMessage"] = "An unexpected error occurred. Please try again or contact IT.";
+            }
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostEditAgencyAsync()
         {
-            var agency = await _context.Agencies.FindAsync(AgencyId);
-            if (agency != null && !string.IsNullOrWhiteSpace(AgencyName) && !string.IsNullOrWhiteSpace(AgencyAbbreviation))
-            {
-                agency.FullName = AgencyName;
-                agency.Abbreviation = AgencyAbbreviation;
-                await _context.SaveChangesAsync();
+            try {
+                var agency = await _context.Agencies.FindAsync(AgencyId);
+                if (agency != null && !string.IsNullOrWhiteSpace(AgencyName) && !string.IsNullOrWhiteSpace(AgencyAbbreviation))
+                {
+                    agency.FullName = AgencyName;
+                    agency.Abbreviation = AgencyAbbreviation;
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Agency edited successfully.";
+                }
+            } catch (Exception ex) {
+                _logger.LogError(ex, "Error editing agency.");
+                TempData["ErrorMessage"] = "An unexpected error occurred. Please try again or contact IT.";
             }
             return RedirectToPage(); // PRG Pattern (Reloads active tab via our JS localstorage)
         }
 
         public async Task<IActionResult> OnPostDeactivateAgencyAsync()
         {
-            var agency = await _context.Agencies.FindAsync(AgencyId);
-            if (agency != null)
-            {
-                agency.IsActive = false;
-                await _context.SaveChangesAsync();
+            try {
+                var agency = await _context.Agencies.FindAsync(AgencyId);
+                if (agency != null)
+                {
+                    agency.IsActive = false;
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Agency deactivated.";
+                }
+            } catch (Exception ex) {
+                _logger.LogError(ex, "Error deactivating agency.");
+                TempData["ErrorMessage"] = "An unexpected error occurred. Please try again or contact IT.";
             }
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostEditCertificationAsync()
         {
-            var cert = await _context.Certifications.FindAsync(CertId);
-            if (cert != null && !string.IsNullOrWhiteSpace(CertName))
-            {
-                cert.Name = CertName;
-                cert.AgencyId = CertAgencyId;
-                cert.ValidityPeriodMonths = CertValidity;
-                await _context.SaveChangesAsync();
+            try {
+                var cert = await _context.Certifications.FindAsync(CertId);
+                if (cert != null && !string.IsNullOrWhiteSpace(CertName))
+                {
+                    cert.Name = CertName;
+                    cert.AgencyId = CertAgencyId;
+                    cert.ValidityPeriodMonths = CertValidity;
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Certification edited successfully.";
+                }
+            } catch (Exception ex) {
+                _logger.LogError(ex, "Error editing certification.");
+                TempData["ErrorMessage"] = "An unexpected error occurred. Please try again or contact IT.";
             }
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostDeactivateCertificationAsync()
         {
-            var cert = await _context.Certifications.FindAsync(CertId);
-            if (cert != null)
-            {
-                cert.IsActive = false;
-                await _context.SaveChangesAsync();
+            try {
+                var cert = await _context.Certifications.FindAsync(CertId);
+                if (cert != null)
+                {
+                    cert.IsActive = false;
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Certification deactivated.";
+                }
+            } catch (Exception ex) {
+                _logger.LogError(ex, "Error deactivating certification.");
+                TempData["ErrorMessage"] = "An unexpected error occurred. Please try again or contact IT.";
             }
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostReactivateAgencyAsync()
         {
-            var agency = await _context.Agencies.FindAsync(AgencyId);
-            if (agency != null)
-            {
-                agency.IsActive = true;
-                await _context.SaveChangesAsync();
+            try {
+                var agency = await _context.Agencies.FindAsync(AgencyId);
+                if (agency != null)
+                {
+                    agency.IsActive = true;
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Agency reactivated.";
+                }
+            } catch (Exception ex) {
+                _logger.LogError(ex, "Error reactivating agency.");
+                TempData["ErrorMessage"] = "An unexpected error occurred. Please try again or contact IT.";
             }
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostReactivateCertificationAsync()
         {
-            var cert = await _context.Certifications.FindAsync(CertId);
-            if (cert != null)
-            {
-                cert.IsActive = true;
-                await _context.SaveChangesAsync();
+            try {
+                var cert = await _context.Certifications.FindAsync(CertId);
+                if (cert != null)
+                {
+                    cert.IsActive = true;
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Certification reactivated.";
+                }
+            } catch (Exception ex) {
+                _logger.LogError(ex, "Error reactivating certification.");
+                TempData["ErrorMessage"] = "An unexpected error occurred. Please try again or contact IT.";
             }
             return RedirectToPage();
         }
 
-        public async Task<IActionResult> OnGetExportAgenciesAsync()
+        public async Task<IActionResult> OnPostDownloadCatalogAsync(string exportScope = "Full")
         {
             var agencies = await _context.Agencies
                 .Include(a => a.Certifications)
@@ -238,33 +295,23 @@ namespace SeHrCertificationPortal.Pages.Admin
                         {
                             row.ConstantItem(150).Image(logoBytes);
                         }
-                        row.RelativeItem().AlignRight().AlignMiddle().Text("Agency & Certification Roster").FontColor(Colors.White).FontSize(16).SemiBold();
+                        string title = exportScope == "Agencies" ? "Agency Roster" : (exportScope == "Certifications" ? "Certification Roster" : "Agency & Certification Roster");
+                        row.RelativeItem().AlignRight().AlignMiddle().Text(title).FontColor(Colors.White).FontSize(16).SemiBold();
                     });
 
                     // Content
                     page.Content().PaddingVertical(1, Unit.Centimetre).Column(col =>
                     {
-                        foreach (var agency in agencies)
+                        if (exportScope == "Certifications")
                         {
-                            // 1. Dynamic Agency Header
-                            var agencyColor = agency.IsActive ? "#a19482" : (string)Colors.Red.Medium;
-                            var agencyStatusText = agency.IsActive ? "" : " [INACTIVE]";
+                            var allCerts = agencies.SelectMany(a => a.Certifications.Select(c => new { Cert = c, Agency = a })).OrderBy(x => x.Cert.Name).ToList();
 
-                            col.Item().PaddingTop(10).PaddingBottom(5).Text($"{agency.FullName} ({agency.Abbreviation}){agencyStatusText}")
-                                .FontSize(14).SemiBold().FontColor(agencyColor);
-
-                            if (!agency.Certifications.Any())
-                            {
-                                col.Item().PaddingBottom(15).Text("No certifications currently linked.").Italic().FontColor(Colors.Grey.Medium);
-                                continue;
-                            }
-
-                            // 2. Certifications Table
                             col.Item().PaddingBottom(15).Table(table =>
                             {
                                 table.ColumnsDefinition(columns =>
                                 {
                                     columns.RelativeColumn(3); // Name
+                                    columns.RelativeColumn(2); // Agency
                                     columns.RelativeColumn(1); // Validity
                                     columns.RelativeColumn(1); // Status
                                 });
@@ -272,21 +319,101 @@ namespace SeHrCertificationPortal.Pages.Admin
                                 table.Header(header =>
                                 {
                                     header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Certification Name").SemiBold();
+                                    header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Agency").SemiBold();
                                     header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Validity Period").SemiBold();
                                     header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Status").SemiBold();
                                 });
 
-                                foreach (var cert in agency.Certifications)
+                                foreach (var item in allCerts)
                                 {
-                                    // Dynamic Row Colors
-                                    var rowTextColor = cert.IsActive ? Colors.Black : Colors.Grey.Medium;
-                                    var statusColor = cert.IsActive ? Colors.Green.Darken1 : Colors.Red.Medium;
+                                    var rowTextColor = item.Cert.IsActive ? Colors.Black : Colors.Grey.Medium;
+                                    var statusColor = item.Cert.IsActive ? Colors.Green.Darken1 : Colors.Red.Medium;
 
-                                    table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(cert.Name).FontColor(rowTextColor);
-                                    table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(cert.ValidityPeriodMonths == 0 ? "Permanent" : $"{cert.ValidityPeriodMonths} Months").FontColor(rowTextColor);
-                                    table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(cert.IsActive ? "Active" : "Inactive").FontColor(statusColor).SemiBold();
+                                    table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(item.Cert.Name).FontColor(rowTextColor);
+                                    table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(item.Agency.Abbreviation).FontColor(rowTextColor);
+                                    table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(item.Cert.ValidityPeriodMonths == 0 ? "Permanent" : $"{item.Cert.ValidityPeriodMonths} Months").FontColor(rowTextColor);
+                                    table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(item.Cert.IsActive ? "Active" : "Inactive").FontColor(statusColor).SemiBold();
                                 }
                             });
+                        }
+                        else if (exportScope == "Agencies")
+                        {
+                            col.Item().PaddingBottom(15).Table(table =>
+                            {
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.RelativeColumn(3); // Name
+                                    columns.RelativeColumn(1); // Abbreviation
+                                    columns.RelativeColumn(1); // Active Certs
+                                    columns.RelativeColumn(1); // Status
+                                });
+
+                                table.Header(header =>
+                                {
+                                    header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Agency Full Name").SemiBold();
+                                    header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Abbreviation").SemiBold();
+                                    header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Certifications").SemiBold();
+                                    header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Status").SemiBold();
+                                });
+
+                                foreach (var agency in agencies)
+                                {
+                                    var rowTextColor = agency.IsActive ? Colors.Black : Colors.Grey.Medium;
+                                    var statusColor = agency.IsActive ? Colors.Green.Darken1 : Colors.Red.Medium;
+
+                                    table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(agency.FullName).FontColor(rowTextColor);
+                                    table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(agency.Abbreviation).FontColor(rowTextColor);
+                                    table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(agency.Certifications.Count.ToString()).FontColor(rowTextColor);
+                                    table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(agency.IsActive ? "Active" : "Inactive").FontColor(statusColor).SemiBold();
+                                }
+                            });
+                        }
+                        else
+                        {
+                            foreach (var agency in agencies)
+                            {
+                                // 1. Dynamic Agency Header
+                                var agencyColor = agency.IsActive ? "#a19482" : (string)Colors.Red.Medium;
+                                var agencyStatusText = agency.IsActive ? "" : " [INACTIVE]";
+
+                                col.Item().PaddingTop(10).PaddingBottom(5).Text($"{agency.FullName} ({agency.Abbreviation}){agencyStatusText}")
+                                    .FontSize(14).SemiBold().FontColor(agencyColor);
+
+                                if (!agency.Certifications.Any())
+                                {
+                                    col.Item().PaddingBottom(15).Text("No certifications currently linked.").Italic().FontColor(Colors.Grey.Medium);
+                                    continue;
+                                }
+
+                                // 2. Certifications Table
+                                col.Item().PaddingBottom(15).Table(table =>
+                                {
+                                    table.ColumnsDefinition(columns =>
+                                    {
+                                        columns.RelativeColumn(3); // Name
+                                        columns.RelativeColumn(1); // Validity
+                                        columns.RelativeColumn(1); // Status
+                                    });
+
+                                    table.Header(header =>
+                                    {
+                                        header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Certification Name").SemiBold();
+                                        header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Validity Period").SemiBold();
+                                        header.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5).Text("Status").SemiBold();
+                                    });
+
+                                    foreach (var cert in agency.Certifications)
+                                    {
+                                        // Dynamic Row Colors
+                                        var rowTextColor = cert.IsActive ? Colors.Black : Colors.Grey.Medium;
+                                        var statusColor = cert.IsActive ? Colors.Green.Darken1 : Colors.Red.Medium;
+
+                                        table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(cert.Name).FontColor(rowTextColor);
+                                        table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(cert.ValidityPeriodMonths == 0 ? "Permanent" : $"{cert.ValidityPeriodMonths} Months").FontColor(rowTextColor);
+                                        table.Cell().PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Text(cert.IsActive ? "Active" : "Inactive").FontColor(statusColor).SemiBold();
+                                    }
+                                });
+                            }
                         }
                     });
 
@@ -302,7 +429,7 @@ namespace SeHrCertificationPortal.Pages.Admin
             });
 
             byte[] pdfBytes = document.GeneratePdf();
-            return File(pdfBytes, "application/pdf", $"SPE_Agencies_Roster_{DateTime.Now:yyyyMMdd}.pdf");
+            return File(pdfBytes, "application/pdf", $"SPE_Catalog_{exportScope}_{DateTime.Now:yyyyMMdd}.pdf");
         }
 
         public async Task<IActionResult> OnGetExportEmployeesAsync()
@@ -384,45 +511,69 @@ namespace SeHrCertificationPortal.Pages.Admin
         public async Task<IActionResult> OnPostAddEmployeeAsync()
         {
             if (string.IsNullOrWhiteSpace(NewEmployee.DisplayName)) return RedirectToPage();
-            NewEmployee.IsActive = true;
-            // The frontend will bind EmployeeIdNumber, Role, and Department directly to NewEmployee
-            _context.Employees.Add(NewEmployee);
-            await _context.SaveChangesAsync();
+            try {
+                NewEmployee.IsActive = true;
+                // The frontend will bind EmployeeIdNumber, Role, and Department directly to NewEmployee
+                _context.Employees.Add(NewEmployee);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Employee added successfully.";
+            } catch (Exception ex) {
+                _logger.LogError(ex, "Error adding employee.");
+                TempData["ErrorMessage"] = "An unexpected error occurred. Please try again or contact IT.";
+            }
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostEditEmployeeAsync()
         {
-            var emp = await _context.Employees.FindAsync(EmployeeId);
-            if (emp != null && !string.IsNullOrWhiteSpace(EmployeeName))
-            {
-                emp.DisplayName = EmployeeName;
-                emp.EmployeeIdNumber = EmployeeIdNumberInput;
-                emp.Role = EmployeeRoleInput;
-                emp.Department = EmployeeDepartmentInput;
-                await _context.SaveChangesAsync();
+            try {
+                var emp = await _context.Employees.FindAsync(EmployeeId);
+                if (emp != null && !string.IsNullOrWhiteSpace(EmployeeName))
+                {
+                    emp.DisplayName = EmployeeName;
+                    emp.EmployeeIdNumber = EmployeeIdNumberInput;
+                    emp.Role = EmployeeRoleInput;
+                    emp.Department = EmployeeDepartmentInput;
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Employee edited successfully.";
+                }
+            } catch (Exception ex) {
+                _logger.LogError(ex, "Error editing employee.");
+                TempData["ErrorMessage"] = "An unexpected error occurred. Please try again or contact IT.";
             }
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostDeactivateEmployeeAsync()
         {
-            var emp = await _context.Employees.FindAsync(EmployeeId);
-            if (emp != null)
-            {
-                emp.IsActive = false;
-                await _context.SaveChangesAsync();
+            try {
+                var emp = await _context.Employees.FindAsync(EmployeeId);
+                if (emp != null)
+                {
+                    emp.IsActive = false;
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Employee deactivated.";
+                }
+            } catch (Exception ex) {
+                _logger.LogError(ex, "Error deactivating employee.");
+                TempData["ErrorMessage"] = "An unexpected error occurred. Please try again or contact IT.";
             }
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostReactivateEmployeeAsync()
         {
-            var emp = await _context.Employees.FindAsync(EmployeeId);
-            if (emp != null)
-            {
-                emp.IsActive = true;
-                await _context.SaveChangesAsync();
+            try {
+                var emp = await _context.Employees.FindAsync(EmployeeId);
+                if (emp != null)
+                {
+                    emp.IsActive = true;
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Employee reactivated.";
+                }
+            } catch (Exception ex) {
+                _logger.LogError(ex, "Error reactivating employee.");
+                TempData["ErrorMessage"] = "An unexpected error occurred. Please try again or contact IT.";
             }
             return RedirectToPage();
         }

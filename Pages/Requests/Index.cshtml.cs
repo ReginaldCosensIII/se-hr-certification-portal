@@ -7,10 +7,12 @@ namespace SeHrCertificationPortal.Pages.Requests
     public class IndexModel : PageModel
     {
         private readonly SeHrCertificationPortal.Data.ApplicationDbContext _context;
+        private readonly ILogger<IndexModel> _logger;
 
-        public IndexModel(SeHrCertificationPortal.Data.ApplicationDbContext context)
+        public IndexModel(SeHrCertificationPortal.Data.ApplicationDbContext context, ILogger<IndexModel> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public IList<SeHrCertificationPortal.Models.CertificationRequest> CertificationRequest { get; set; } = default!;
@@ -37,56 +39,65 @@ namespace SeHrCertificationPortal.Pages.Requests
         [BindProperty(SupportsGet = true)]
         public SeHrCertificationPortal.Models.RequestStatus? StatusFilter { get; set; }
 
-        public async Task OnGetAsync(int p = 1, int? pageSize = null)
+        public async Task<IActionResult> OnGetAsync(int p = 1, int? pageSize = null)
         {
-            CurrentPage = p < 1 ? 1 : p;
+            try {
+                CurrentPage = p < 1 ? 1 : p;
 
-            // Restrict PageSize to valid options, default to 25
-            int[] validSizes = { 10, 15, 20, 25, 50 };
-            PageSize = pageSize.HasValue && validSizes.Contains(pageSize.Value) ? pageSize.Value : 25;
+                // Restrict PageSize to valid options, default to 25
+                int[] validSizes = { 10, 15, 20, 25, 50 };
+                PageSize = pageSize.HasValue && validSizes.Contains(pageSize.Value) ? pageSize.Value : 25;
 
-            var query = _context.CertificationRequests
-                .Include(c => c.Agency)
-                .Include(c => c.Certification)
-                .Include(c => c.Employee)
-                .AsQueryable();
+                var query = _context.CertificationRequests
+                    .Include(c => c.Agency)
+                    .Include(c => c.Certification)
+                    .Include(c => c.Employee)
+                    .AsQueryable();
 
-            if (StatusFilter.HasValue)
-            {
-                query = query.Where(c => c.Status == StatusFilter.Value);
+                if (StatusFilter.HasValue)
+                {
+                    query = query.Where(c => c.Status == StatusFilter.Value);
+                }
+
+                if (!string.IsNullOrWhiteSpace(SearchString))
+                {
+                    var searchLower = SearchString.ToLower().Trim();
+                    // Clean the search string so users can type "REQ-764" or "764" interchangeably
+                    var idSearch = searchLower.Replace("req-", "").Trim();
+
+                    query = query.Where(c =>
+                        (c.Employee != null && c.Employee.DisplayName.ToLower().Contains(searchLower)) ||
+                        (c.ManagerName != null && c.ManagerName.ToLower().Contains(searchLower)) ||
+                        c.Id.ToString() == idSearch);
+                }
+
+                TotalRecords = await query.CountAsync();
+                TotalPages = (int)Math.Ceiling(TotalRecords / (double)PageSize);
+
+                CertificationRequest = await query
+                    .OrderByDescending(c => c.RequestDate)
+                    .ThenByDescending(c => c.Id)
+                    .Skip((CurrentPage - 1) * PageSize)
+                    .Take(PageSize)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                Agencies = await _context.Agencies
+                    .Where(a => a.IsActive)
+                    .OrderBy(a => a.Abbreviation)
+                    .ToListAsync();
+
+                Employees = await _context.Employees
+                    .OrderBy(e => e.DisplayName)
+                    .ToListAsync();
+            } catch (Exception ex) {
+                _logger.LogError(ex, "Error fetching data for page load.");
+                TempData["ErrorMessage"] = "Unable to connect to the database to load records. The system may be experiencing an outage.";
+                CertificationRequest = new List<SeHrCertificationPortal.Models.CertificationRequest>();
+                Agencies = new List<SeHrCertificationPortal.Models.Agency>();
+                Employees = new List<SeHrCertificationPortal.Models.Employee>();
             }
-
-            if (!string.IsNullOrWhiteSpace(SearchString))
-            {
-                var searchLower = SearchString.ToLower().Trim();
-                // Clean the search string so users can type "REQ-764" or "764" interchangeably
-                var idSearch = searchLower.Replace("req-", "").Trim();
-
-                query = query.Where(c =>
-                    (c.Employee != null && c.Employee.DisplayName.ToLower().Contains(searchLower)) ||
-                    (c.ManagerName != null && c.ManagerName.ToLower().Contains(searchLower)) ||
-                    c.Id.ToString() == idSearch);
-            }
-
-            TotalRecords = await query.CountAsync();
-            TotalPages = (int)Math.Ceiling(TotalRecords / (double)PageSize);
-
-            CertificationRequest = await query
-                .OrderByDescending(c => c.RequestDate)
-                .ThenByDescending(c => c.Id)
-                .Skip((CurrentPage - 1) * PageSize)
-                .Take(PageSize)
-                .AsNoTracking()
-                .ToListAsync();
-
-            Agencies = await _context.Agencies
-                .Where(a => a.IsActive)
-                .OrderBy(a => a.Abbreviation)
-                .ToListAsync();
-
-            Employees = await _context.Employees
-                .OrderBy(e => e.DisplayName)
-                .ToListAsync();
+            return Page();
         }
 
         public IActionResult OnGetCertificationsByAgency(int agencyId)
@@ -101,30 +112,48 @@ namespace SeHrCertificationPortal.Pages.Requests
 
         public async Task<IActionResult> OnPostUpdateStatusAsync(int id, SeHrCertificationPortal.Models.RequestStatus newStatus, int p = 1, int pageSize = 25, string? searchString = null, SeHrCertificationPortal.Models.RequestStatus? statusFilter = null)
         {
-            var request = await _context.CertificationRequests.FindAsync(id);
-            if (request == null) return NotFound();
+            try
+            {
+                var request = await _context.CertificationRequests.FindAsync(id);
+                if (request == null) return NotFound();
 
-            request.Status = newStatus;
-            await _context.SaveChangesAsync();
+                request.Status = newStatus;
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Status updated successfully.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing status update.");
+                TempData["ErrorMessage"] = "An unexpected error occurred while saving. Please try again or contact IT.";
+            }
 
             return RedirectToPage(new { p, pageSize, SearchString = searchString, StatusFilter = statusFilter });
         }
 
         public async Task<IActionResult> OnPostMarkPassedAsync(int id, DateTime? expirationDate, int p = 1, int pageSize = 25, string? searchString = null, SeHrCertificationPortal.Models.RequestStatus? statusFilter = null)
         {
-            var request = await _context.CertificationRequests.FindAsync(id);
-            if (request != null)
+            try
             {
-                request.Status = SeHrCertificationPortal.Models.RequestStatus.Passed;
-                if (expirationDate.HasValue)
+                var request = await _context.CertificationRequests.FindAsync(id);
+                if (request != null)
                 {
-                    request.ExpirationDate = DateTime.SpecifyKind(expirationDate.Value, DateTimeKind.Utc);
+                    request.Status = SeHrCertificationPortal.Models.RequestStatus.Passed;
+                    if (expirationDate.HasValue)
+                    {
+                        request.ExpirationDate = DateTime.SpecifyKind(expirationDate.Value, DateTimeKind.Utc);
+                    }
+                    else
+                    {
+                        request.ExpirationDate = null;
+                    }
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Certification marked as passed.";
                 }
-                else
-                {
-                    request.ExpirationDate = null;
-                }
-                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing certification pass.");
+                TempData["ErrorMessage"] = "An unexpected error occurred while saving. Please try again or contact IT.";
             }
             return RedirectToPage(new { p, pageSize, SearchString = searchString, StatusFilter = statusFilter });
         }
@@ -133,46 +162,64 @@ namespace SeHrCertificationPortal.Pages.Requests
         {
             if (string.IsNullOrWhiteSpace(EmployeeNameInput)) return RedirectToPage();
 
-            // 1. Auto-Add Logic: Find existing or create new employee silently
-            var employee = await _context.Employees
-                .FirstOrDefaultAsync(e => e.DisplayName.ToLower() == EmployeeNameInput.ToLower());
-
-            if (employee == null)
+            try
             {
-                employee = new SeHrCertificationPortal.Models.Employee { DisplayName = EmployeeNameInput };
-                _context.Employees.Add(employee);
+                // 1. Auto-Add Logic: Find existing or create new employee silently
+                var employee = await _context.Employees
+                    .FirstOrDefaultAsync(e => e.DisplayName.ToLower() == EmployeeNameInput.ToLower());
+
+                if (employee == null)
+                {
+                    employee = new SeHrCertificationPortal.Models.Employee { DisplayName = EmployeeNameInput };
+                    _context.Employees.Add(employee);
+                    await _context.SaveChangesAsync();
+                }
+
+                // 2. Map and Save Request
+                NewRequest.EmployeeId = employee.Id;
+                NewRequest.RequestDate = DateTime.SpecifyKind(NewRequest.RequestDate, DateTimeKind.Utc);
+                NewRequest.Status = SeHrCertificationPortal.Models.RequestStatus.Pending;
+
+                // Clean custom fields if standard agency is selected
+                if (NewRequest.AgencyId != null)
+                {
+                    NewRequest.CustomAgencyName = null;
+                    NewRequest.CustomCertificationName = null;
+                }
+
+                _context.CertificationRequests.Add(NewRequest);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "New request created successfully.";
             }
-
-            // 2. Map and Save Request
-            NewRequest.EmployeeId = employee.Id;
-            NewRequest.RequestDate = DateTime.SpecifyKind(NewRequest.RequestDate, DateTimeKind.Utc);
-            NewRequest.Status = SeHrCertificationPortal.Models.RequestStatus.Pending;
-
-            // Clean custom fields if standard agency is selected
-            if (NewRequest.AgencyId != null)
+            catch (Exception ex)
             {
-                NewRequest.CustomAgencyName = null;
-                NewRequest.CustomCertificationName = null;
+                _logger.LogError(ex, "Error processing new request.");
+                TempData["ErrorMessage"] = "An unexpected error occurred while saving. Please try again or contact IT.";
             }
-
-            _context.CertificationRequests.Add(NewRequest);
-            await _context.SaveChangesAsync();
 
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostEditRequestAsync(int id, string managerName, SeHrCertificationPortal.Models.RequestType requestType, DateTime requestDate, int agencyId, int certificationId, int p = 1, int pageSize = 25, string? searchString = null, SeHrCertificationPortal.Models.RequestStatus? statusFilter = null)
         {
-            var request = await _context.CertificationRequests.FindAsync(id);
-            if (request != null)
+            try
             {
-                request.ManagerName = managerName;
-                request.RequestType = requestType;
-                request.RequestDate = DateTime.SpecifyKind(requestDate, DateTimeKind.Utc);
-                request.AgencyId = agencyId;
-                request.CertificationId = certificationId;
-                await _context.SaveChangesAsync();
+                var request = await _context.CertificationRequests.FindAsync(id);
+                if (request != null)
+                {
+                    request.ManagerName = managerName;
+                    request.RequestType = requestType;
+                    request.RequestDate = DateTime.SpecifyKind(requestDate, DateTimeKind.Utc);
+                    request.AgencyId = agencyId;
+                    request.CertificationId = certificationId;
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Request edited successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error editing request.");
+                TempData["ErrorMessage"] = "An unexpected error occurred while saving. Please try again or contact IT.";
             }
             return RedirectToPage(new { p, pageSize, SearchString = searchString, StatusFilter = statusFilter });
         }
