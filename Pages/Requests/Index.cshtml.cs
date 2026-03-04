@@ -259,36 +259,15 @@ namespace SeHrCertificationPortal.Pages.Requests
 
                         col.Item().Text("Employee Name: _____________________________________________________    Request Date: ___________________________").FontSize(12);
 
-                        col.Item().Row(r =>
-                        {
-                            r.RelativeItem().Text("Manager: ________________________________________________________________").FontSize(12);
-                            r.AutoItem().AlignBottom().Row(r2 => 
-                            { 
-                                r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); 
-                                r2.RelativeItem().PaddingLeft(5).AlignMiddle().Text("Recertification").FontSize(11); 
-                            });
-                        });
+                        col.Item().Text("Manager: ___________________________________________________________    [  ] Recertification").FontSize(12);
 
                         col.Item().Text("Certification Agency: ___________________________________    Certification Desired: ___________________________________").FontSize(12);
 
-                        col.Item().PaddingTop(10).Column(c =>
-                        {
-                            c.Item().PaddingBottom(5).Text("Exam Type:").SemiBold();
-                            c.Item().Row(r =>
-                            {
-                                r.RelativeItem().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Review Session"); });
-                                r.RelativeItem().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Written Exam"); });
-                                r.RelativeItem().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Practical Exam"); });
-                                r.RelativeItem().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Reciprocity"); });
-                            });
-                        });
+                        col.Item().PaddingTop(10).Text("Exam Type:").SemiBold().FontSize(12);
+                        col.Item().Text("[  ] Review Session        [  ] Written Exam        [  ] Practical Exam        [  ] Reciprocity").FontSize(12);
 
-                        col.Item().PaddingTop(10).Row(r =>
-                        {
-                            r.AutoItem().PaddingRight(15).Text("Need to purchase study material?").SemiBold();
-                            r.AutoItem().PaddingRight(15).Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("YES"); });
-                            r.AutoItem().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("NO"); });
-                        });
+                        col.Item().PaddingTop(10).Text("Need to purchase study material?").SemiBold().FontSize(12);
+                        col.Item().Text("[  ] YES        [  ] NO").FontSize(12);
 
                         col.Item().PaddingTop(10).Text("Date Needed: ___________________________________________    Date Offered: ___________________________________________").FontSize(12);
                         col.Item().Text("Location of Exam: ______________________________________________________________________________________________").FontSize(12);
@@ -298,25 +277,12 @@ namespace SeHrCertificationPortal.Pages.Requests
                         col.Item().PaddingTop(30).Border(1).BorderColor(Colors.Black).Padding(10).Column(ac =>
                         {
                             ac.Item().PaddingBottom(10).Text("For Administrative Use Only").SemiBold().FontSize(12);
-                            ac.Item().Row(r =>
-                            {
-                                r.RelativeItem().Column(c =>
-                                {
-                                    c.Spacing(8);
-                                    c.Item().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Registration Submitted"); });
-                                    c.Item().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Added to Tracking Spreadsheet"); });
-                                    c.Item().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Cert / License Rec'd"); });
-                                    c.Item().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Added to DB"); });
-                                });
-                                r.RelativeItem().Column(c =>
-                                {
-                                    c.Spacing(8);
-                                    c.Item().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Confirmation Received"); });
-                                    c.Item().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Confirmation Forwarded"); });
-                                    c.Item().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Added to Calendar"); });
-                                    c.Item().Row(r2 => { r2.AutoItem().Text("Lodging Needed?"); r2.AutoItem().PaddingLeft(10).Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.AutoItem().PaddingLeft(5).Text("Yes"); r2.AutoItem().PaddingLeft(10).Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.AutoItem().PaddingLeft(5).Text("No"); });
-                                });
-                            });
+                            
+                            ac.Item().Text("[  ] Registration Submitted                 [  ] Confirmation Received").FontSize(12);
+                            ac.Item().Text("[  ] Added to Tracking Spreadsheet          [  ] Confirmation Forwarded").FontSize(12);
+                            ac.Item().Text("[  ] Cert / License Rec'd                   [  ] Added to Calendar").FontSize(12);
+                            ac.Item().Text("[  ] Added to DB                            Lodging Needed?    [  ] Yes    [  ] No").FontSize(12);
+                            
                             ac.Item().PaddingTop(15).Text("Written Exam Date: ______________________________________________________________________________________________").FontSize(12);
                         });
                     });
