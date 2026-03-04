@@ -37,6 +37,9 @@
                             <i data-lucide="download" class="me-1" style="width: 14px; height: 14px;"></i> Export Options
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><button type="submit" class="dropdown-item" asp-page-handler="DownloadAgenciesCsv">Export Agencies (CSV)</button></li>
+                            <li><button type="submit" class="dropdown-item" asp-page-handler="DownloadCertsCsv">Export Certifications (CSV)</button></li>
+                            <li><hr class="dropdown-divider"></li>
                             <li><button type="submit" class="dropdown-item" asp-page-handler="DownloadCatalog" asp-route-exportScope="Full">Export Full Catalog (PDF)</button></li>
                             <li><button type="submit" class="dropdown-item" asp-page-handler="DownloadCatalog" asp-route-exportScope="Agencies">Export Agencies Only (PDF)</button></li>
                             <li><button type="submit" class="dropdown-item" asp-page-handler="DownloadCatalog" asp-route-exportScope="Certifications">Export Certifications Only (PDF)</button></li>
@@ -77,6 +80,16 @@
                                 </tr>
                             </thead>
                             <tbody style="visibility: hidden;">
+                            @if (!Model.Agency.Any())
+                            {
+                                <tr>
+                                    <td colspan="12" class="text-center py-5 text-muted">
+                                        <i data-lucide="search-x" class="mb-2" style="width: 32px; height: 32px; opacity: 0.5;"></i>
+                                        <h5 class="fw-bold text-secondary mb-1">No Records Found</h5>
+                                        <p class="mb-0 small">We couldn't find any data matching your current search or filter criteria.</p>
+                                    </td>
+                                </tr>
+                            }
                             @foreach (var item in Model.Agency) {
                                 <tr>
                                     <td class="ps-3 text-muted">@item.Id</td>
@@ -198,6 +211,16 @@
                                 </tr>
                             </thead>
                             <tbody style="visibility: hidden;">
+                            @if (!Model.Certifications.Any())
+                            {
+                                <tr>
+                                    <td colspan="12" class="text-center py-5 text-muted">
+                                        <i data-lucide="search-x" class="mb-2" style="width: 32px; height: 32px; opacity: 0.5;"></i>
+                                        <h5 class="fw-bold text-secondary mb-1">No Records Found</h5>
+                                        <p class="mb-0 small">We couldn't find any data matching your current search or filter criteria.</p>
+                                    </td>
+                                </tr>
+                            }
                             @foreach (var cert in Model.Certifications) {
                                 <tr>
                                     <td class="ps-3 fw-bold">@cert.Name</td>

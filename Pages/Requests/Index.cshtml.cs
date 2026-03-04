@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace SeHrCertificationPortal.Pages.Requests
 {
@@ -8,11 +11,13 @@ namespace SeHrCertificationPortal.Pages.Requests
     {
         private readonly SeHrCertificationPortal.Data.ApplicationDbContext _context;
         private readonly ILogger<IndexModel> _logger;
+        private readonly IWebHostEnvironment _env;
 
-        public IndexModel(SeHrCertificationPortal.Data.ApplicationDbContext context, ILogger<IndexModel> logger)
+        public IndexModel(SeHrCertificationPortal.Data.ApplicationDbContext context, ILogger<IndexModel> logger, IWebHostEnvironment env)
         {
             _context = context;
             _logger = logger;
+            _env = env;
         }
 
         public IList<SeHrCertificationPortal.Models.CertificationRequest> CertificationRequest { get; set; } = default!;
@@ -222,6 +227,56 @@ namespace SeHrCertificationPortal.Pages.Requests
                 TempData["ErrorMessage"] = "An unexpected error occurred while saving. Please try again or contact IT.";
             }
             return RedirectToPage(new { p, pageSize, SearchString = searchString, StatusFilter = statusFilter });
+        }
+
+        public IActionResult OnPostDownloadBlankForm()
+        {
+            var logoPath = Path.Combine(_env.WebRootPath, "img", "branding-assets", "Specialized-Engineering-Logo-white.webp");
+            byte[]? logoBytes = System.IO.File.Exists(logoPath) ? System.IO.File.ReadAllBytes(logoPath) : null;
+
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.Letter);
+                    page.Margin(1, Unit.Centimetre);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(11).FontFamily(Fonts.Arial));
+
+                    page.Header().Background("#66615c").Padding(10).Row(row =>
+                    {
+                        if (logoBytes != null)
+                        {
+                            row.ConstantItem(150).Image(logoBytes);
+                        }
+                        row.RelativeItem().AlignRight().AlignMiddle().Text("Employee Certification Request Form").FontColor(Colors.White).FontSize(16).SemiBold();
+                    });
+
+                    page.Content().PaddingVertical(20).Column(col =>
+                    {
+                        col.Spacing(30);
+                        col.Item().Text("Please complete all fields and obtain manager signature.").Italic().FontSize(12).FontColor("#555");
+                        col.Item().Row(r => r.RelativeItem().Text("Employee Name: __________________________________________________________________").FontSize(14));
+                        col.Item().Row(r => r.RelativeItem().Text("Date: _____________________________________________________________________________").FontSize(14));
+                        col.Item().Row(r => r.RelativeItem().Text("Requested Certification: _________________________________________________________").FontSize(14));
+                        col.Item().Row(r => r.RelativeItem().Text("Justification/Reasoning: __________________________________________________________").FontSize(14));
+                        col.Item().Row(r => r.RelativeItem().Text("__________________________________________________________________________________").FontSize(14));
+                        col.Item().Row(r => r.RelativeItem().Text("Manager Name: ___________________________________________________________________").FontSize(14));
+                        col.Item().PaddingTop(30).Row(r => r.RelativeItem().Text("Manager Signature: ______________________________________________________________").FontSize(14));
+                    });
+
+                    page.Footer().AlignCenter().Text(x =>
+                    {
+                        x.Span("Page ");
+                        x.CurrentPageNumber();
+                        x.Span(" of ");
+                        x.TotalPages();
+                    });
+                });
+            });
+
+            var pdfBytes = document.GeneratePdf();
+            return File(pdfBytes, "application/pdf", "Certification_Request_Form.pdf");
         }
     }
 }

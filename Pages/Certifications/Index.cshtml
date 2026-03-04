@@ -194,6 +194,16 @@
                 </tr>
             </thead>
             <tbody>
+                @if (!Model.PassedCertifications.Any())
+                {
+                    <tr>
+                        <td colspan="12" class="text-center py-5 text-muted">
+                            <i data-lucide="search-x" class="mb-2" style="width: 32px; height: 32px; opacity: 0.5;"></i>
+                            <h5 class="fw-bold text-secondary mb-1">No Records Found</h5>
+                            <p class="mb-0 small">We couldn't find any data matching your current search or filter criteria.</p>
+                        </td>
+                    </tr>
+                }
                 @foreach (var item in Model.PassedCertifications)
                 {
                     <tr class="clickable-row" style="cursor: pointer;" data-employee-id="@item.EmployeeId" title="Click to view certification history">
@@ -243,7 +253,12 @@
                             }
                         </td>
                         <td class="text-end">
-                            <div class="d-flex justify-content-end gap-3">
+                            <div class="d-flex justify-content-end gap-3 align-items-center">
+                                <form method="post" class="m-0 p-0">
+                                    <button type="submit" asp-page-handler="DownloadEmployeeHistoryPdf" asp-route-employeeId="@item.EmployeeId" class="btn btn-link p-0 m-0 border-0 text-info action-btn text-decoration-none" title="Print History">
+                                        <i data-lucide="printer" style="width: 18px; height: 18px;"></i>
+                                    </button>
+                                </form>
                                 @if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Revoked)
                                 {
                                     <a href="javascript:void(0)" class="text-success action-btn restore-cert-btn" data-request-id="@item.Id" title="Restore Certification">
