@@ -359,9 +359,8 @@
                                         }
                                     </td>
                                     <td class="text-center border-start">
-                                        <a href="javascript:void(0)" class="text-info text-decoration-none me-2 view-emp-certs-btn" data-id="@emp.Id" data-name="@emp.DisplayName" title="View Certifications"><i data-lucide="eye" style="width: 18px; height: 18px;"></i></a>
                                         <form method="post" class="d-inline m-0 p-0">
-                                            <button type="submit" formtarget="_blank" asp-page-handler="DownloadEmployeeHistoryPdf" asp-route-employeeId="@emp.Id" class="btn btn-link p-0 m-0 border-0 text-secondary action-btn text-decoration-none me-2" title="Print History">
+                                            <button type="submit" formtarget="_blank" asp-page-handler="DownloadEmployeeHistoryPdf" asp-route-employeeId="@emp.Id" class="btn btn-link p-0 m-0 border-0 text-secondary action-btn text-decoration-none me-2" title="Print History" onclick="event.stopPropagation();">
                                                 <i data-lucide="printer" style="width: 18px; height: 18px;"></i>
                                             </button>
                                         </form>
@@ -1103,6 +1102,36 @@
             }
 
             // Employee Actions
+            var editEmpBtn = e.target.closest('.edit-emp-btn');
+            if (editEmpBtn) {
+                e.preventDefault();
+                document.getElementById('editEmployeeId').value = editEmpBtn.getAttribute('data-id');
+                document.getElementById('editEmployeeName').value = editEmpBtn.getAttribute('data-name');
+                document.getElementById('editEmployeeIdNumber').value = editEmpBtn.getAttribute('data-empno') || '';
+                document.getElementById('editEmployeeRole').value = editEmpBtn.getAttribute('data-role') || '';
+                document.getElementById('editEmployeeDepartment').value = editEmpBtn.getAttribute('data-dept') || '';
+                new bootstrap.Modal(document.getElementById('editEmployeeModal')).show();
+                return;
+            }
+
+            var deactivateEmpBtn = e.target.closest('.deactivate-emp-btn');
+            if (deactivateEmpBtn) {
+                e.preventDefault();
+                document.getElementById('deactivateEmployeeId').value = deactivateEmpBtn.getAttribute('data-id');
+                document.getElementById('deactivateEmployeeNameDisplay').textContent = deactivateEmpBtn.getAttribute('data-name');
+                new bootstrap.Modal(document.getElementById('deactivateEmployeeModal')).show();
+                return;
+            }
+
+            var reactivateEmpBtn = e.target.closest('.reactivate-emp-btn');
+            if (reactivateEmpBtn) {
+                e.preventDefault();
+                document.getElementById('reactivateEmployeeId').value = reactivateEmpBtn.getAttribute('data-id');
+                document.getElementById('reactivateEmployeeNameDisplay').textContent = reactivateEmpBtn.getAttribute('data-name');
+                new bootstrap.Modal(document.getElementById('reactivateEmployeeModal')).show();
+                return;
+            }
+
             var viewEmpCertsBtn = e.target.closest('.view-emp-certs-btn');
             if (viewEmpCertsBtn) {
                 e.preventDefault();
@@ -1138,36 +1167,6 @@
                         new bootstrap.Modal(document.getElementById('employeeHistoryModal')).show();
                     })
                     .catch(err => console.error('Fetch error:', err));
-                return;
-            }
-
-            var editEmpBtn = e.target.closest('.edit-emp-btn');
-            if (editEmpBtn) {
-                e.preventDefault();
-                document.getElementById('editEmployeeId').value = editEmpBtn.getAttribute('data-id');
-                document.getElementById('editEmployeeName').value = editEmpBtn.getAttribute('data-name');
-                document.getElementById('editEmployeeIdNumber').value = editEmpBtn.getAttribute('data-empno') || '';
-                document.getElementById('editEmployeeRole').value = editEmpBtn.getAttribute('data-role') || '';
-                document.getElementById('editEmployeeDepartment').value = editEmpBtn.getAttribute('data-dept') || '';
-                new bootstrap.Modal(document.getElementById('editEmployeeModal')).show();
-                return;
-            }
-
-            var deactivateEmpBtn = e.target.closest('.deactivate-emp-btn');
-            if (deactivateEmpBtn) {
-                e.preventDefault();
-                document.getElementById('deactivateEmployeeId').value = deactivateEmpBtn.getAttribute('data-id');
-                document.getElementById('deactivateEmployeeNameDisplay').textContent = deactivateEmpBtn.getAttribute('data-name');
-                new bootstrap.Modal(document.getElementById('deactivateEmployeeModal')).show();
-                return;
-            }
-
-            var reactivateEmpBtn = e.target.closest('.reactivate-emp-btn');
-            if (reactivateEmpBtn) {
-                e.preventDefault();
-                document.getElementById('reactivateEmployeeId').value = reactivateEmpBtn.getAttribute('data-id');
-                document.getElementById('reactivateEmployeeNameDisplay').textContent = reactivateEmpBtn.getAttribute('data-name');
-                new bootstrap.Modal(document.getElementById('reactivateEmployeeModal')).show();
                 return;
             }
         });
