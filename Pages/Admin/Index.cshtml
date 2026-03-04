@@ -343,7 +343,7 @@
                             }
                             @foreach (var emp in Model.Employees) {
                                 var activeCerts = emp.CertificationRequests.Count(c => c.Status == SeHrCertificationPortal.Models.RequestStatus.Passed && (c.ExpirationDate == null || c.ExpirationDate > DateTime.UtcNow));
-                                <tr>
+                                <tr class="clickable-row align-middle" style="cursor: pointer;" data-employee-id="@emp.Id" title="Click to view certification history">
                                     <td class="ps-3 text-muted">@emp.Id</td>
                                     <td class="fw-bold">
                                         @emp.DisplayName
@@ -1132,11 +1132,12 @@
                 return;
             }
 
-            var viewEmpCertsBtn = e.target.closest('.view-emp-certs-btn');
-            if (viewEmpCertsBtn) {
+            // E. Handle the ROW CLICK (Employee Modal)
+            var row = e.target.closest('.clickable-row');
+            if (row) {
                 e.preventDefault();
-                var employeeId = viewEmpCertsBtn.getAttribute('data-id');
-                var employeeName = viewEmpCertsBtn.getAttribute('data-name');
+                var employeeId = row.getAttribute('data-employee-id');
+                var employeeName = row.querySelector('td:nth-child(2)')?.textContent.trim() || 'Employee';
                 document.getElementById('modalEmployeeName').textContent = employeeName + "'s Certifications";
 
                 fetch('?handler=EmployeeHistory&employeeId=' + employeeId)
