@@ -443,16 +443,6 @@ namespace SeHrCertificationPortal.Pages.Certifications
                             });
                         });
 
-                        var expiredList = analyticsRaw.Where(c => c.ExpirationDate.HasValue && c.ExpirationDate.Value < today).ToList();
-                        if (expiredList.Any())
-                        {
-                            col.Item().PaddingTop(15).PaddingBottom(5).Text("⚠️ Action Required: Critical Lapses").FontSize(12).SemiBold().FontColor(Colors.Red.Medium);
-                            foreach(var lapse in expiredList) {
-                                var empName = lapse.Employee != null ? lapse.Employee.DisplayName : "Unknown";
-                                var certName = lapse.Certification != null ? lapse.Certification.Name : (lapse.CustomCertificationName ?? "Unknown");
-                                col.Item().Text($"• {empName} - {certName} (Expired: {lapse.ExpirationDate!.Value:MMM dd, yyyy})").FontSize(10);
-                            }
-                        }
 
                         if (agencyChartBytes != null || certChartBytes != null)
                         {
