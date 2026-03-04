@@ -252,31 +252,102 @@ namespace SeHrCertificationPortal.Pages.Requests
                         row.RelativeItem().AlignRight().AlignMiddle().Text("Employee Certification Request Form").FontColor(Colors.White).FontSize(16).SemiBold();
                     });
 
-                    page.Content().PaddingVertical(20).Column(col =>
+                    page.Content().PaddingVertical(20).PaddingHorizontal(20).Column(col =>
                     {
-                        col.Spacing(30);
-                        col.Item().Text("Please complete all fields and obtain manager signature.").Italic().FontSize(12).FontColor("#555");
-                        col.Item().Row(r => r.RelativeItem().Text("Employee Name: __________________________________________________________________").FontSize(14));
-                        col.Item().Row(r => r.RelativeItem().Text("Date: _____________________________________________________________________________").FontSize(14));
-                        col.Item().Row(r => r.RelativeItem().Text("Requested Certification: _________________________________________________________").FontSize(14));
-                        col.Item().Row(r => r.RelativeItem().Text("Justification/Reasoning: __________________________________________________________").FontSize(14));
-                        col.Item().Row(r => r.RelativeItem().Text("__________________________________________________________________________________").FontSize(14));
-                        col.Item().Row(r => r.RelativeItem().Text("Manager Name: ___________________________________________________________________").FontSize(14));
-                        col.Item().PaddingTop(30).Row(r => r.RelativeItem().Text("Manager Signature: ______________________________________________________________").FontSize(14));
+                        col.Spacing(15);
+                        col.Item().Text("Please complete all fields and obtain manager signature.").Italic().FontSize(12).FontColor(Colors.Grey.Medium);
+
+                        col.Item().Row(r => 
+                        {
+                            r.RelativeItem(2).PaddingRight(10).Column(c => { c.Item().Text("Employee Name:"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
+                            r.RelativeItem(1).Column(c => { c.Item().Text("Request Date:"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
+                        });
+
+                        col.Item().Row(r =>
+                        {
+                            r.RelativeItem(2).PaddingRight(10).Column(c => { c.Item().Text("Manager:"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
+                            r.RelativeItem(1).AlignBottom().Row(r2 => 
+                            { 
+                                r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); 
+                                r2.RelativeItem().PaddingLeft(5).AlignMiddle().Text("Recertification").FontSize(11); 
+                            });
+                        });
+
+                        col.Item().Row(r => 
+                        {
+                            r.RelativeItem(1).PaddingRight(10).Column(c => { c.Item().Text("Certification Agency:"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
+                            r.RelativeItem(1).Column(c => { c.Item().Text("Certification Desired:"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
+                        });
+
+                        col.Item().PaddingTop(10).Column(c =>
+                        {
+                            c.Item().PaddingBottom(5).Text("Exam Type:").SemiBold();
+                            c.Item().Row(r =>
+                            {
+                                r.RelativeItem().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Review Session"); });
+                                r.RelativeItem().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Written Exam"); });
+                                r.RelativeItem().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Practical Exam"); });
+                                r.RelativeItem().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Reciprocity"); });
+                            });
+                        });
+
+                        col.Item().PaddingTop(10).Row(r =>
+                        {
+                            r.AutoItem().PaddingRight(15).Text("Need to purchase study material?").SemiBold();
+                            r.AutoItem().PaddingRight(15).Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("YES"); });
+                            r.AutoItem().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("NO"); });
+                        });
+
+                        col.Item().PaddingTop(10).Row(r => 
+                        {
+                            r.RelativeItem(1).PaddingRight(10).Column(c => { c.Item().Text("Date Needed:"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
+                            r.RelativeItem(1).Column(c => { c.Item().Text("Date Offered:"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
+                        });
+
+                        col.Item().Column(c => { c.Item().Text("Location of Exam:"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
+
+                        col.Item().PaddingTop(20).Row(r => 
+                        {
+                            r.RelativeItem(2).PaddingRight(10).Column(c => { c.Item().Text("Approved By (Manager Signature):"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
+                            r.RelativeItem(1).Column(c => { c.Item().Text("Date:"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
+                        });
+
+                        col.Item().PaddingTop(30).Border(1).BorderColor(Colors.Black).Padding(10).Column(ac =>
+                        {
+                            ac.Item().PaddingBottom(10).Text("For Administrative Use Only").SemiBold().FontSize(12);
+                            ac.Item().Row(r =>
+                            {
+                                r.RelativeItem().Column(c =>
+                                {
+                                    c.Spacing(8);
+                                    c.Item().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Registration Submitted"); });
+                                    c.Item().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Added to Tracking Spreadsheet"); });
+                                    c.Item().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Cert / License Rec'd"); });
+                                    c.Item().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Added to DB"); });
+                                });
+                                r.RelativeItem().Column(c =>
+                                {
+                                    c.Spacing(8);
+                                    c.Item().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Confirmation Received"); });
+                                    c.Item().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Confirmation Forwarded"); });
+                                    c.Item().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("Added to Calendar"); });
+                                    c.Item().Row(r2 => { r2.AutoItem().Text("Lodging Needed?"); r2.AutoItem().PaddingLeft(10).Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.AutoItem().PaddingLeft(5).Text("Yes"); r2.AutoItem().PaddingLeft(10).Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.AutoItem().PaddingLeft(5).Text("No"); });
+                                });
+                            });
+                            ac.Item().PaddingTop(15).Column(c => { c.Item().Text("Written Exam Date:"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
+                        });
                     });
 
                     page.Footer().AlignCenter().Text(x =>
                     {
-                        x.Span("Page ");
-                        x.CurrentPageNumber();
-                        x.Span(" of ");
-                        x.TotalPages();
+                        x.Span("John Harrison | Corporate Director of Training & Facilities | Email: jharrison@specializedengineering.com | Mobile: 240-674-0250").FontSize(9).FontColor(Colors.Grey.Darken1);
                     });
                 });
             });
 
             var pdfBytes = document.GeneratePdf();
-            return File(pdfBytes, "application/pdf", "Certification_Request_Form.pdf");
+            Response.Headers.Append("Content-Disposition", "inline; filename=\"Certification_Request_Form.pdf\"");
+            return File(pdfBytes, "application/pdf");
         }
     }
 }

@@ -255,7 +255,7 @@
                         <td class="text-end">
                             <div class="d-flex justify-content-end gap-3 align-items-center">
                                 <form method="post" class="m-0 p-0">
-                                    <button type="submit" asp-page-handler="DownloadEmployeeHistoryPdf" asp-route-employeeId="@item.EmployeeId" class="btn btn-link p-0 m-0 border-0 text-info action-btn text-decoration-none" title="Print History">
+                                    <button type="submit" formtarget="_blank" asp-page-handler="DownloadEmployeeHistoryPdf" asp-route-employeeId="@item.EmployeeId" class="btn btn-link p-0 m-0 border-0 text-info action-btn text-decoration-none" title="Print History">
                                         <i data-lucide="printer" style="width: 18px; height: 18px;"></i>
                                     </button>
                                 </form>

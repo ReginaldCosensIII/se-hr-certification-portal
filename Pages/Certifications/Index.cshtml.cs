@@ -638,7 +638,8 @@ namespace SeHrCertificationPortal.Pages.Certifications
                 });
 
                 var pdfBytes = document.GeneratePdf();
-                return File(pdfBytes, "application/pdf", $"History_{employee.DisplayName.Replace(" ", "_")}.pdf");
+                Response.Headers.Append("Content-Disposition", $"inline; filename=\"History_{employee.DisplayName.Replace(" ", "_")}.pdf\"");
+                return File(pdfBytes, "application/pdf");
             }
             catch (Exception ex)
             {
