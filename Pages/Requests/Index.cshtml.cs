@@ -257,27 +257,19 @@ namespace SeHrCertificationPortal.Pages.Requests
                         col.Spacing(15);
                         col.Item().Text("Please complete all fields and obtain manager signature.").Italic().FontSize(12).FontColor(Colors.Grey.Medium);
 
-                        col.Item().Row(r => 
-                        {
-                            r.RelativeItem(2).PaddingRight(10).Column(c => { c.Item().Text("Employee Name:"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
-                            r.RelativeItem(1).Column(c => { c.Item().Text("Request Date:"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
-                        });
+                        col.Item().Text("Employee Name: _____________________________________________________    Request Date: ___________________________").FontSize(12);
 
                         col.Item().Row(r =>
                         {
-                            r.RelativeItem(2).PaddingRight(10).Column(c => { c.Item().Text("Manager:"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
-                            r.RelativeItem(1).AlignBottom().Row(r2 => 
+                            r.RelativeItem().Text("Manager: ________________________________________________________________").FontSize(12);
+                            r.AutoItem().AlignBottom().Row(r2 => 
                             { 
                                 r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); 
                                 r2.RelativeItem().PaddingLeft(5).AlignMiddle().Text("Recertification").FontSize(11); 
                             });
                         });
 
-                        col.Item().Row(r => 
-                        {
-                            r.RelativeItem(1).PaddingRight(10).Column(c => { c.Item().Text("Certification Agency:"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
-                            r.RelativeItem(1).Column(c => { c.Item().Text("Certification Desired:"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
-                        });
+                        col.Item().Text("Certification Agency: ___________________________________    Certification Desired: ___________________________________").FontSize(12);
 
                         col.Item().PaddingTop(10).Column(c =>
                         {
@@ -298,19 +290,10 @@ namespace SeHrCertificationPortal.Pages.Requests
                             r.AutoItem().Row(r2 => { r2.AutoItem().Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.RelativeItem().PaddingLeft(5).Text("NO"); });
                         });
 
-                        col.Item().PaddingTop(10).Row(r => 
-                        {
-                            r.RelativeItem(1).PaddingRight(10).Column(c => { c.Item().Text("Date Needed:"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
-                            r.RelativeItem(1).Column(c => { c.Item().Text("Date Offered:"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
-                        });
+                        col.Item().PaddingTop(10).Text("Date Needed: ___________________________________________    Date Offered: ___________________________________________").FontSize(12);
+                        col.Item().Text("Location of Exam: ______________________________________________________________________________________________").FontSize(12);
 
-                        col.Item().Column(c => { c.Item().Text("Location of Exam:"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
-
-                        col.Item().PaddingTop(20).Row(r => 
-                        {
-                            r.RelativeItem(2).PaddingRight(10).Column(c => { c.Item().Text("Approved By (Manager Signature):"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
-                            r.RelativeItem(1).Column(c => { c.Item().Text("Date:"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
-                        });
+                        col.Item().PaddingTop(20).Text("Approved By (Manager Signature): ___________________________________________    Date: ___________________________").FontSize(12);
 
                         col.Item().PaddingTop(30).Border(1).BorderColor(Colors.Black).Padding(10).Column(ac =>
                         {
@@ -334,7 +317,7 @@ namespace SeHrCertificationPortal.Pages.Requests
                                     c.Item().Row(r2 => { r2.AutoItem().Text("Lodging Needed?"); r2.AutoItem().PaddingLeft(10).Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.AutoItem().PaddingLeft(5).Text("Yes"); r2.AutoItem().PaddingLeft(10).Width(12).Height(12).Border(1).BorderColor(Colors.Black); r2.AutoItem().PaddingLeft(5).Text("No"); });
                                 });
                             });
-                            ac.Item().PaddingTop(15).Column(c => { c.Item().Text("Written Exam Date:"); c.Item().BorderBottom(1).PaddingBottom(2).Text(""); });
+                            ac.Item().PaddingTop(15).Text("Written Exam Date: ______________________________________________________________________________________________").FontSize(12);
                         });
                     });
 
