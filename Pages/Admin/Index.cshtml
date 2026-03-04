@@ -31,8 +31,8 @@
                 <h5 class="card-title fs-5 fw-bold text-dark mb-0">
                     Manage Agencies
                 </h5>
-                <div class="d-flex gap-2">
-                    <form method="post" class="dropdown d-inline-block">
+                <div class="d-flex gap-2 align-items-center">
+                    <form method="post" class="dropdown m-0 p-0">
                         <button class="btn btn-sm btn-outline-brand fw-bold dropdown-toggle d-inline-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i data-lucide="download" class="me-1" style="width: 14px; height: 14px;"></i> Export Options
                         </button>
@@ -45,7 +45,7 @@
                             <li><button type="submit" class="dropdown-item" asp-page-handler="DownloadCatalog" asp-route-exportScope="Certifications">Export Certifications Only (PDF)</button></li>
                         </ul>
                     </form>
-                    <button class="btn btn-sm btn-brand fw-bold text-white" data-bs-toggle="modal" data-bs-target="#addAgencyModal">
+                    <button class="btn btn-sm btn-brand fw-bold text-white d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addAgencyModal">
                         <i data-lucide="plus" class="me-1" style="width: 14px;"></i> Add Agency
                     </button>
                 </div>
@@ -159,8 +159,8 @@
                  <h5 class="card-title fs-5 fw-bold text-dark mb-0">
                     Manage Certifications
                 </h5>
-                <div class="d-flex gap-2">
-                    <form method="post" class="dropdown d-inline-block">
+                <div class="d-flex gap-2 align-items-center">
+                    <form method="post" class="dropdown m-0 p-0">
                         <button class="btn btn-sm btn-outline-brand fw-bold dropdown-toggle d-inline-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i data-lucide="download" class="me-1" style="width: 14px; height: 14px;"></i> Export Options
                         </button>
@@ -170,7 +170,7 @@
                             <li><button type="submit" class="dropdown-item" asp-page-handler="DownloadCatalog" asp-route-exportScope="Certifications">Export Certifications Only (PDF)</button></li>
                         </ul>
                     </form>
-                    <button class="btn btn-sm btn-brand fw-bold text-white" data-bs-toggle="modal" data-bs-target="#addCertificationModal">
+                    <button class="btn btn-sm btn-brand fw-bold text-white d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addCertificationModal">
                         <i data-lucide="plus" class="me-1" style="width: 14px;"></i> Add Certification
                     </button>
                 </div>
@@ -296,11 +296,11 @@
         <div class="card shadow-sm">
             <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
                  <h5 class="card-title fs-5 fw-bold text-dark mb-0">Manage Employees</h5>
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 align-items-center">
                     <a asp-page-handler="ExportEmployees" class="btn btn-sm btn-outline-brand fw-bold d-inline-flex align-items-center">
                         <i data-lucide="download" class="me-1" style="width: 14px; height: 14px;"></i> Export List
                     </a>
-                    <button class="btn btn-sm btn-brand fw-bold text-white" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+                    <button class="btn btn-sm btn-brand fw-bold text-white d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
                         <i data-lucide="plus" class="me-1" style="width: 14px;"></i> Add Employee
                     </button>
                 </div>
