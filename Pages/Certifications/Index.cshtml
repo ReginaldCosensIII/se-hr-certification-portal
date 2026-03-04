@@ -55,35 +55,35 @@
 <div class="collapse show" id="analyticsCollapse">
 <div class="row mb-4">
     <div class="col-md-4">
-        <div class="card bg-success text-white shadow-sm h-100 position-relative overflow-hidden">
+        <div class="card bg-success text-white shadow-sm h-100 position-relative overflow-hidden analytics-card">
             <div class="card-body position-relative z-1">
                 <h6 class="text-uppercase fw-bold mb-1">Total Active</h6>
                 <h2 class="mb-0">@Model.AnalyticsTotalActive</h2>
-                <i data-lucide="award" class="position-absolute opacity-25" style="width: 50px; height: 50px; right: 15px; top: 15px; z-index: 0;"></i>
+                <i data-lucide="award" class="position-absolute opacity-25 analytics-icon" style="width: 50px; height: 50px; right: 15px; top: 15px; z-index: 0;"></i>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card bg-warning text-dark shadow-sm h-100 position-relative overflow-hidden">
+        <div class="card bg-warning text-dark shadow-sm h-100 position-relative overflow-hidden analytics-card">
             <div class="card-body position-relative z-1">
                 <h6 class="text-uppercase fw-bold mb-1"><i data-lucide="alert-triangle" class="me-1" style="width: 18px;"></i> Expiring Soon</h6>
                 <h2 class="mb-0">@Model.AnalyticsExpiringSoon</h2>
                 <div class="mt-2" title="@string.Join("\n", Model.ExpiringSoonDetails.Take(15))">
-                    <small class="text-white-50" style="cursor: help;"><i data-lucide="info" class="me-1" style="width: 12px;"></i>Hover for details</small>
+                    <small class="text-dark opacity-75" style="cursor: help;"><i data-lucide="info" class="me-1" style="width: 12px;"></i>Hover for details</small>
                 </div>
-                <i data-lucide="clock" class="position-absolute opacity-25" style="width: 50px; height: 50px; right: 15px; top: 15px; z-index: 0;"></i>
+                <i data-lucide="clock" class="position-absolute opacity-25 analytics-icon" style="width: 50px; height: 50px; right: 15px; top: 15px; z-index: 0;"></i>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card bg-danger text-white shadow-sm h-100 position-relative overflow-hidden">
+        <div class="card bg-danger text-white shadow-sm h-100 position-relative overflow-hidden analytics-card">
             <div class="card-body position-relative z-1">
                 <h6 class="text-uppercase fw-bold mb-1">Critical Lapses</h6>
                 <h2 class="mb-0">@Model.AnalyticsExpired</h2>
                 <div class="mt-2" title="@string.Join("\n", Model.ExpiredDetails.Take(15))">
                     <small class="text-white-50" style="cursor: help;"><i data-lucide="info" class="me-1" style="width: 12px;"></i>Hover for details</small>
                 </div>
-                <i data-lucide="alert-triangle" class="position-absolute opacity-25" style="width: 50px; height: 50px; right: 15px; top: 15px; z-index: 0;"></i>
+                <i data-lucide="alert-triangle" class="position-absolute opacity-25 analytics-icon" style="width: 50px; height: 50px; right: 15px; top: 15px; z-index: 0;"></i>
             </div>
         </div>
     </div>

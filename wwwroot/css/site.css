@@ -453,6 +453,29 @@ body.sidebar-collapse .toggle-icon-collapsed {
     color: #dc3545 !important;
 }
 
+/* -------------------------------------------------------------------------- */
+/*                        CERTIFICATIONS KPI CARDS                            */
+/* -------------------------------------------------------------------------- */
+
+.analytics-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.analytics-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.analytics-card .analytics-icon {
+    transition: all 0.3s linear;
+}
+
+.analytics-card:hover .analytics-icon {
+    transform: scale(1.1);
+    opacity: 0.45 !important;
+}
+
+
 .form-floating>.form-control-plaintext::placeholder,
 .form-floating>.form-control::placeholder {
     color: var(--bs-secondary-color);
