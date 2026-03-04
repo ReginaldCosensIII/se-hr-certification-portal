@@ -269,6 +269,48 @@ namespace SeHrCertificationPortal.Pages.Admin
             return RedirectToPage();
         }
 
+        public async Task<IActionResult> OnPostDownloadAgenciesCsvAsync()
+        {
+            try
+            {
+                var agencies = await _context.Agencies.OrderBy(a => a.Abbreviation).ToListAsync();
+                var csvBuilder = new System.Text.StringBuilder();
+                csvBuilder.AppendLine("\"ID\",\"Name\",\"Abbreviation\"");
+                foreach (var agency in agencies)
+                {
+                    csvBuilder.AppendLine($"\"{agency.Id}\",\"{agency.FullName?.Replace("\"", "\"\"")}\",\"{agency.Abbreviation?.Replace("\"", "\"\"")}\"");
+                }
+                return File(System.Text.Encoding.UTF8.GetBytes(csvBuilder.ToString()), "text/csv", "Agencies_Export.csv");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting Agencies CSV.");
+                TempData["ErrorMessage"] = "Failed to export CSV. Please try again.";
+                return RedirectToPage();
+            }
+        }
+
+        public async Task<IActionResult> OnPostDownloadCertsCsvAsync()
+        {
+            try 
+            {
+                var certs = await _context.Certifications.Include(c => c.Agency).OrderBy(c => c.Name).ToListAsync();
+                var csvBuilder = new System.Text.StringBuilder();
+                csvBuilder.AppendLine("\"ID\",\"Name\",\"Agency\",\"ValidityPeriodMonths\"");
+                foreach (var cert in certs)
+                {
+                    csvBuilder.AppendLine($"\"{cert.Id}\",\"{cert.Name?.Replace("\"", "\"\"")}\",\"{cert.Agency?.Abbreviation?.Replace("\"", "\"\"")}\",\"{cert.ValidityPeriodMonths}\"");
+                }
+                return File(System.Text.Encoding.UTF8.GetBytes(csvBuilder.ToString()), "text/csv", "Certifications_Export.csv");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting Certifications CSV.");
+                TempData["ErrorMessage"] = "Failed to export CSV. Please try again.";
+                return RedirectToPage();
+            }
+        }
+
         public async Task<IActionResult> OnPostDownloadCatalogAsync(string exportScope = "Full")
         {
             var agencies = await _context.Agencies

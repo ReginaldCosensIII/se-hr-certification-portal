@@ -100,6 +100,13 @@
             <h5 class="card-title fs-5 fw-bold text-dark mb-0">Manage Requests</h5>
             
             <div class="card-tools d-flex align-items-center gap-2">
+                <!-- Print Blank Form -->
+                <form method="post" class="m-0 p-0">
+                    <button type="submit" asp-page-handler="DownloadBlankForm" class="btn btn-sm btn-outline-secondary d-flex align-items-center">
+                        <i data-lucide="printer" class="me-1" style="width: 14px;"></i> Print Blank Form
+                    </button>
+                </form>
+                
                 <!-- Search & Filter -->
                 <form method="get" class="d-flex align-items-center gap-2">
                     <input type="hidden" name="pageSize" value="@Model.PageSize" />

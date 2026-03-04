@@ -31,18 +31,21 @@
                 <h5 class="card-title fs-5 fw-bold text-dark mb-0">
                     Manage Agencies
                 </h5>
-                <div class="d-flex gap-2">
-                    <form method="post" class="dropdown d-inline-block">
+                <div class="d-flex gap-2 align-items-center">
+                    <form method="post" class="dropdown m-0 p-0">
                         <button class="btn btn-sm btn-outline-brand fw-bold dropdown-toggle d-inline-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i data-lucide="download" class="me-1" style="width: 14px; height: 14px;"></i> Export Options
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><button type="submit" class="dropdown-item" asp-page-handler="DownloadAgenciesCsv">Export Agencies (CSV)</button></li>
+                            <li><button type="submit" class="dropdown-item" asp-page-handler="DownloadCertsCsv">Export Certifications (CSV)</button></li>
+                            <li><hr class="dropdown-divider"></li>
                             <li><button type="submit" class="dropdown-item" asp-page-handler="DownloadCatalog" asp-route-exportScope="Full">Export Full Catalog (PDF)</button></li>
                             <li><button type="submit" class="dropdown-item" asp-page-handler="DownloadCatalog" asp-route-exportScope="Agencies">Export Agencies Only (PDF)</button></li>
                             <li><button type="submit" class="dropdown-item" asp-page-handler="DownloadCatalog" asp-route-exportScope="Certifications">Export Certifications Only (PDF)</button></li>
                         </ul>
                     </form>
-                    <button class="btn btn-sm btn-brand fw-bold text-white" data-bs-toggle="modal" data-bs-target="#addAgencyModal">
+                    <button class="btn btn-sm btn-brand fw-bold text-white d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addAgencyModal">
                         <i data-lucide="plus" class="me-1" style="width: 14px;"></i> Add Agency
                     </button>
                 </div>
@@ -77,6 +80,16 @@
                                 </tr>
                             </thead>
                             <tbody style="visibility: hidden;">
+                            @if (!Model.Agency.Any())
+                            {
+                                <tr>
+                                    <td colspan="12" class="text-center py-5 text-muted">
+                                        <i data-lucide="search-x" class="mb-2" style="width: 32px; height: 32px; opacity: 0.5;"></i>
+                                        <h5 class="fw-bold text-secondary mb-1">No Records Found</h5>
+                                        <p class="mb-0 small">We couldn't find any data matching your current search or filter criteria.</p>
+                                    </td>
+                                </tr>
+                            }
                             @foreach (var item in Model.Agency) {
                                 <tr>
                                     <td class="ps-3 text-muted">@item.Id</td>
@@ -146,8 +159,8 @@
                  <h5 class="card-title fs-5 fw-bold text-dark mb-0">
                     Manage Certifications
                 </h5>
-                <div class="d-flex gap-2">
-                    <form method="post" class="dropdown d-inline-block">
+                <div class="d-flex gap-2 align-items-center">
+                    <form method="post" class="dropdown m-0 p-0">
                         <button class="btn btn-sm btn-outline-brand fw-bold dropdown-toggle d-inline-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i data-lucide="download" class="me-1" style="width: 14px; height: 14px;"></i> Export Options
                         </button>
@@ -157,7 +170,7 @@
                             <li><button type="submit" class="dropdown-item" asp-page-handler="DownloadCatalog" asp-route-exportScope="Certifications">Export Certifications Only (PDF)</button></li>
                         </ul>
                     </form>
-                    <button class="btn btn-sm btn-brand fw-bold text-white" data-bs-toggle="modal" data-bs-target="#addCertificationModal">
+                    <button class="btn btn-sm btn-brand fw-bold text-white d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addCertificationModal">
                         <i data-lucide="plus" class="me-1" style="width: 14px;"></i> Add Certification
                     </button>
                 </div>
@@ -198,6 +211,16 @@
                                 </tr>
                             </thead>
                             <tbody style="visibility: hidden;">
+                            @if (!Model.Certifications.Any())
+                            {
+                                <tr>
+                                    <td colspan="12" class="text-center py-5 text-muted">
+                                        <i data-lucide="search-x" class="mb-2" style="width: 32px; height: 32px; opacity: 0.5;"></i>
+                                        <h5 class="fw-bold text-secondary mb-1">No Records Found</h5>
+                                        <p class="mb-0 small">We couldn't find any data matching your current search or filter criteria.</p>
+                                    </td>
+                                </tr>
+                            }
                             @foreach (var cert in Model.Certifications) {
                                 <tr>
                                     <td class="ps-3 fw-bold">@cert.Name</td>
@@ -273,11 +296,11 @@
         <div class="card shadow-sm">
             <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
                  <h5 class="card-title fs-5 fw-bold text-dark mb-0">Manage Employees</h5>
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 align-items-center">
                     <a asp-page-handler="ExportEmployees" class="btn btn-sm btn-outline-brand fw-bold d-inline-flex align-items-center">
                         <i data-lucide="download" class="me-1" style="width: 14px; height: 14px;"></i> Export List
                     </a>
-                    <button class="btn btn-sm btn-brand fw-bold text-white" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+                    <button class="btn btn-sm btn-brand fw-bold text-white d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
                         <i data-lucide="plus" class="me-1" style="width: 14px;"></i> Add Employee
                     </button>
                 </div>
@@ -308,6 +331,16 @@
                                 </tr>
                             </thead>
                             <tbody style="visibility: hidden;">
+                            @if (!Model.Employees.Any())
+                            {
+                                <tr>
+                                    <td colspan="12" class="text-center py-5 text-muted">
+                                        <i data-lucide="search-x" class="mb-2" style="width: 32px; height: 32px; opacity: 0.5;"></i>
+                                        <h5 class="fw-bold text-secondary mb-1">No Records Found</h5>
+                                        <p class="mb-0 small">We couldn't find any data matching your current search or filter criteria.</p>
+                                    </td>
+                                </tr>
+                            }
                             @foreach (var emp in Model.Employees) {
                                 var activeCerts = emp.CertificationRequests.Count(c => c.Status == SeHrCertificationPortal.Models.RequestStatus.Passed && (c.ExpirationDate == null || c.ExpirationDate > DateTime.UtcNow));
                                 <tr>
