@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-
+using SeHrCertificationPortal.Utilities;
 
 namespace SeHrCertificationPortal.Pages.Requests
 {
@@ -227,6 +227,35 @@ namespace SeHrCertificationPortal.Pages.Requests
             return RedirectToPage(new { p, pageSize, SearchString = searchString, StatusFilter = statusFilter });
         }
 
-
+        public async Task<IActionResult> OnPostDownloadRequestsCsvAsync()
+        {
+            try
+            {
+                var requests = await _context.CertificationRequests
+                    .Include(c => c.Agency)
+                    .Include(c => c.Certification)
+                    .Include(c => c.Employee)
+                    .OrderByDescending(c => c.RequestDate)
+                    .ToListAsync();
+                var headers = new[] { "Request ID", "Employee Name", "Manager Name", "Agency", "Certification", "Request Type", "Request Date", "Status" };
+                var csv = CsvExportHelper.GenerateCsv(requests, headers, r => new[] {
+                    r.Id.ToString(),
+                    r.Employee?.DisplayName ?? "",
+                    r.ManagerName ?? "",
+                    r.Agency?.Abbreviation ?? r.CustomAgencyName ?? "",
+                    r.Certification?.Name ?? r.CustomCertificationName ?? "",
+                    r.RequestType.ToString(),
+                    r.RequestDate.ToString("yyyy-MM-dd"),
+                    r.Status.ToString()
+                });
+                return File(System.Text.Encoding.UTF8.GetBytes(csv), "text/csv", $"Requests_Export_{DateTime.Now:yyyyMMdd}.csv");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting Requests CSV.");
+                TempData["ErrorMessage"] = "Failed to export CSV. Please try again.";
+                return RedirectToPage();
+            }
+        }
     }
 }

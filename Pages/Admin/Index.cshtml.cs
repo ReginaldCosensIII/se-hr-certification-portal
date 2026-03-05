@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using SeHrCertificationPortal.Utilities;
 
 namespace SeHrCertificationPortal.Pages.Admin
 {
@@ -274,13 +275,9 @@ namespace SeHrCertificationPortal.Pages.Admin
             try
             {
                 var agencies = await _context.Agencies.OrderBy(a => a.Abbreviation).ToListAsync();
-                var csvBuilder = new System.Text.StringBuilder();
-                csvBuilder.AppendLine("\"ID\",\"Name\",\"Abbreviation\"");
-                foreach (var agency in agencies)
-                {
-                    csvBuilder.AppendLine($"\"{agency.Id}\",\"{agency.FullName?.Replace("\"", "\"\"")}\",\"{agency.Abbreviation?.Replace("\"", "\"\"")}\"");
-                }
-                return File(System.Text.Encoding.UTF8.GetBytes(csvBuilder.ToString()), "text/csv", "Agencies_Export.csv");
+                var headers = new[] { "ID", "Name", "Abbreviation" };
+                var csv = CsvExportHelper.GenerateCsv(agencies, headers, a => new[] { a.Id.ToString(), a.FullName ?? "", a.Abbreviation ?? "" });
+                return File(System.Text.Encoding.UTF8.GetBytes(csv), "text/csv", "Agencies_Export.csv");
             }
             catch (Exception ex)
             {
@@ -295,13 +292,9 @@ namespace SeHrCertificationPortal.Pages.Admin
             try 
             {
                 var certs = await _context.Certifications.Include(c => c.Agency).OrderBy(c => c.Name).ToListAsync();
-                var csvBuilder = new System.Text.StringBuilder();
-                csvBuilder.AppendLine("\"ID\",\"Name\",\"Agency\",\"ValidityPeriodMonths\"");
-                foreach (var cert in certs)
-                {
-                    csvBuilder.AppendLine($"\"{cert.Id}\",\"{cert.Name?.Replace("\"", "\"\"")}\",\"{cert.Agency?.Abbreviation?.Replace("\"", "\"\"")}\",\"{cert.ValidityPeriodMonths}\"");
-                }
-                return File(System.Text.Encoding.UTF8.GetBytes(csvBuilder.ToString()), "text/csv", "Certifications_Export.csv");
+                var headers = new[] { "ID", "Name", "Agency", "ValidityPeriodMonths" };
+                var csv = CsvExportHelper.GenerateCsv(certs, headers, c => new[] { c.Id.ToString(), c.Name ?? "", c.Agency?.Abbreviation ?? "", c.ValidityPeriodMonths.ToString() });
+                return File(System.Text.Encoding.UTF8.GetBytes(csv), "text/csv", "Certifications_Export.csv");
             }
             catch (Exception ex)
             {
@@ -549,6 +542,29 @@ namespace SeHrCertificationPortal.Pages.Admin
 
             byte[] pdfBytes = document.GeneratePdf();
             return File(pdfBytes, "application/pdf", $"SPE_Employee_Roster_{DateTime.Now:yyyyMMdd}.pdf");
+        }
+
+        public async Task<IActionResult> OnPostDownloadEmployeesCsvAsync()
+        {
+            try
+            {
+                var employees = await _context.Employees
+                    .Include(e => e.CertificationRequests)
+                    .OrderBy(e => e.DisplayName)
+                    .ToListAsync();
+                var headers = new[] { "Employee Name", "Emp ID", "Role", "Department", "Active Certs" };
+                var csv = CsvExportHelper.GenerateCsv(employees, headers, e => {
+                    var activeCertsCount = e.CertificationRequests.Count(c => c.Status == SeHrCertificationPortal.Models.RequestStatus.Passed && (c.ExpirationDate == null || c.ExpirationDate > DateTime.UtcNow));
+                    return new[] { e.DisplayName ?? "", e.EmployeeIdNumber ?? "", e.Role ?? "", e.Department ?? "", activeCertsCount.ToString() };
+                });
+                return File(System.Text.Encoding.UTF8.GetBytes(csv), "text/csv", $"Employees_Export_{DateTime.Now:yyyyMMdd}.csv");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting Employees CSV.");
+                TempData["ErrorMessage"] = "Failed to export CSV. Please try again.";
+                return RedirectToPage();
+            }
         }
         public async Task<IActionResult> OnPostAddEmployeeAsync()
         {

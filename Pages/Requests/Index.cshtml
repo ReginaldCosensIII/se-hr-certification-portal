@@ -11,11 +11,16 @@
 <!-- New Request Accordion Form -->
 <div class="accordion mb-4 shadow-sm" id="newRequestAccordion">
     <div class="accordion-item border-0" style="border-top: 4px solid var(--brand-primary) !important;">
-        <h2 class="accordion-header" id="headingNewRequest">
-            <button class="accordion-button collapsed text-body" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNewRequest" aria-expanded="false" aria-controls="collapseNewRequest" style="background-color: #fff;">
-                <span class="fs-4 fw-bold"> <i data-lucide="plus-circle" class="me-2 text-brand-primary" style="color: var(--brand-primary);"></i> New Certification Request</span>
-            </button>
-        </h2>
+        <div class="d-flex justify-content-between align-items-center pe-3" style="background-color: #fff;">
+            <h2 class="accordion-header flex-grow-1" id="headingNewRequest">
+                <button class="accordion-button collapsed text-body shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNewRequest" aria-expanded="false" aria-controls="collapseNewRequest" style="background-color: transparent;">
+                    <span class="fs-4 fw-bold"> <i data-lucide="plus-circle" class="me-2 text-brand-primary" style="color: var(--brand-primary);"></i> New Certification Request</span>
+                </button>
+            </h2>
+            <form method="post" class="m-0 z-3 position-relative">
+                <button type="submit" asp-page-handler="DownloadRequestsCsv" class="btn btn-secondary"> <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export CSV </button>
+            </form>
+        </div>
         <div id="collapseNewRequest" class="accordion-collapse collapse" aria-labelledby="headingNewRequest" data-bs-parent="#newRequestAccordion">
             <div class="accordion-body bg-white">
                 <form method="post">
