@@ -9,23 +9,35 @@ document.addEventListener('DOMContentLoaded', function () {
         const originalRows = Array.from(tbody.querySelectorAll('tr'));
         const headers = table.querySelectorAll('th.sortable');
 
+        // 1. Reusable DOM Hydration for Default Sort
+        const applyDefaultSortVisuals = () => {
+            headers.forEach(th => {
+                th.dataset.sort = '';
+                const icon = th.querySelector('.sort-icon');
+                if (icon) icon.remove();
+
+                if (th.hasAttribute('data-sort-default')) {
+                    const defaultDir = th.getAttribute('data-sort-default');
+                    th.dataset.sort = defaultDir;
+                    const iconHtml = `<i data-lucide="${defaultDir === 'asc' ? 'arrow-up' : 'arrow-down'}" class="ms-1 sort-icon text-danger" style="width: 14px; height: 14px;"></i>`;
+                    th.insertAdjacentHTML('beforeend', iconHtml);
+                }
+            });
+            if (window.lucide) window.lucide.createIcons();
+        };
+
+        // Run hydration immediately on page load
+        applyDefaultSortVisuals();
+
+        // 2. Click Event Listeners
         headers.forEach(th => {
             th.style.cursor = 'pointer';
             th.title = "Click to sort";
 
-            // Apply default sorting icon if the attribute is set by the server
-            if (th.hasAttribute('data-sort-default')) {
-                const defaultState = th.getAttribute('data-sort-default');
-                th.dataset.sort = defaultState;
-                const iconHtml = `<i data-lucide="${defaultState === 'asc' ? 'arrow-up' : 'arrow-down'}" class="ms-1 sort-icon text-danger" style="width: 14px; height: 14px;"></i>`;
-                th.insertAdjacentHTML('beforeend', iconHtml);
-                if (window.lucide) window.lucide.createIcons();
-            }
-
             th.addEventListener('click', () => {
                 const index = Array.from(th.parentNode.children).indexOf(th);
 
-                // Determine next state: Unsorted -> Asc -> Desc -> Reset
+                // Determine next state: Unsorted/Default -> Asc -> Desc -> Reset
                 let nextState = 'asc';
                 if (th.dataset.sort === 'asc') nextState = 'desc';
                 else if (th.dataset.sort === 'desc') nextState = 'reset';
@@ -40,6 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Handle Reset State
                 if (nextState === 'reset') {
                     originalRows.forEach(row => tbody.appendChild(row));
+                    applyDefaultSortVisuals(); // <-- THE HOTFIX: Restore default icons!
                     return;
                 }
 
