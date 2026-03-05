@@ -1,52 +1,71 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const headers = document.querySelectorAll('th.sortable');
-    headers.forEach(th => {
-        th.style.cursor = 'pointer';
-        th.title = "Click to sort";
-        
-        th.addEventListener('click', () => {
-            const table = th.closest('table');
-            const tbody = table.querySelector('tbody');
-            const rows = Array.from(tbody.querySelectorAll('tr'));
-            const index = Array.from(th.parentNode.children).indexOf(th);
-            const isAscending = th.classList.contains('asc');
-            const direction = isAscending ? -1 : 1;
+    const tables = document.querySelectorAll('table');
 
-            rows.sort((a, b) => {
-                const aText = a.children[index].textContent.trim();
-                const bText = b.children[index].textContent.trim();
+    tables.forEach(table => {
+        const tbody = table.querySelector('tbody');
+        if (!tbody) return;
 
-                // Date check
-                const aDate = Date.parse(aText);
-                const bDate = Date.parse(bText);
-                if (!isNaN(aDate) && !isNaN(bDate)) return (aDate - bDate) * direction;
+        // Snapshot the original server-rendered row order for the "Reset" state
+        const originalRows = Array.from(tbody.querySelectorAll('tr'));
+        const headers = table.querySelectorAll('th.sortable');
 
-                // Numeric check
-                const aNum = parseFloat(aText.replace(/[^0-9.-]+/g,""));
-                const bNum = parseFloat(bText.replace(/[^0-9.-]+/g,""));
-                if (!isNaN(aNum) && !isNaN(bNum) && aText.match(/^[0-9.,$-]+$/) && bText.match(/^[0-9.,$-]+$/)) {
-                    return (aNum - bNum) * direction;
+        headers.forEach(th => {
+            th.style.cursor = 'pointer';
+            th.title = "Click to sort";
+
+            th.addEventListener('click', () => {
+                const index = Array.from(th.parentNode.children).indexOf(th);
+
+                // Determine next state: Unsorted -> Asc -> Desc -> Reset
+                let nextState = 'asc';
+                if (th.dataset.sort === 'asc') nextState = 'desc';
+                else if (th.dataset.sort === 'desc') nextState = 'reset';
+
+                // Clear all sort states and remove injected icons from all headers
+                headers.forEach(h => {
+                    h.dataset.sort = '';
+                    const icon = h.querySelector('.sort-icon');
+                    if (icon) icon.remove();
+                });
+
+                // Handle Reset State
+                if (nextState === 'reset') {
+                    originalRows.forEach(row => tbody.appendChild(row));
+                    return;
                 }
 
-                // String fallback
-                return aText.localeCompare(bText) * direction;
+                // Apply new state and dynamically inject the active icon
+                th.dataset.sort = nextState;
+                const iconHtml = `<i data-lucide="${nextState === 'asc' ? 'arrow-up' : 'arrow-down'}" class="ms-1 sort-icon" style="width: 14px; height: 14px; color: var(--brand-primary);"></i>`;
+                th.insertAdjacentHTML('beforeend', iconHtml);
+                if (window.lucide) window.lucide.createIcons();
+
+                // Sort rows
+                const direction = nextState === 'asc' ? 1 : -1;
+                const rowsToSort = Array.from(tbody.querySelectorAll('tr'));
+
+                rowsToSort.sort((a, b) => {
+                    const aText = a.children[index].textContent.trim();
+                    const bText = b.children[index].textContent.trim();
+
+                    // Date Sort
+                    const aDate = Date.parse(aText);
+                    const bDate = Date.parse(bText);
+                    if (!isNaN(aDate) && !isNaN(bDate) && isNaN(aText) && isNaN(bText)) return (aDate - bDate) * direction;
+
+                    // Numeric/Currency Sort
+                    const aNum = parseFloat(aText.replace(/[^0-9.-]+/g, ""));
+                    const bNum = parseFloat(bText.replace(/[^0-9.-]+/g, ""));
+                    if (!isNaN(aNum) && !isNaN(bNum) && aText.match(/^[-+]?[0-9.,$]+$/) && bText.match(/^[-+]?[0-9.,$]+$/)) {
+                        return (aNum - bNum) * direction;
+                    }
+
+                    // String Sort
+                    return aText.localeCompare(bText) * direction;
+                });
+
+                rowsToSort.forEach(row => tbody.appendChild(row));
             });
-
-            // Reset all icons and classes
-            headers.forEach(h => {
-                h.classList.remove('asc', 'desc');
-                const icon = h.querySelector('.sort-icon');
-                if (icon) icon.setAttribute('data-lucide', 'arrow-up-down');
-            });
-
-            // Set active sort icon and class
-            th.classList.add(isAscending ? 'desc' : 'asc');
-            const activeIcon = th.querySelector('.sort-icon');
-            if (activeIcon) activeIcon.setAttribute('data-lucide', isAscending ? 'arrow-down' : 'arrow-up');
-            if (window.lucide) window.lucide.createIcons();
-
-            // Re-append rows to DOM
-            rows.forEach(row => tbody.appendChild(row));
         });
     });
 });
