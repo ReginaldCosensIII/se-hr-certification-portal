@@ -42,9 +42,12 @@ namespace SeHrCertificationPortal.Pages.Requests
         [BindProperty(SupportsGet = true)]
         public SeHrCertificationPortal.Models.RequestStatus? StatusFilter { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int p = 1, int? pageSize = null)
+        public string? CurrentSort { get; set; }
+
+        public async Task<IActionResult> OnGetAsync(int p = 1, int? pageSize = null, string? sortOrder = null)
         {
             try {
+                CurrentSort = sortOrder;
                 CurrentPage = p < 1 ? 1 : p;
 
                 // Restrict PageSize to valid options, default to 25
@@ -77,8 +80,23 @@ namespace SeHrCertificationPortal.Pages.Requests
                 TotalRecords = await query.CountAsync();
                 TotalPages = (int)Math.Ceiling(TotalRecords / (double)PageSize);
 
-                CertificationRequest = await query
-                    .OrderByDescending(c => c.RequestDate)
+                // Server-Side Sorting Logic
+                var orderedQuery = sortOrder switch
+                {
+                    "emp_asc" => query.OrderBy(c => c.Employee!.DisplayName),
+                    "emp_desc" => query.OrderByDescending(c => c.Employee!.DisplayName),
+                    "agency_asc" => query.OrderBy(c => c.Agency!.Abbreviation ?? c.CustomAgencyName),
+                    "agency_desc" => query.OrderByDescending(c => c.Agency!.Abbreviation ?? c.CustomAgencyName),
+                    "cert_asc" => query.OrderBy(c => c.Certification!.Name ?? c.CustomCertificationName),
+                    "cert_desc" => query.OrderByDescending(c => c.Certification!.Name ?? c.CustomCertificationName),
+                    "date_asc" => query.OrderBy(c => c.RequestDate),
+                    "date_desc" => query.OrderByDescending(c => c.RequestDate),
+                    "status_asc" => query.OrderBy(c => c.Status),
+                    "status_desc" => query.OrderByDescending(c => c.Status),
+                    _ => query.OrderByDescending(c => c.RequestDate), // Default Reset State
+                };
+
+                CertificationRequest = await orderedQuery
                     .ThenByDescending(c => c.Id)
                     .Skip((CurrentPage - 1) * PageSize)
                     .Take(PageSize)
