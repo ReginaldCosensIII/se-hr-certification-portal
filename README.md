@@ -51,6 +51,9 @@ Our proactive SRE design guarantees the frontend remains bulletproof against int
 - **Fail-safe `try-catch` database wrappers**: Eradicates unhandled native `NullReferenceExceptions` allowing dynamic fallback to empty model collections.
 - **Responsive `TempData` UI Notifications**: Broadcasts graceful, dismissible Bootstrap alerts to instantly communicate system status securely.
 - **Global Exception Middleware**: `app.UseExceptionHandler("/Error")` enforces a polished, branded user fallback rendering in extreme catastrophe avoiding raw `500` stack traces output.
+- **Air-Gapped CDNs**: Localized all critical JavaScript and CSS assets into `wwwroot/lib` to guarantee resilient deployment independence from external CDNs.
+
+Learn more in our [SRE Error Handling Architecture Documentation](docs/sre-error-handling.md).
 
 ## Development Workflow
 - **Branching**: Use feature branches (`feat/name`, `fix/name`) for all new work.

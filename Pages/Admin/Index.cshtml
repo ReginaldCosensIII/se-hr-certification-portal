@@ -31,9 +31,9 @@
                 <h5 class="card-title fs-5 fw-bold text-dark mb-0">
                     Manage Agencies
                 </h5>
-                <div class="d-flex gap-2 align-items-center">
-                    <form method="post" class="dropdown m-0 p-0">
-                        <button class="btn btn-sm btn-outline-brand fw-bold dropdown-toggle d-inline-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <div class="d-flex gap-2 align-items-stretch">
+                    <form method="post" class="dropdown m-0 p-0 d-flex">
+                        <button class="btn btn-sm btn-outline-brand fw-bold dropdown-toggle d-inline-flex align-items-center h-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i data-lucide="download" class="me-1" style="width: 14px; height: 14px;"></i> Export Options
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
@@ -45,7 +45,7 @@
                             <li><button type="submit" class="dropdown-item" asp-page-handler="DownloadCatalog" asp-route-exportScope="Certifications">Export Certifications Only (PDF)</button></li>
                         </ul>
                     </form>
-                    <button class="btn btn-sm btn-brand fw-bold text-white d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addAgencyModal">
+                    <button class="btn btn-sm btn-brand fw-bold text-white d-inline-flex align-items-center h-100" data-bs-toggle="modal" data-bs-target="#addAgencyModal">
                         <i data-lucide="plus" class="me-1" style="width: 14px;"></i> Add Agency
                     </button>
                 </div>
@@ -159,9 +159,9 @@
                  <h5 class="card-title fs-5 fw-bold text-dark mb-0">
                     Manage Certifications
                 </h5>
-                <div class="d-flex gap-2 align-items-center">
-                    <form method="post" class="dropdown m-0 p-0">
-                        <button class="btn btn-sm btn-outline-brand fw-bold dropdown-toggle d-inline-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <div class="d-flex gap-2 align-items-stretch">
+                    <form method="post" class="dropdown m-0 p-0 d-flex">
+                        <button class="btn btn-sm btn-outline-brand fw-bold dropdown-toggle d-inline-flex align-items-center h-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i data-lucide="download" class="me-1" style="width: 14px; height: 14px;"></i> Export Options
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
@@ -170,7 +170,7 @@
                             <li><button type="submit" class="dropdown-item" asp-page-handler="DownloadCatalog" asp-route-exportScope="Certifications">Export Certifications Only (PDF)</button></li>
                         </ul>
                     </form>
-                    <button class="btn btn-sm btn-brand fw-bold text-white d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addCertificationModal">
+                    <button class="btn btn-sm btn-brand fw-bold text-white d-inline-flex align-items-center h-100" data-bs-toggle="modal" data-bs-target="#addCertificationModal">
                         <i data-lucide="plus" class="me-1" style="width: 14px;"></i> Add Certification
                     </button>
                 </div>
@@ -296,11 +296,14 @@
         <div class="card shadow-sm">
             <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
                  <h5 class="card-title fs-5 fw-bold text-dark mb-0">Manage Employees</h5>
-                <div class="d-flex gap-2 align-items-center">
-                    <a asp-page-handler="ExportEmployees" class="btn btn-sm btn-outline-brand fw-bold d-inline-flex align-items-center">
-                        <i data-lucide="download" class="me-1" style="width: 14px; height: 14px;"></i> Export List
-                    </a>
-                    <button class="btn btn-sm btn-brand fw-bold text-white d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+                <div class="d-flex gap-2 align-items-stretch">
+                    <form method="get" class="m-0 p-0 d-flex">
+                        <input type="hidden" name="handler" value="ExportEmployees" />
+                        <button type="submit" class="btn btn-sm btn-outline-brand fw-bold d-inline-flex align-items-center h-100">
+                            <i data-lucide="download" class="me-1" style="width: 14px; height: 14px;"></i> Export List
+                        </button>
+                    </form>
+                    <button class="btn btn-sm btn-brand fw-bold text-white d-inline-flex align-items-center h-100" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
                         <i data-lucide="plus" class="me-1" style="width: 14px;"></i> Add Employee
                     </button>
                 </div>
@@ -343,7 +346,7 @@
                             }
                             @foreach (var emp in Model.Employees) {
                                 var activeCerts = emp.CertificationRequests.Count(c => c.Status == SeHrCertificationPortal.Models.RequestStatus.Passed && (c.ExpirationDate == null || c.ExpirationDate > DateTime.UtcNow));
-                                <tr>
+                                <tr class="clickable-row align-middle" style="cursor: pointer;" data-employee-id="@emp.Id" title="Click to view certification history">
                                     <td class="ps-3 text-muted">@emp.Id</td>
                                     <td class="fw-bold">
                                         @emp.DisplayName
@@ -359,6 +362,11 @@
                                         }
                                     </td>
                                     <td class="text-center border-start">
+                                        <form method="post" class="d-inline m-0 p-0">
+                                            <button type="submit" formtarget="_blank" asp-page-handler="DownloadEmployeeHistoryPdf" asp-route-employeeId="@emp.Id" class="btn btn-link p-0 m-0 border-0 text-secondary action-btn text-decoration-none me-2" title="Print History" onclick="event.stopPropagation();">
+                                                <i data-lucide="printer" style="width: 18px; height: 18px;"></i>
+                                            </button>
+                                        </form>
                                         <a href="javascript:void(0)" class="text-primary text-decoration-none me-2 edit-emp-btn" 
                                            data-id="@emp.Id" data-name="@emp.DisplayName" data-empno="@emp.EmployeeIdNumber" data-role="@emp.Role" data-dept="@emp.Department" 
                                            title="Edit Employee"><i data-lucide="edit" style="width: 18px; height: 18px;"></i></a>
@@ -427,6 +435,40 @@
 </div>
 
 <!-- Modals -->
+
+<!-- Employee History Modal -->
+<div class="modal fade" id="employeeHistoryModal" tabindex="-1" aria-labelledby="employeeHistoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title" id="employeeHistoryModalLabel">
+                    <i data-lucide="user" class="me-2"></i><span id="modalEmployeeName">Employee History</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle mb-0" id="modalHistoryTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Agency</th>
+                                <th>Certification</th>
+                                <th>Date Passed</th>
+                                <th>Expiration</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalHistoryBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Add Agency Modal -->
 <div class="modal fade" id="addAgencyModal" tabindex="-1" aria-labelledby="addAgencyModalLabel" aria-hidden="true">
@@ -1090,6 +1132,45 @@
                 document.getElementById('reactivateEmployeeId').value = reactivateEmpBtn.getAttribute('data-id');
                 document.getElementById('reactivateEmployeeNameDisplay').textContent = reactivateEmpBtn.getAttribute('data-name');
                 new bootstrap.Modal(document.getElementById('reactivateEmployeeModal')).show();
+                return;
+            }
+
+            // E. Handle the ROW CLICK (Employee Modal)
+            var row = e.target.closest('.clickable-row');
+            if (row) {
+                e.preventDefault();
+                var employeeId = row.getAttribute('data-employee-id');
+                var employeeName = row.querySelector('td:nth-child(2)')?.textContent.trim() || 'Employee';
+                document.getElementById('modalEmployeeName').textContent = employeeName + "'s Certifications";
+
+                fetch('?handler=EmployeeHistory&employeeId=' + employeeId)
+                    .then(response => response.json())
+                    .then(data => {
+                        var tbodyHtml = '';
+                        if (data.length === 0) {
+                            tbodyHtml = '<tr><td colspan="5" class="text-center text-muted fst-italic py-4">No certification history found.</td></tr>';
+                        } else {
+                            data.forEach(function(item) {
+                                var badgeClass = 'bg-secondary';
+                                if (item.status === 'Active') badgeClass = 'bg-success';
+                                else if (item.status === 'ExpiringSoon') badgeClass = 'bg-warning text-dark';
+                                else if (item.status === 'Expired') badgeClass = 'bg-danger';
+                                else if (item.status === 'Permanent') badgeClass = 'bg-info text-dark';
+
+                                tbodyHtml += `<tr>
+                                    <td>${item.agency}</td>
+                                    <td>${item.certification}</td>
+                                    <td>${item.datePassed}</td>
+                                    <td>${item.expirationDate}</td>
+                                    <td><span class="badge ${badgeClass}">${item.status}</span></td>
+                                </tr>`;
+                            });
+                        }
+                        document.getElementById('modalHistoryBody').innerHTML = tbodyHtml;
+                        if(window.lucide) { window.lucide.createIcons(); }
+                        new bootstrap.Modal(document.getElementById('employeeHistoryModal')).show();
+                    })
+                    .catch(err => console.error('Fetch error:', err));
                 return;
             }
         });
