@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (th.hasAttribute('data-sort-default')) {
                 const defaultState = th.getAttribute('data-sort-default');
                 th.dataset.sort = defaultState;
-                const iconHtml = `<i data-lucide="${defaultState === 'asc' ? 'arrow-up' : 'arrow-down'}" class="ms-1 sort-icon text-primary" style="width: 14px; height: 14px;"></i>`;
+                const iconHtml = `<i data-lucide="${defaultState === 'asc' ? 'arrow-up' : 'arrow-down'}" class="ms-1 sort-icon text-danger" style="width: 14px; height: 14px;"></i>`;
                 th.insertAdjacentHTML('beforeend', iconHtml);
                 if (window.lucide) window.lucide.createIcons();
             }
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Apply new state and dynamically inject the active icon
                 th.dataset.sort = nextState;
-                const iconHtml = `<i data-lucide="${nextState === 'asc' ? 'arrow-up' : 'arrow-down'}" class="ms-1 sort-icon text-primary" style="width: 14px; height: 14px;"></i>`;
+                const iconHtml = `<i data-lucide="${nextState === 'asc' ? 'arrow-up' : 'arrow-down'}" class="ms-1 sort-icon text-danger" style="width: 14px; height: 14px;"></i>`;
                 th.insertAdjacentHTML('beforeend', iconHtml);
                 if (window.lucide) window.lucide.createIcons();
 
