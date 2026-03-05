@@ -237,16 +237,15 @@ namespace SeHrCertificationPortal.Pages.Requests
                     .Include(c => c.Employee)
                     .OrderByDescending(c => c.RequestDate)
                     .ToListAsync();
-                var headers = new[] { "Request ID", "Employee Name", "Manager Name", "Agency", "Certification", "Request Type", "Request Date", "Status" };
-                var csv = CsvExportHelper.GenerateCsv(requests, headers, r => new[] {
-                    r.Id.ToString(),
-                    r.Employee?.DisplayName ?? "",
-                    r.ManagerName ?? "",
-                    r.Agency?.Abbreviation ?? r.CustomAgencyName ?? "",
-                    r.Certification?.Name ?? r.CustomCertificationName ?? "",
-                    r.RequestType.ToString(),
-                    r.RequestDate.ToString("yyyy-MM-dd"),
-                    r.Status.ToString()
+                var headers = new[] { "Request ID", "Employee Name", "Agency", "Certification", "Request Date", "Expiration Date", "Status" };
+                var csv = CsvExportHelper.GenerateCsv(requests, headers, r => new string[] { 
+                    r.Id.ToString(), 
+                    r.Employee?.DisplayName ?? "Unknown", 
+                    r.Agency?.Abbreviation ?? r.CustomAgencyName ?? "Unknown", 
+                    r.Certification?.Name ?? r.CustomCertificationName ?? "Unknown", 
+                    r.RequestDate.ToString("yyyy-MM-dd"), 
+                    r.ExpirationDate?.ToString("yyyy-MM-dd") ?? "Permanent", 
+                    r.Status.ToString() 
                 });
                 return File(System.Text.Encoding.UTF8.GetBytes(csv), "text/csv", $"Requests_Export_{DateTime.Now:yyyyMMdd}.csv");
             }
