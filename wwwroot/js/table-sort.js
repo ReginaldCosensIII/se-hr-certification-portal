@@ -40,10 +40,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (overlay) overlay.classList.remove('d-none');
             }
 
-            // Determine next state: Unsorted -> asc -> desc -> reset
+            // Determine next state: Unsorted -> asc -> desc -> reset (or toggle if master default)
             let nextDir = 'asc';
-            if (th.dataset.sort === 'asc') nextDir = 'desc';
-            else if (th.dataset.sort === 'desc') nextDir = '';
+            if (th.dataset.sort === 'asc') {
+                nextDir = 'desc';
+            } else if (th.dataset.sort === 'desc') {
+                nextDir = th.hasAttribute('data-master-default') ? 'asc' : '';
+            }
 
             // Build URL
             const urlParams = new URLSearchParams(window.location.search);

@@ -156,7 +156,7 @@
                                 <th class="sortable text-nowrap" style="width: 25%;" data-column="cert" @(Model.CurrentSort?.StartsWith("cert_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Certification</th>
                                 <th class="sortable text-nowrap" style="width: 11%;" data-column="type" @(Model.CurrentSort?.StartsWith("type_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Type</th>
                                 <th class="sortable text-nowrap text-center" style="width: 110px;" data-column="status" @(Model.CurrentSort?.StartsWith("status_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Status</th>
-                                <th class="sortable text-nowrap" style="width: 115px;" data-column="date" @(Model.CurrentSort?.StartsWith("date_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : (string.IsNullOrEmpty(Model.CurrentSort) ? "data-sort-default=desc" : ""))>Request Date</th>
+                                <th class="sortable text-nowrap" style="width: 115px;" data-column="date" data-master-default="true" @(Model.CurrentSort?.StartsWith("date_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : (string.IsNullOrEmpty(Model.CurrentSort) ? "data-sort-default=desc" : ""))>Request Date</th>
                                 <th class="text-center text-nowrap" style="width: 110px;">Actions</th>
                             </tr>
                         </thead>
