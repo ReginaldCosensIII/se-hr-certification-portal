@@ -973,13 +973,6 @@
                 this.renderPagination(totalPages);
                 if(window.lucide) { window.lucide.createIcons(); } 
                 if(this.tableBody) this.tableBody.style.visibility = 'visible';
-
-                // Auto-scroll UX Fix
-                if (this.container) {
-                    const yOffset = -80; // offset for fixed headers
-                    const y = this.container.getBoundingClientRect().top + window.scrollY + yOffset;
-                    window.scrollTo({top: y, behavior: 'smooth'});
-                }
             }
 
             renderPagination(totalPages) {
