@@ -21,7 +21,7 @@ A simple internal HR web portal for Specialized Engineering (SPE) to track emplo
 ## Getting Started
 
 ### Prerequisites
-- .NET 8 SDK
+- .NET 10 SDK
 - PostgreSQL Server
 - Git
 
