@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-
+using SeHrCertificationPortal.Utilities;
 
 namespace SeHrCertificationPortal.Pages.Requests
 {
@@ -42,9 +42,12 @@ namespace SeHrCertificationPortal.Pages.Requests
         [BindProperty(SupportsGet = true)]
         public SeHrCertificationPortal.Models.RequestStatus? StatusFilter { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int p = 1, int? pageSize = null)
+        public string? CurrentSort { get; set; }
+
+        public async Task<IActionResult> OnGetAsync(int p = 1, int? pageSize = null, string? sortOrder = null)
         {
             try {
+                CurrentSort = sortOrder;
                 CurrentPage = p < 1 ? 1 : p;
 
                 // Restrict PageSize to valid options, default to 25
@@ -77,8 +80,29 @@ namespace SeHrCertificationPortal.Pages.Requests
                 TotalRecords = await query.CountAsync();
                 TotalPages = (int)Math.Ceiling(TotalRecords / (double)PageSize);
 
-                CertificationRequest = await query
-                    .OrderByDescending(c => c.RequestDate)
+        // Server-Side Sorting Logic
+        var orderedQuery = sortOrder switch
+        {
+            "id_asc" => query.OrderBy(c => c.Id),
+            "id_desc" => query.OrderByDescending(c => c.Id),
+            "emp_asc" => query.OrderBy(c => c.Employee!.DisplayName),
+            "emp_desc" => query.OrderByDescending(c => c.Employee!.DisplayName),
+            "manager_asc" => query.OrderBy(c => c.ManagerName),
+            "manager_desc" => query.OrderByDescending(c => c.ManagerName),
+            "agency_asc" => query.OrderBy(c => c.Agency!.Abbreviation ?? c.CustomAgencyName),
+            "agency_desc" => query.OrderByDescending(c => c.Agency!.Abbreviation ?? c.CustomAgencyName),
+            "cert_asc" => query.OrderBy(c => c.Certification!.Name ?? c.CustomCertificationName),
+            "cert_desc" => query.OrderByDescending(c => c.Certification!.Name ?? c.CustomCertificationName),
+            "type_asc" => query.OrderBy(c => c.RequestType),
+            "type_desc" => query.OrderByDescending(c => c.RequestType),
+            "status_asc" => query.OrderBy(c => c.Status),
+            "status_desc" => query.OrderByDescending(c => c.Status),
+            "date_asc" => query.OrderBy(c => c.RequestDate),
+            "date_desc" => query.OrderByDescending(c => c.RequestDate),
+            _ => query.OrderByDescending(c => c.RequestDate), // Default Reset State
+        };
+
+                CertificationRequest = await orderedQuery
                     .ThenByDescending(c => c.Id)
                     .Skip((CurrentPage - 1) * PageSize)
                     .Take(PageSize)
@@ -227,6 +251,34 @@ namespace SeHrCertificationPortal.Pages.Requests
             return RedirectToPage(new { p, pageSize, SearchString = searchString, StatusFilter = statusFilter });
         }
 
-
+        public async Task<IActionResult> OnPostDownloadRequestsCsvAsync()
+        {
+            try
+            {
+                var requests = await _context.CertificationRequests
+                    .Include(c => c.Agency)
+                    .Include(c => c.Certification)
+                    .Include(c => c.Employee)
+                    .OrderByDescending(c => c.RequestDate)
+                    .ToListAsync();
+                var headers = new[] { "Request ID", "Employee Name", "Agency", "Certification", "Request Date", "Expiration Date", "Status" };
+                var csv = CsvExportHelper.GenerateCsv(requests, headers, r => new string[] { 
+                    r.Id.ToString(), 
+                    r.Employee?.DisplayName ?? "Unknown", 
+                    r.Agency?.Abbreviation ?? r.CustomAgencyName ?? "Unknown", 
+                    r.Certification?.Name ?? r.CustomCertificationName ?? "Unknown", 
+                    r.RequestDate.ToString("yyyy-MM-dd"), 
+                    r.ExpirationDate?.ToString("yyyy-MM-dd") ?? "Permanent", 
+                    r.Status.ToString() 
+                });
+                return File(System.Text.Encoding.UTF8.GetBytes(csv), "text/csv", $"Requests_Export_{DateTime.Now:yyyyMMdd}.csv");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting Requests CSV.");
+                TempData["ErrorMessage"] = "Failed to export CSV. Please try again.";
+                return RedirectToPage();
+            }
+        }
     }
 }

@@ -67,3 +67,13 @@ See `docs/DEPLOYMENT.md` for detailed IIS deployment instructions.
 ## Documentation
 - `docs/REQUIREMENTS.md`: Brand identity, database rules, and feature requirements.
 - `docs/TESTING.md`: Testing strategy and requirements.
+
+## 📊 Data Grid & Sorting Architecture
+To ensure extreme performance and accurate pagination, this application utilizes **Server-Side Sorting** combined with an air-gapped **DOM Hydration** frontend strategy. 
+
+* **The Backend (`.cshtml.cs`):** Tables are bound to a `sortOrder` URL parameter. Entity Framework Core processes the `OrderBy` sorting directly in the PostgreSQL database *before* slicing the pagination (`.Take()`), ensuring perfect data accuracy.
+* **The Frontend (`table-sort.js`):** A lightweight, zero-dependency Vanilla JS script handles click routing and UX. It relies strictly on HTML data attributes:
+    * `data-column="emp"`: Maps the UI column to the C# `switch` statement string.
+    * `data-sort-default="asc"`: Allows the C# server to asynchronously pass its state down to the HTML. The JS engine reads this on load to "hydrate" the UI.
+    * `data-master-default="true"`: Applied to fallback columns (like Request Date) so the script toggles infinitely (Asc <-> Desc) instead of clearing the URL state.
+* **Layout Stability & UX:** All tables enforce `table-layout: fixed;` to prevent the auto-layout algorithm from shifting column sizes. The JS engine utilizes a 300ms UX delay to allow loading overlays to render, and injects URL hash anchors (`#table-id`) to preserve the user's scroll position upon page reload.

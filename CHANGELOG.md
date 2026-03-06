@@ -14,8 +14,15 @@
 ### Fixed
 - Chart.js canvas height collapse and label truncation.
 
-### Removed
 - Deprecated HTML notification bell mockup from the main layout header.
+
+## [Branch Closeout: feat/data-exports-and-sorting]
+### Added
+- Implemented a DRY `CsvExportHelper` utility to centralize and robustly handle CSV generation across the application.
+- Refactored Admin CSV handlers (Agencies, Certifications) to use the new utility.
+- Added new CSV export endpoints for Employees and Certification Requests.
+- Contextualized the Admin Export UI dropdowns per tab pane (Agencies, Certifications, Employees) to display only relevant export options.
+- Added a new secondary CSV export button to the Requests page header.
 
 ## [Branch Closeout: feat/dashboard-and-core-ui]
 ### Added

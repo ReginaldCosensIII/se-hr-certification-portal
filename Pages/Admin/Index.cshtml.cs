@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using SeHrCertificationPortal.Utilities;
 
 namespace SeHrCertificationPortal.Pages.Admin
 {
@@ -76,24 +77,60 @@ namespace SeHrCertificationPortal.Pages.Admin
         [BindProperty]
         public string AdminEmail { get; set; } = string.Empty;
 
+        [BindProperty(Name = "sortOrder", SupportsGet = true)]
+        public string? CurrentSort { get; set; }
+
         public async Task<IActionResult> OnGetAsync()
         {
             try {
-                Agency = await _context.Agencies
-                    .Include(a => a.Certifications)
-                    .OrderBy(a => a.Abbreviation)
-                    .ToListAsync();
+                var today = DateTime.UtcNow;
 
-                Certifications = await _context.Certifications
-                    .Include(c => c.Agency)
-                    .OrderBy(c => c.Agency!.Abbreviation)
-                    .ThenBy(c => c.Name)
-                    .ToListAsync();
+                // 1. Sort Agencies
+                var agencyQuery = _context.Agencies.Include(a => a.Certifications).AsQueryable();
+                agencyQuery = CurrentSort switch {
+                    "agId_asc" => agencyQuery.OrderBy(a => a.Id),
+                    "agId_desc" => agencyQuery.OrderByDescending(a => a.Id),
+                    "agName_asc" => agencyQuery.OrderBy(a => a.FullName),
+                    "agName_desc" => agencyQuery.OrderByDescending(a => a.FullName),
+                    "agCerts_asc" => agencyQuery.OrderBy(a => a.Certifications.Count),
+                    "agCerts_desc" => agencyQuery.OrderByDescending(a => a.Certifications.Count),
+                    "agStatus_asc" => agencyQuery.OrderByDescending(a => a.IsActive), // Descending puts Active (True) first
+                    "agStatus_desc" => agencyQuery.OrderBy(a => a.IsActive),
+                    _ => agencyQuery.OrderBy(a => a.Abbreviation)
+                };
+                Agency = await agencyQuery.ToListAsync();
 
-                Employees = await _context.Employees
-                    .Include(e => e.CertificationRequests)
-                    .OrderBy(e => e.DisplayName)
-                    .ToListAsync();
+                // 2. Sort Certifications
+                var certQuery = _context.Certifications.Include(c => c.Agency).AsQueryable();
+                certQuery = CurrentSort switch {
+                    "ctName_asc" => certQuery.OrderBy(c => c.Name),
+                    "ctName_desc" => certQuery.OrderByDescending(c => c.Name),
+                    "ctAgency_asc" => certQuery.OrderBy(c => c.Agency!.Abbreviation),
+                    "ctAgency_desc" => certQuery.OrderByDescending(c => c.Agency!.Abbreviation),
+                    "ctValidity_asc" => certQuery.OrderBy(c => c.ValidityPeriodMonths),
+                    "ctValidity_desc" => certQuery.OrderByDescending(c => c.ValidityPeriodMonths),
+                    "ctStatus_asc" => certQuery.OrderByDescending(c => c.IsActive),
+                    "ctStatus_desc" => certQuery.OrderBy(c => c.IsActive),
+                    _ => certQuery.OrderBy(c => c.Agency!.Abbreviation).ThenBy(c => c.Name)
+                };
+                Certifications = await certQuery.ToListAsync();
+
+                // 3. Sort Employees
+                var empQuery = _context.Employees.Include(e => e.CertificationRequests).AsQueryable();
+                empQuery = CurrentSort switch {
+                    "emId_asc" => empQuery.OrderBy(e => e.Id),
+                    "emId_desc" => empQuery.OrderByDescending(e => e.Id),
+                    "emName_asc" => empQuery.OrderBy(e => e.DisplayName),
+                    "emName_desc" => empQuery.OrderByDescending(e => e.DisplayName),
+                    "emDept_asc" => empQuery.OrderBy(e => e.Department),
+                    "emDept_desc" => empQuery.OrderByDescending(e => e.Department),
+                    "emCerts_asc" => empQuery.OrderBy(e => e.CertificationRequests.Count(cr => cr.Status == SeHrCertificationPortal.Models.RequestStatus.Passed && (cr.ExpirationDate == null || cr.ExpirationDate > today))),
+                    "emCerts_desc" => empQuery.OrderByDescending(e => e.CertificationRequests.Count(cr => cr.Status == SeHrCertificationPortal.Models.RequestStatus.Passed && (cr.ExpirationDate == null || cr.ExpirationDate > today))),
+                    "emStatus_asc" => empQuery.OrderByDescending(e => e.IsActive),
+                    "emStatus_desc" => empQuery.OrderBy(e => e.IsActive),
+                    _ => empQuery.OrderBy(e => e.DisplayName)
+                };
+                Employees = await empQuery.ToListAsync();
 
                 var thresholdSetting = await _context.SystemSettings.FindAsync("ExpiringSoonThresholdDays");
                 ExpiringSoonThresholdDays = thresholdSetting != null && int.TryParse(thresholdSetting.Value, out int days) ? days : 30;
@@ -274,13 +311,9 @@ namespace SeHrCertificationPortal.Pages.Admin
             try
             {
                 var agencies = await _context.Agencies.OrderBy(a => a.Abbreviation).ToListAsync();
-                var csvBuilder = new System.Text.StringBuilder();
-                csvBuilder.AppendLine("\"ID\",\"Name\",\"Abbreviation\"");
-                foreach (var agency in agencies)
-                {
-                    csvBuilder.AppendLine($"\"{agency.Id}\",\"{agency.FullName?.Replace("\"", "\"\"")}\",\"{agency.Abbreviation?.Replace("\"", "\"\"")}\"");
-                }
-                return File(System.Text.Encoding.UTF8.GetBytes(csvBuilder.ToString()), "text/csv", "Agencies_Export.csv");
+                var headers = new[] { "ID", "Name", "Abbreviation" };
+                var csv = CsvExportHelper.GenerateCsv(agencies, headers, a => new[] { a.Id.ToString(), a.FullName ?? "", a.Abbreviation ?? "" });
+                return File(System.Text.Encoding.UTF8.GetBytes(csv), "text/csv", "Agencies_Export.csv");
             }
             catch (Exception ex)
             {
@@ -295,13 +328,9 @@ namespace SeHrCertificationPortal.Pages.Admin
             try 
             {
                 var certs = await _context.Certifications.Include(c => c.Agency).OrderBy(c => c.Name).ToListAsync();
-                var csvBuilder = new System.Text.StringBuilder();
-                csvBuilder.AppendLine("\"ID\",\"Name\",\"Agency\",\"ValidityPeriodMonths\"");
-                foreach (var cert in certs)
-                {
-                    csvBuilder.AppendLine($"\"{cert.Id}\",\"{cert.Name?.Replace("\"", "\"\"")}\",\"{cert.Agency?.Abbreviation?.Replace("\"", "\"\"")}\",\"{cert.ValidityPeriodMonths}\"");
-                }
-                return File(System.Text.Encoding.UTF8.GetBytes(csvBuilder.ToString()), "text/csv", "Certifications_Export.csv");
+                var headers = new[] { "ID", "Name", "Agency", "ValidityPeriodMonths" };
+                var csv = CsvExportHelper.GenerateCsv(certs, headers, c => new[] { c.Id.ToString(), c.Name ?? "", c.Agency?.Abbreviation ?? "", c.ValidityPeriodMonths.ToString() });
+                return File(System.Text.Encoding.UTF8.GetBytes(csv), "text/csv", "Certifications_Export.csv");
             }
             catch (Exception ex)
             {
@@ -549,6 +578,29 @@ namespace SeHrCertificationPortal.Pages.Admin
 
             byte[] pdfBytes = document.GeneratePdf();
             return File(pdfBytes, "application/pdf", $"SPE_Employee_Roster_{DateTime.Now:yyyyMMdd}.pdf");
+        }
+
+        public async Task<IActionResult> OnPostDownloadEmployeesCsvAsync()
+        {
+            try
+            {
+                var employees = await _context.Employees
+                    .Include(e => e.CertificationRequests)
+                    .OrderBy(e => e.DisplayName)
+                    .ToListAsync();
+                var headers = new[] { "Employee Name", "Emp ID", "Role", "Department", "Active Certs" };
+                var csv = CsvExportHelper.GenerateCsv(employees, headers, e => {
+                    var activeCertsCount = e.CertificationRequests.Count(c => c.Status == SeHrCertificationPortal.Models.RequestStatus.Passed && (c.ExpirationDate == null || c.ExpirationDate > DateTime.UtcNow));
+                    return new[] { e.DisplayName ?? "", e.EmployeeIdNumber ?? "", e.Role ?? "", e.Department ?? "", activeCertsCount.ToString() };
+                });
+                return File(System.Text.Encoding.UTF8.GetBytes(csv), "text/csv", $"Employees_Export_{DateTime.Now:yyyyMMdd}.csv");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting Employees CSV.");
+                TempData["ErrorMessage"] = "Failed to export CSV. Please try again.";
+                return RedirectToPage();
+            }
         }
         public async Task<IActionResult> OnPostAddEmployeeAsync()
         {

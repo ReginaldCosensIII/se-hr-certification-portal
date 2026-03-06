@@ -19,8 +19,7 @@
 <body class="bg-body-tertiary no-transition">
     <script>
         // Immediate State Restoration to prevent FOUC
-        const savedState = localStorage.getItem('sidebar-collapse');
-        if (savedState === 'true') {
+        if (localStorage.getItem('sidebar-collapse') === 'true') {
             document.body.classList.add('sidebar-collapse');
         }
 
@@ -130,6 +129,7 @@
         });
     </script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/table-sort.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

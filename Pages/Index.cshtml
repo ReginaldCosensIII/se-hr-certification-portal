@@ -87,19 +87,22 @@
             </a>
         </div>
     </div>
-    <div class="card-body table-responsive p-0">
-        <table class="table table-striped table-hover align-middle mb-0">
+    <div class="card-body table-responsive p-0 position-relative">
+    <div class="table-loading-overlay d-none position-absolute w-100 h-100 d-flex justify-content-center align-items-center" style="top: 0; left: 0; background: rgba(255, 255, 255, 0.8); z-index: 10;">
+        <div class="spinner-border text-brand-primary" role="status" style="width: 3rem; height: 3rem; color: var(--brand-primary);"><span class="visually-hidden">Loading...</span></div>
+    </div>
+        <table class="table table-striped table-hover align-middle mb-0" style="table-layout: fixed;">
             <thead class="bg-light">
             <tr>
-                <th>Req ID</th>
-                <th>Employee</th>
-                <th>Manager</th> <!-- Added Manager -->
-                <th>Agency</th> 
-                <th>Certification</th> 
-                <th>Type</th>
-                <th class="text-center">Status</th>
-                <th>Request Date</th> <!-- Renamed Date -->
-                <th>Actions</th>
+                <th class="sortable text-nowrap" style="width: 90px;" data-column="id" @(Model.CurrentSort?.StartsWith("id_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Req ID</th>
+                <th class="sortable text-nowrap" style="width: 16%;" data-column="emp" @(Model.CurrentSort?.StartsWith("emp_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Employee</th>
+                <th class="sortable text-nowrap" style="width: 16%;" data-column="manager" @(Model.CurrentSort?.StartsWith("manager_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Manager</th>
+                <th class="sortable text-nowrap" style="width: 12%;" data-column="agency" @(Model.CurrentSort?.StartsWith("agency_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Agency</th>
+                <th class="sortable text-nowrap" style="width: 25%;" data-column="cert" @(Model.CurrentSort?.StartsWith("cert_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Certification</th>
+                <th class="sortable text-nowrap" style="width: 11%;" data-column="type" @(Model.CurrentSort?.StartsWith("type_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Type</th>
+                <th class="sortable text-nowrap text-center" style="width: 110px;" data-column="status" @(Model.CurrentSort?.StartsWith("status_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Status</th>
+                <th class="sortable text-nowrap" style="width: 115px;" data-column="date" data-master-default="true" @(Model.CurrentSort?.StartsWith("date_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : (string.IsNullOrEmpty(Model.CurrentSort) ? "data-sort-default=desc" : ""))>Request Date</th>
+                <th class="text-center text-nowrap" style="width: 90px;">Actions</th>
             </tr>
             </thead>
             <tbody>
@@ -116,15 +119,15 @@
             @foreach (var item in Model.RecentRequests)
             {
                 <tr>
-                    <td><span class="text-muted">REQ-@item.Id</span></td>
+                    <td class="text-nowrap"><span class="text-muted">REQ-@item.Id</span></td>
                     <td>
-                        <span class="fw-bold">@item.Employee?.DisplayName</span>
+                        <span class="fw-bold text-truncate d-block">@item.Employee?.DisplayName</span>
                     </td>
-                    <td>@(item.ManagerName ?? "N/A")</td>
-                    <td>@(item.Agency?.Abbreviation ?? item.CustomAgencyName ?? "Custom")</td>
-                    <td>@(item.Certification?.Name ?? item.CustomCertificationName ?? "Custom")</td>
-                    <td><span class="fw-bold">@item.RequestType</span></td>
-                    <td class="text-center">
+                    <td class="text-truncate">@(item.ManagerName ?? "N/A")</td>
+                    <td class="text-truncate">@(item.Agency?.Abbreviation ?? item.CustomAgencyName ?? "Custom")</td>
+                    <td class="text-truncate">@(item.Certification?.Name ?? item.CustomCertificationName ?? "Custom")</td>
+                    <td class="text-nowrap"><span class="fw-bold">@item.RequestType</span></td>
+                    <td class="text-center text-nowrap">
                         @if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Pending)
                         {
                             <span class="badge text-bg-warning d-inline-flex align-items-center"><i data-lucide="clock" class="me-1" style="width: 12px; height: 12px;"></i> Pending</span>
@@ -138,8 +141,8 @@
                             <span class="badge text-bg-danger d-inline-flex align-items-center"><i data-lucide="x-circle" class="me-1" style="width: 12px; height: 12px;"></i> @item.Status</span>
                         }
                     </td>
-                    <td>@item.RequestDate.ToString("yyyy-MM-dd")</td>
-                    <td class="text-center">
+                    <td class="text-nowrap">@item.RequestDate.ToString("yyyy-MM-dd")</td>
+                    <td class="text-center text-nowrap">
                         <a href="/Requests/Index?SearchString=@item.Id" class="text-warning" title="Manage Record">
                             <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
                         </a>

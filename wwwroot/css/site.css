@@ -13,9 +13,21 @@
     --sidebar-width-collapsed: 80px;
 }
 
+/* Anti-FOUC / Page Load Transition Killer */
+.no-transition,
+.no-transition * {
+    transition: none !important;
+}
+
 body {
     background-color: #f4f6f9;
     /* Light gray background */
+}
+
+/* Ensure anchored tables clear the fixed top navbar */
+table,
+.card {
+    scroll-margin-top: 80px;
 }
 
 /* -------------------------------------------------------------------------- */
