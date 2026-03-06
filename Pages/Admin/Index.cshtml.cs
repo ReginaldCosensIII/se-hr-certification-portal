@@ -124,8 +124,8 @@ namespace SeHrCertificationPortal.Pages.Admin
                     "emName_desc" => empQuery.OrderByDescending(e => e.DisplayName),
                     "emDept_asc" => empQuery.OrderBy(e => e.Department),
                     "emDept_desc" => empQuery.OrderByDescending(e => e.Department),
-                    "emCerts_asc" => empQuery.OrderBy(e => e.CertificationRequests.Count(cr => cr.Status == RequestStatus.Passed && (cr.ExpirationDate == null || cr.ExpirationDate > today))),
-                    "emCerts_desc" => empQuery.OrderByDescending(e => e.CertificationRequests.Count(cr => cr.Status == RequestStatus.Passed && (cr.ExpirationDate == null || cr.ExpirationDate > today))),
+                    "emCerts_asc" => empQuery.OrderBy(e => e.CertificationRequests.Count(cr => cr.Status == SeHrCertificationPortal.Models.RequestStatus.Passed && (cr.ExpirationDate == null || cr.ExpirationDate > today))),
+                    "emCerts_desc" => empQuery.OrderByDescending(e => e.CertificationRequests.Count(cr => cr.Status == SeHrCertificationPortal.Models.RequestStatus.Passed && (cr.ExpirationDate == null || cr.ExpirationDate > today))),
                     "emStatus_asc" => empQuery.OrderByDescending(e => e.IsActive),
                     "emStatus_desc" => empQuery.OrderBy(e => e.IsActive),
                     _ => empQuery.OrderBy(e => e.DisplayName)
