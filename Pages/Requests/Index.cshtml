@@ -149,21 +149,21 @@
             <table class="table table-striped table-hover align-middle mb-0">
                         <thead>
                             <tr>
-                                <th class="sortable text-nowrap" style="width: 100px;" data-column="id" @(Model.CurrentSort?.StartsWith("id_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Req ID</th>
+                                <th class="sortable text-nowrap" style="width: 120px;" data-column="id" @(Model.CurrentSort?.StartsWith("id_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Req ID</th>
                                 <th class="sortable text-nowrap" style="width: 15%;" data-column="emp" @(Model.CurrentSort?.StartsWith("emp_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Employee</th>
                                 <th class="sortable text-nowrap" style="width: 15%;" data-column="manager" @(Model.CurrentSort?.StartsWith("manager_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Manager</th>
                                 <th class="sortable text-nowrap" style="width: 10%;" data-column="agency" @(Model.CurrentSort?.StartsWith("agency_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Agency</th>
-                                <th class="sortable" style="width: 25%;" data-column="cert" @(Model.CurrentSort?.StartsWith("cert_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Certification</th>
+                                <th class="sortable text-nowrap" style="width: 25%;" data-column="cert" @(Model.CurrentSort?.StartsWith("cert_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Certification</th>
                                 <th class="sortable text-nowrap" style="width: 10%;" data-column="type" @(Model.CurrentSort?.StartsWith("type_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Type</th>
                                 <th class="sortable text-nowrap text-center" style="width: 130px;" data-column="status" @(Model.CurrentSort?.StartsWith("status_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Status</th>
                                 <th class="sortable text-nowrap" style="width: 120px;" data-column="date" @(Model.CurrentSort?.StartsWith("date_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : (string.IsNullOrEmpty(Model.CurrentSort) ? "data-sort-default=desc" : ""))>Request Date</th>
-                                <th class="text-center" style="width: 100px;">Actions</th>
+                                <th class="text-center text-nowrap" style="width: 150px;">Actions</th>
                             </tr>
                         </thead>
             <tbody>
             @foreach (var item in Model.CertificationRequest) {
                 <tr>
-                    <td><span class="text-muted fw-mono">REQ-@item.Id</span></td>
+                    <td class="text-nowrap"><span class="text-muted fw-mono">REQ-@item.Id</span></td>
                     <td>
                         <div class="d-flex flex-column">
                             <span class="fw-bold">@item.Employee?.DisplayName</span>
@@ -171,7 +171,7 @@
                     </td>
                     <td>@(item.ManagerName ?? "N/A")</td>
                     <td>@(item.Agency?.Abbreviation ?? item.CustomAgencyName ?? "Custom")</td>
-                    <td>@(item.Certification?.Name ?? item.CustomCertificationName ?? "Custom")</td>
+                    <td class="text-nowrap">@(item.Certification?.Name ?? item.CustomCertificationName ?? "Custom")</td>
                     <td><span class="fw-bold">@item.RequestType</span></td>
                     <td class="text-center">
                         @if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Pending)
@@ -196,7 +196,7 @@
                         }
                     </td>
                     <td>@item.RequestDate.ToString("MMM dd, yyyy")</td>
-                    <td class="text-center border-start">
+                    <td class="text-center border-start text-nowrap">
                         <form method="post" asp-page-handler="UpdateStatus" class="d-inline">
                             <input type="hidden" name="id" value="@item.Id" />
                             <input type="hidden" name="p" value="@Model.CurrentPage" />
