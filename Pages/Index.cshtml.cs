@@ -25,6 +25,9 @@ public class IndexModel : PageModel
     public IList<CertificationRequest> CriticalActionItems { get; set; } = default!;
 
     [BindProperty(SupportsGet = true)]
+    public string? CurrentSort { get; set; }
+
+    [BindProperty(SupportsGet = true)]
     public int PageSize { get; set; } = 5;
 
     [BindProperty(SupportsGet = true)]
@@ -76,8 +79,28 @@ public class IndexModel : PageModel
                     r.Id.ToString() == SearchString);
             }
 
+            requestQuery = CurrentSort switch
+            {
+                "id_asc" => requestQuery.OrderBy(c => c.Id),
+                "id_desc" => requestQuery.OrderByDescending(c => c.Id),
+                "emp_asc" => requestQuery.OrderBy(c => c.Employee!.DisplayName),
+                "emp_desc" => requestQuery.OrderByDescending(c => c.Employee!.DisplayName),
+                "manager_asc" => requestQuery.OrderBy(c => c.ManagerName),
+                "manager_desc" => requestQuery.OrderByDescending(c => c.ManagerName),
+                "agency_asc" => requestQuery.OrderBy(c => c.Agency!.Abbreviation ?? c.CustomAgencyName),
+                "agency_desc" => requestQuery.OrderByDescending(c => c.Agency!.Abbreviation ?? c.CustomAgencyName),
+                "cert_asc" => requestQuery.OrderBy(c => c.Certification!.Name ?? c.CustomCertificationName),
+                "cert_desc" => requestQuery.OrderByDescending(c => c.Certification!.Name ?? c.CustomCertificationName),
+                "type_asc" => requestQuery.OrderBy(c => c.RequestType),
+                "type_desc" => requestQuery.OrderByDescending(c => c.RequestType),
+                "status_asc" => requestQuery.OrderBy(c => c.Status),
+                "status_desc" => requestQuery.OrderByDescending(c => c.Status),
+                "date_asc" => requestQuery.OrderBy(c => c.RequestDate),
+                "date_desc" => requestQuery.OrderByDescending(c => c.RequestDate),
+                _ => requestQuery.OrderByDescending(c => c.RequestDate), // Default
+            };
+
             RecentRequests = await requestQuery
-                .OrderByDescending(r => r.RequestDate)
                 .Take(PageSize > 0 ? PageSize : 5)
                 .ToListAsync();
         } 

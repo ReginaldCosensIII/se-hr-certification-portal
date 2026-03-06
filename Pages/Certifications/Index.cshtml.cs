@@ -26,6 +26,9 @@ namespace SeHrCertificationPortal.Pages.Certifications
         }
 
         [BindProperty(SupportsGet = true)]
+        public string? CurrentSort { get; set; }
+
+        [BindProperty(SupportsGet = true)]
         public int PageSize { get; set; } = 25;
 
         [BindProperty(SupportsGet = true)]
@@ -194,8 +197,24 @@ namespace SeHrCertificationPortal.Pages.Certifications
                 TotalRecords = await query.CountAsync();
                 TotalPages = (int)Math.Ceiling(TotalRecords / (double)PageSize);
 
+                query = CurrentSort switch
+                {
+                    "emp_asc" => query.OrderBy(c => c.Employee!.DisplayName),
+                    "emp_desc" => query.OrderByDescending(c => c.Employee!.DisplayName),
+                    "agency_asc" => query.OrderBy(c => c.Agency!.Abbreviation ?? c.CustomAgencyName),
+                    "agency_desc" => query.OrderByDescending(c => c.Agency!.Abbreviation ?? c.CustomAgencyName),
+                    "cert_asc" => query.OrderBy(c => c.Certification!.Name ?? c.CustomCertificationName),
+                    "cert_desc" => query.OrderByDescending(c => c.Certification!.Name ?? c.CustomCertificationName),
+                    "passed_asc" => query.OrderBy(c => c.RequestDate),
+                    "passed_desc" => query.OrderByDescending(c => c.RequestDate),
+                    "expires_asc" => query.OrderBy(c => c.ExpirationDate),
+                    "expires_desc" => query.OrderByDescending(c => c.ExpirationDate),
+                    "status_asc" => query.OrderBy(c => c.Status),
+                    "status_desc" => query.OrderByDescending(c => c.Status),
+                    _ => query.OrderByDescending(c => c.ExpirationDate), // Default
+                };
+
                 PassedCertifications = await query
-                    .OrderByDescending(c => c.ExpirationDate)
                     .Skip((CurrentPage - 1) * PageSize)
                     .Take(PageSize)
                     .AsNoTracking()
