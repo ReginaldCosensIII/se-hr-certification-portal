@@ -12,7 +12,7 @@ A simple internal HR web portal for Specialized Engineering (SPE) to track emplo
 - **PDF Export Engine**: Built-in QuestPDF reporting engine with WYSIWYG export pipeline.
 
 ## Technology Stack
-- **Framework**: ASP.NET Core 8 (Razor Pages)
+- **Framework**: ASP.NET Core 10 (Razor Pages)
 - **Database**: PostgreSQL (Entity Framework Core)
 - **Frontend**: Custom UI mapped to Brand Guidelines (Bootstrap 5, Lucide Icons, Chart.js)
 - **Reporting**: QuestPDF
