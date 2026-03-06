@@ -25,7 +25,7 @@ namespace SeHrCertificationPortal.Pages.Certifications
             _logger = logger;
         }
 
-        [BindProperty(SupportsGet = true)]
+        [BindProperty(Name = "sortOrder", SupportsGet = true)]
         public string? CurrentSort { get; set; }
 
         [BindProperty(SupportsGet = true)]

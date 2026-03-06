@@ -77,24 +77,60 @@ namespace SeHrCertificationPortal.Pages.Admin
         [BindProperty]
         public string AdminEmail { get; set; } = string.Empty;
 
+        [BindProperty(Name = "sortOrder", SupportsGet = true)]
+        public string? CurrentSort { get; set; }
+
         public async Task<IActionResult> OnGetAsync()
         {
             try {
-                Agency = await _context.Agencies
-                    .Include(a => a.Certifications)
-                    .OrderBy(a => a.Abbreviation)
-                    .ToListAsync();
+                var today = DateTime.UtcNow;
 
-                Certifications = await _context.Certifications
-                    .Include(c => c.Agency)
-                    .OrderBy(c => c.Agency!.Abbreviation)
-                    .ThenBy(c => c.Name)
-                    .ToListAsync();
+                // 1. Sort Agencies
+                var agencyQuery = _context.Agencies.Include(a => a.Certifications).AsQueryable();
+                agencyQuery = CurrentSort switch {
+                    "agId_asc" => agencyQuery.OrderBy(a => a.Id),
+                    "agId_desc" => agencyQuery.OrderByDescending(a => a.Id),
+                    "agName_asc" => agencyQuery.OrderBy(a => a.FullName),
+                    "agName_desc" => agencyQuery.OrderByDescending(a => a.FullName),
+                    "agCerts_asc" => agencyQuery.OrderBy(a => a.Certifications.Count),
+                    "agCerts_desc" => agencyQuery.OrderByDescending(a => a.Certifications.Count),
+                    "agStatus_asc" => agencyQuery.OrderByDescending(a => a.IsActive), // Descending puts Active (True) first
+                    "agStatus_desc" => agencyQuery.OrderBy(a => a.IsActive),
+                    _ => agencyQuery.OrderBy(a => a.Abbreviation)
+                };
+                Agency = await agencyQuery.ToListAsync();
 
-                Employees = await _context.Employees
-                    .Include(e => e.CertificationRequests)
-                    .OrderBy(e => e.DisplayName)
-                    .ToListAsync();
+                // 2. Sort Certifications
+                var certQuery = _context.Certifications.Include(c => c.Agency).AsQueryable();
+                certQuery = CurrentSort switch {
+                    "ctName_asc" => certQuery.OrderBy(c => c.Name),
+                    "ctName_desc" => certQuery.OrderByDescending(c => c.Name),
+                    "ctAgency_asc" => certQuery.OrderBy(c => c.Agency!.Abbreviation),
+                    "ctAgency_desc" => certQuery.OrderByDescending(c => c.Agency!.Abbreviation),
+                    "ctValidity_asc" => certQuery.OrderBy(c => c.ValidityPeriodMonths),
+                    "ctValidity_desc" => certQuery.OrderByDescending(c => c.ValidityPeriodMonths),
+                    "ctStatus_asc" => certQuery.OrderByDescending(c => c.IsActive),
+                    "ctStatus_desc" => certQuery.OrderBy(c => c.IsActive),
+                    _ => certQuery.OrderBy(c => c.Agency!.Abbreviation).ThenBy(c => c.Name)
+                };
+                Certifications = await certQuery.ToListAsync();
+
+                // 3. Sort Employees
+                var empQuery = _context.Employees.Include(e => e.CertificationRequests).AsQueryable();
+                empQuery = CurrentSort switch {
+                    "emId_asc" => empQuery.OrderBy(e => e.Id),
+                    "emId_desc" => empQuery.OrderByDescending(e => e.Id),
+                    "emName_asc" => empQuery.OrderBy(e => e.DisplayName),
+                    "emName_desc" => empQuery.OrderByDescending(e => e.DisplayName),
+                    "emDept_asc" => empQuery.OrderBy(e => e.Department),
+                    "emDept_desc" => empQuery.OrderByDescending(e => e.Department),
+                    "emCerts_asc" => empQuery.OrderBy(e => e.CertificationRequests.Count(cr => cr.Status == RequestStatus.Passed && (cr.ExpirationDate == null || cr.ExpirationDate > today))),
+                    "emCerts_desc" => empQuery.OrderByDescending(e => e.CertificationRequests.Count(cr => cr.Status == RequestStatus.Passed && (cr.ExpirationDate == null || cr.ExpirationDate > today))),
+                    "emStatus_asc" => empQuery.OrderByDescending(e => e.IsActive),
+                    "emStatus_desc" => empQuery.OrderBy(e => e.IsActive),
+                    _ => empQuery.OrderBy(e => e.DisplayName)
+                };
+                Employees = await empQuery.ToListAsync();
 
                 var thresholdSetting = await _context.SystemSettings.FindAsync("ExpiringSoonThresholdDays");
                 ExpiringSoonThresholdDays = thresholdSetting != null && int.TryParse(thresholdSetting.Value, out int days) ? days : 30;

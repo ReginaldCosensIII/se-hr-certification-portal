@@ -24,7 +24,7 @@ public class IndexModel : PageModel
     public IList<CertificationRequest> RecentRequests { get; set; } = default!;
     public IList<CertificationRequest> CriticalActionItems { get; set; } = default!;
 
-    [BindProperty(SupportsGet = true)]
+    [BindProperty(Name = "sortOrder", SupportsGet = true)]
     public string? CurrentSort { get; set; }
 
     [BindProperty(SupportsGet = true)]
