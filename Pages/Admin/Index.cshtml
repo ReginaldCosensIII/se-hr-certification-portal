@@ -405,6 +405,32 @@
     </div>
 </div>
 
+    <script>
+        (function() {
+            var savedTab = localStorage.getItem('activeAdminTab');
+            if (savedTab) {
+                // 1. Strip 'active' and 'show' from all tabs and panes natively
+                document.querySelectorAll('.admin-tabs .nav-link').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.tab-content .tab-pane').forEach(el => el.classList.remove('show', 'active'));
+                
+                // 2. Apply 'active' and 'show' strictly to the saved tab
+                var targetLink = document.querySelector('.admin-tabs .nav-link[data-bs-target="' + savedTab + '"]');
+                var targetPane = document.querySelector(savedTab);
+                
+                if (targetLink && targetPane) {
+                    targetLink.classList.add('active');
+                    targetPane.classList.add('show', 'active');
+                } else {
+                    // Fallback to first tab if ID is invalid
+                    var firstLink = document.querySelector('.admin-tabs .nav-link');
+                    var firstPane = document.querySelector('.tab-content .tab-pane');
+                    if(firstLink) firstLink.classList.add('active');
+                    if(firstPane) firstPane.classList.add('show', 'active');
+                }
+            }
+        })();
+    </script>
+
 <!-- General Settings -->
 <div class="row">
     <div class="col-md-12">
@@ -1044,13 +1070,7 @@
                 });
             });
 
-            var activeTabTarget = localStorage.getItem('activeAdminTab');
-            if (activeTabTarget) {
-                var tabToActivate = document.querySelector('button[data-bs-target="' + activeTabTarget + '"]');
-                if (tabToActivate) {
-                    new bootstrap.Tab(tabToActivate).show();
-                }
-            }
+            // Tab state retention event listeners are kept.
         });
 
         // 3. MASTER ACTION MODALS EVENT DELEGATION
