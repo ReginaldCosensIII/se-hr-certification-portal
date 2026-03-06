@@ -59,9 +59,9 @@ document.addEventListener('DOMContentLoaded', function () {
             urlParams.set('p', '1'); // Reset pagination
 
             // Find the closest table or card to anchor back to
-            const tableElement = th.closest('table');
-            if (!tableElement.id) tableElement.id = 'data-grid-target';
-            const anchorHash = '#' + tableElement.id;
+            // Find the parent card to anchor to (keeps filters/header visible)
+            const anchorTarget = th.closest('.card') || th.closest('table');
+            const anchorHash = anchorTarget && anchorTarget.id ? '#' + anchorTarget.id : '';
 
             // UX Polish: 300ms delay to allow the loading overlay to smoothly animate
             setTimeout(() => {
