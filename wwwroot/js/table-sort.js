@@ -57,7 +57,16 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             urlParams.set('p', '1'); // Reset pagination
-            window.location.href = window.location.pathname + '?' + urlParams.toString();
+
+            // Find the closest table or card to anchor back to
+            const tableElement = th.closest('table');
+            if (!tableElement.id) tableElement.id = 'data-grid-target';
+            const anchorHash = '#' + tableElement.id;
+
+            // UX Polish: 300ms delay to allow the loading overlay to smoothly animate
+            setTimeout(() => {
+                window.location.href = window.location.pathname + '?' + urlParams.toString() + anchorHash;
+            }, 300);
         });
     });
 });

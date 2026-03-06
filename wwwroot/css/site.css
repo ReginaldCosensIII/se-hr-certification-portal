@@ -24,6 +24,12 @@ body {
     /* Light gray background */
 }
 
+/* Ensure anchored tables clear the fixed top navbar */
+table,
+.card {
+    scroll-margin-top: 80px;
+}
+
 /* -------------------------------------------------------------------------- */
 /*                               LAYOUT ENGINE                                */
 /* -------------------------------------------------------------------------- */
