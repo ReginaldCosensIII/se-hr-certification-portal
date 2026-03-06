@@ -80,27 +80,27 @@ namespace SeHrCertificationPortal.Pages.Requests
                 TotalRecords = await query.CountAsync();
                 TotalPages = (int)Math.Ceiling(TotalRecords / (double)PageSize);
 
-                // Server-Side Sorting Logic
-                var orderedQuery = sortOrder switch
-                {
-                    "id_asc" => query.OrderBy(c => c.Id),
-                    "id_desc" => query.OrderByDescending(c => c.Id),
-                    "emp_asc" => query.OrderBy(c => c.Employee!.DisplayName),
-                    "emp_desc" => query.OrderByDescending(c => c.Employee!.DisplayName),
-                    "manager_asc" => query.OrderBy(c => c.ManagerName),
-                    "manager_desc" => query.OrderByDescending(c => c.ManagerName),
-                    "agency_asc" => query.OrderBy(c => c.Agency!.Abbreviation ?? c.CustomAgencyName),
-                    "agency_desc" => query.OrderByDescending(c => c.Agency!.Abbreviation ?? c.CustomAgencyName),
-                    "cert_asc" => query.OrderBy(c => c.Certification!.Name ?? c.CustomCertificationName),
-                    "cert_desc" => query.OrderByDescending(c => c.Certification!.Name ?? c.CustomCertificationName),
-                    "type_asc" => query.OrderBy(c => c.RequestType),
-                    "type_desc" => query.OrderByDescending(c => c.RequestType),
-                    "status_asc" => query.OrderBy(c => c.Status),
-                    "status_desc" => query.OrderByDescending(c => c.Status),
-                    "date_asc" => query.OrderBy(c => c.RequestDate),
-                    "date_desc" => query.OrderByDescending(c => c.RequestDate),
-                    _ => query.OrderByDescending(c => c.RequestDate), // Default Reset State
-                };
+        // Server-Side Sorting Logic
+        var orderedQuery = sortOrder switch
+        {
+            "id_asc" => query.OrderBy(c => c.Id),
+            "id_desc" => query.OrderByDescending(c => c.Id),
+            "emp_asc" => query.OrderBy(c => c.Employee!.DisplayName),
+            "emp_desc" => query.OrderByDescending(c => c.Employee!.DisplayName),
+            "manager_asc" => query.OrderBy(c => c.ManagerName),
+            "manager_desc" => query.OrderByDescending(c => c.ManagerName),
+            "agency_asc" => query.OrderBy(c => c.Agency!.Abbreviation ?? c.CustomAgencyName),
+            "agency_desc" => query.OrderByDescending(c => c.Agency!.Abbreviation ?? c.CustomAgencyName),
+            "cert_asc" => query.OrderBy(c => c.Certification!.Name ?? c.CustomCertificationName),
+            "cert_desc" => query.OrderByDescending(c => c.Certification!.Name ?? c.CustomCertificationName),
+            "type_asc" => query.OrderBy(c => c.RequestType),
+            "type_desc" => query.OrderByDescending(c => c.RequestType),
+            "status_asc" => query.OrderBy(c => c.Status),
+            "status_desc" => query.OrderByDescending(c => c.Status),
+            "date_asc" => query.OrderBy(c => c.RequestDate),
+            "date_desc" => query.OrderByDescending(c => c.RequestDate),
+            _ => query.OrderByDescending(c => c.RequestDate), // Default Reset State
+        };
 
                 CertificationRequest = await orderedQuery
                     .ThenByDescending(c => c.Id)

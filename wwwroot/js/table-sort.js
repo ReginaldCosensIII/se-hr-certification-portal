@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const column = th.getAttribute('data-column');
             if (!column) return; // Prevent hanging: abort if no mapping exists
 
-            // Show overlay safely using a class instead of an ID for reusability
+            // Show overlay safely using a class instead of an ID for global reusability
             const tableContainer = th.closest('.position-relative');
             if (tableContainer) {
                 const overlay = tableContainer.querySelector('.table-loading-overlay');

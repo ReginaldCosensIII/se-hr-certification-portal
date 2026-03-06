@@ -147,19 +147,19 @@
                 </div>
             </div>
             <table class="table table-striped table-hover align-middle mb-0">
-                <thead class="bg-light">
-                    <tr>
-                        <th class="sortable text-nowrap" data-column="id" @(Model.CurrentSort?.StartsWith("id_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Req ID</th>
-                        <th class="sortable text-nowrap" data-column="emp" @(Model.CurrentSort?.StartsWith("emp_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Employee</th>
-                        <th class="sortable text-nowrap" data-column="manager" @(Model.CurrentSort?.StartsWith("manager_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Manager</th>
-                        <th class="sortable text-nowrap" data-column="agency" @(Model.CurrentSort?.StartsWith("agency_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Agency</th>
-                        <th class="sortable text-nowrap" data-column="cert" @(Model.CurrentSort?.StartsWith("cert_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Certification</th>
-                        <th class="sortable text-nowrap" data-column="type" @(Model.CurrentSort?.StartsWith("type_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Type</th>
-                        <th class="sortable text-nowrap" data-column="status" @(Model.CurrentSort?.StartsWith("status_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Status</th>
-                        <th class="sortable text-nowrap" data-column="date" @(Model.CurrentSort?.StartsWith("date_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : (string.IsNullOrEmpty(Model.CurrentSort) ? "data-sort-default=desc" : ""))>Request Date</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                </thead>
+                        <thead>
+                            <tr>
+                                <th class="sortable text-nowrap" style="width: 100px;" data-column="id" @(Model.CurrentSort?.StartsWith("id_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Req ID</th>
+                                <th class="sortable text-nowrap" style="width: 15%;" data-column="emp" @(Model.CurrentSort?.StartsWith("emp_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Employee</th>
+                                <th class="sortable text-nowrap" style="width: 15%;" data-column="manager" @(Model.CurrentSort?.StartsWith("manager_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Manager</th>
+                                <th class="sortable text-nowrap" style="width: 10%;" data-column="agency" @(Model.CurrentSort?.StartsWith("agency_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Agency</th>
+                                <th class="sortable" style="width: 25%;" data-column="cert" @(Model.CurrentSort?.StartsWith("cert_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Certification</th>
+                                <th class="sortable text-nowrap" style="width: 10%;" data-column="type" @(Model.CurrentSort?.StartsWith("type_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Type</th>
+                                <th class="sortable text-nowrap text-center" style="width: 130px;" data-column="status" @(Model.CurrentSort?.StartsWith("status_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : "")>Status</th>
+                                <th class="sortable text-nowrap" style="width: 120px;" data-column="date" @(Model.CurrentSort?.StartsWith("date_") == true ? $"data-sort-default={Model.CurrentSort.Split('_')[1]}" : (string.IsNullOrEmpty(Model.CurrentSort) ? "data-sort-default=desc" : ""))>Request Date</th>
+                                <th class="text-center" style="width: 100px;">Actions</th>
+                            </tr>
+                        </thead>
             <tbody>
             @foreach (var item in Model.CertificationRequest) {
                 <tr>
