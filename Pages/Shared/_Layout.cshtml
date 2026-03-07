@@ -1,4 +1,10 @@
-﻿<!DOCTYPE html>
+﻿@using SeHrCertificationPortal.Data
+@inject ApplicationDbContext _context
+@{
+    var autocompleteSetting = await _context.SystemSettings.FindAsync("Disable_Autocomplete");
+    bool disableAutocomplete = autocompleteSetting?.Value == "true";
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -131,5 +137,15 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/table-sort.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    @if (disableAutocomplete)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('input, form').forEach(function(el) {
+                    el.setAttribute('autocomplete', 'off');
+                });
+            });
+        </script>
+    }
 </body>
 </html>
