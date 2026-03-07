@@ -443,41 +443,80 @@
     </script>
 
 <!-- General Settings -->
-<div class="row">
-    <div class="col-md-12">
-        <div class="card shadow-sm border-0 bg-white">
-            <div class="card-body py-4">
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 h-100 border-top border-brand border-3">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <div class="d-flex align-items-center mb-1">
+                    <i data-lucide="globe" class="text-brand me-2"></i>
+                    <h5 class="fw-bold mb-0">Global System Configuration</h5>
+                </div>
+                <p class="text-muted small mb-0">Changes here apply instantly to all users across the organization.</p>
+            </div>
+            <div class="card-body">
                 <form method="post" asp-page-handler="SaveSettings">
-                   <div class="d-flex align-items-center justify-content-between mb-4">
-                       <div class="d-flex align-items-center">
-                           <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
-                               <i data-lucide="settings" class="text-muted"></i>
-                           </div>
-                           <div>
-                               <h5 class="fw-bold mb-1">General Settings</h5>
-                               <p class="text-muted small mb-0">Configure system-wide notifications and contacts.</p>
-                           </div>
-                       </div>
-                       <button type="submit" class="btn btn-brand text-white fw-bold px-4">Save Settings</button>
-                   </div>
-                   
-                   <div class="row g-3">
-                       <div class="col-md-8 col-lg-9">
-                           <label asp-for="AdminEmail" class="form-label fw-bold text-muted small">Admin Email</label>
-                           <div class="input-group">
-                               <span class="input-group-text bg-light border-end-0"><i data-lucide="mail" style="width: 16px;" class="text-muted"></i></span>
-                               <input type="email" asp-for="AdminEmail" class="form-control" placeholder="admin@specializedengineering.com">
-                           </div>
-                       </div>
-                       <div class="col-md-4 col-lg-3">
-                           <label asp-for="ExpiringSoonThresholdDays" class="form-label fw-bold text-muted small">Expiring Soon Threshold (Days)</label>
-                           <div class="input-group">
-                               <span class="input-group-text bg-light border-end-0"><i data-lucide="clock" style="width: 16px;" class="text-muted"></i></span>
-                               <input type="number" asp-for="ExpiringSoonThresholdDays" class="form-control" placeholder="30">
-                           </div>
-                       </div>
-                   </div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="ExpiringSoonThresholdDays" class="form-label fw-bold text-dark small">Expiring Soon Threshold (Days)</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-light text-muted"><i data-lucide="clock" style="width: 14px;"></i></span>
+                                <input type="number" asp-for="ExpiringSoonThresholdDays" class="form-control" placeholder="30">
+                            </div>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <div class="form-check form-switch mb-1">
+                                <input class="form-check-input" type="checkbox" role="switch" id="disableAutocomplete" asp-for="DisableAutocomplete">
+                                <label class="form-check-label fw-bold small ms-1" for="disableAutocomplete">Disable Browser Autocomplete</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h6 class="fw-bold fs-6 mb-3 border-bottom pb-2">Dynamic Combo-Box Lists</h6>
+                    <div class="mb-3">
+                        <label asp-for="GlobalDepartments" class="form-label fw-bold text-dark small mb-1">Suggested Departments</label>
+                        <p class="text-muted" style="font-size: 0.75rem; margin-bottom: 0.25rem;">Enter departments separated by commas. These will appear as dropdown suggestions when adding employees.</p>
+                        <textarea asp-for="GlobalDepartments" class="form-control form-control-sm text-secondary" rows="2" placeholder="e.g. Engineering, Human Resources, Field Techs"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label asp-for="GlobalRoles" class="form-label fw-bold text-dark small mb-1">Suggested Job Roles</label>
+                        <p class="text-muted" style="font-size: 0.75rem; margin-bottom: 0.25rem;">Enter roles separated by commas.</p>
+                        <textarea asp-for="GlobalRoles" class="form-control form-control-sm text-secondary" rows="2" placeholder="e.g. Technician, Manager, Director"></textarea>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-sm btn-brand text-white fw-bold px-4">Save Global Settings</button>
+                    </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 h-100 border-top border-secondary border-3">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <div class="d-flex align-items-center mb-1">
+                    <i data-lucide="monitor" class="text-secondary me-2"></i>
+                    <h5 class="fw-bold mb-0">Personal Preferences</h5>
+                </div>
+                <p class="text-muted small mb-0">Saved strictly to your local browser.</p>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <label for="prefDefaultRows" class="form-label fw-bold text-dark small mb-1">Default Table Rows</label>
+                    <select id="prefDefaultRows" class="form-select form-select-sm">
+                        <option value="10">10 Rows</option>
+                        <option value="25">25 Rows</option>
+                        <option value="50">50 Rows</option>
+                        <option value="100">100 Rows</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="prefRememberState">
+                        <label class="form-check-label fw-bold small ms-1" for="prefRememberState">Remember Table States</label>
+                    </div>
+                    <p class="text-muted mt-1" style="font-size: 0.75rem;">If enabled, tables will remember your search filters and active page even if you leave the dashboard.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -1049,11 +1088,31 @@
         // 2. PAGE INITIALIZATION
         document.addEventListener('DOMContentLoaded', function() {
             
-            // Intelligent State Reset: Clear grid memory if arriving from a different page
+            // --- Personal Preferences Loader ---
+            var prefRowsSelect = document.getElementById('prefDefaultRows');
+            var prefStateCheck = document.getElementById('prefRememberState');
+            
+            if (prefRowsSelect) {
+                prefRowsSelect.value = localStorage.getItem('userDefaultRows') || '25';
+                prefRowsSelect.addEventListener('change', function(e) {
+                    localStorage.setItem('userDefaultRows', e.target.value);
+                    window.location.reload(); // Reload to apply new row count
+                });
+            }
+            
+            if (prefStateCheck) {
+                prefStateCheck.checked = localStorage.getItem('userRememberState') === 'true';
+                prefStateCheck.addEventListener('change', function(e) {
+                    localStorage.setItem('userRememberState', e.target.checked);
+                });
+            }
+
+            // Intelligent State Reset: Clear grid memory if arriving from a different page AND preference is disabled
             var currentPath = window.location.pathname.toLowerCase();
             var referrerPath = document.referrer ? new URL(document.referrer).pathname.toLowerCase() : '';
+            var rememberState = localStorage.getItem('userRememberState') === 'true';
 
-            if (referrerPath !== currentPath) {
+            if (!rememberState && referrerPath !== currentPath) {
                 var grids = ['agencyGridContainer', 'certGridContainer', 'employeeGridContainer'];
                 grids.forEach(function(id) {
                     sessionStorage.removeItem(id + '_search');
@@ -1063,10 +1122,11 @@
                 });
             }
 
-            // Instantiate reusable grids
-            new ClientSideDataGrid('agencyGridContainer', 25);
-            new ClientSideDataGrid('certGridContainer', 25);
-            new ClientSideDataGrid('employeeGridContainer', 25);
+            // Instantiate reusable grids using personal preference
+            var defaultLimit = parseInt(localStorage.getItem('userDefaultRows')) || 25;
+            new ClientSideDataGrid('agencyGridContainer', defaultLimit);
+            new ClientSideDataGrid('certGridContainer', defaultLimit);
+            new ClientSideDataGrid('employeeGridContainer', defaultLimit);
 
             // Tab State Retention
             var tabElements = document.querySelectorAll('button[data-bs-toggle="tab"]');
