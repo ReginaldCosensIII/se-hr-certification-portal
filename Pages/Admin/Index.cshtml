@@ -919,6 +919,7 @@
                         this.currentPage = 1;
                         sessionStorage.setItem(this.storageKeyPage, this.currentPage);
                         this.render();
+                        this.container.closest('.card').scrollIntoView({ behavior: 'smooth' });
                     });
                 }
                 
@@ -1038,6 +1039,7 @@
                         if (!parentLi.classList.contains('disabled') && anchor) {
                             this.currentPage = parseInt(anchor.getAttribute('data-page'));
                             this.render();
+                            this.container.closest('.card').scrollIntoView({ behavior: 'smooth' });
                         }
                     });
                 });
