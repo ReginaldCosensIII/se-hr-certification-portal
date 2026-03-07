@@ -639,15 +639,16 @@ a:focus {
 .sidebar-menu .nav-link.active i {
     color: #a19482 !important;
 }
- / *   C u s t o m   B r a n d   U t i l i t i e s   * / 
- . b g - b r a n d   { 
-         b a c k g r o u n d - c o l o r :   v a r ( - - b r a n d - p r i m a r y )   ! i m p o r t a n t ; 
- } 
- . b o r d e r - b r a n d   { 
-         b o r d e r - c o l o r :   v a r ( - - b r a n d - p r i m a r y )   ! i m p o r t a n t ; 
- } 
- . t e x t - b r a n d   { 
-         c o l o r :   v a r ( - - b r a n d - p r i m a r y )   ! i m p o r t a n t ; 
- } 
-  
- 
+
+/* Custom Brand Utilities */
+.bg-brand {
+    background-color: var(--brand-primary) !important;
+}
+
+.border-brand {
+    border-color: var(--brand-primary) !important;
+}
+
+.text-brand {
+    color: var(--brand-primary) !important;
+}
