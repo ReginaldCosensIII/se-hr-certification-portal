@@ -32,11 +32,6 @@
             document.body.classList.add('sidebar-collapse');
         }
 
-        // Apply Theater Mode instantly before paint
-        if (localStorage.getItem('theater-mode') === 'true') {
-            document.body.classList.add('theater-mode');
-        }
-
         // Remove transition disablement after paint
         document.addEventListener("DOMContentLoaded", function() {
             setTimeout(function() {

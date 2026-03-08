@@ -652,26 +652,3 @@ a:focus {
 .text-brand {
     color: var(--brand-primary) !important;
 }
-
-/* --- Persistent Theater Mode --- */
-body.theater-mode {
-    grid-template-columns: 0 1fr !important;
-}
-
-body.theater-mode .app-sidebar {
-    opacity: 0;
-    visibility: hidden;
-    overflow: hidden;
-}
-
-body.theater-mode .app-header {
-    display: none !important;
-}
-
-body.theater-mode .app-main {
-    padding-top: 1rem !important;
-}
-
-body.theater-mode .app-footer {
-    display: none !important;
-}
