@@ -146,6 +146,14 @@
             <h5 class="card-title fs-5 fw-bold text-dark mb-0">Employee Certifications</h5>
             
             <div class="card-tools d-flex align-items-center gap-2">
+                <form method="post" asp-page-handler="DownloadCsv" class="m-0 p-0 me-2 border-end pe-3 border-light">
+                    <input type="hidden" name="searchString" value="@Model.SearchString" />
+                    <input type="hidden" name="agencyFilter" value="@Model.AgencyFilter" />
+                    <input type="hidden" name="statusFilter" value="@Model.StatusFilter" />
+                    <button type="submit" class="btn btn-outline-success btn-sm d-flex align-items-center fw-bold shadow-sm" title="Export filtered results to CSV">
+                        <i data-lucide="file-spreadsheet" class="me-1" style="width: 14px;"></i> Export CSV
+                    </button>
+                </form>
                 <form method="get" id="filterForm" class="d-flex align-items-center gap-2">
                     <input type="hidden" name="pageSize" value="@Model.PageSize" />
                     <input type="hidden" name="FilterAnalytics" id="hiddenFilterAnalytics" value="@Model.FilterAnalytics.ToString().ToLower()" />
