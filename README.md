@@ -46,14 +46,14 @@ A simple internal HR web portal for Specialized Engineering (SPE) to track emplo
    ```
 
 ## Architecture & Site Reliability (SRE)
-Our proactive SRE design guarantees the frontend remains bulletproof against internal backend exceptions:
-- **`ILogger<T>` structured backend logging**: Captures deterministic trace telemetry securely isolating variable crash events inline.
-- **Fail-safe `try-catch` database wrappers**: Eradicates unhandled native `NullReferenceExceptions` allowing dynamic fallback to empty model collections.
-- **Responsive `TempData` UI Notifications**: Broadcasts graceful, dismissible Bootstrap alerts to instantly communicate system status securely.
-- **Global Exception Middleware**: `app.UseExceptionHandler("/Error")` enforces a polished, branded user fallback rendering in extreme catastrophe avoiding raw `500` stack traces output.
-- **Air-Gapped CDNs**: Localized all critical JavaScript and CSS assets into `wwwroot/lib` to guarantee resilient deployment independence from external CDNs.
+The application implements SRE principles to ensure frontend resilience against backend exceptions:
+- **Structured Logging (`ILogger<T>`)**: Captures trace telemetry to isolate runtime exceptions.
+- **Fail-Safe Data Wrappers**: Database interactions are wrapped in `try-catch` blocks that fallback to empty model collections, preventing native `NullReferenceExceptions` in Razor views.
+- **UI Notifications**: Utilizes `TempData` to display dismissible Bootstrap alerts for system status communication.
+- **Global Exception Middleware**: `app.UseExceptionHandler("/Error")` provides a branded fallback UI in the event of a catastrophic failure.
+- **Localized Assets**: All critical JavaScript and CSS assets are stored locally in `wwwroot/lib` to ensure deployment independence from external CDNs.
 
-Learn more in our [SRE Error Handling Architecture Documentation](docs/sre-error-handling.md).
+Learn more in the [SRE Error Handling Documentation](docs/sre-error-handling.md).
 
 ## Development Workflow
 - **Branching**: Use feature branches (`feat/name`, `fix/name`) for all new work.
