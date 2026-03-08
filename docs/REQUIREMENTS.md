@@ -104,23 +104,9 @@
 - **Logo**: `wwwroot/img/branding-assets/Specialized-Engineering-Logo-white.webp`
 - **Dropdown Data**: `docs/SpecializedEngineering-HR-Portal-Drop-Down-Lists.pdf`
 
-## 🌟 Future Enhancements & Wishlist (Post-MVP)
-
-### 1. Global Reusable Table Sorting Service
-* **Description:** Implement a dynamic sorting capability across all data tables in the portal.
-* **Use Case:** Users need to sort Requests by Date, Employees by Name, or Certifications by Expiration Date.
-* **Implementation Notes:** Instead of writing custom sorting logic for every Razor Page, build a global service/helper class (e.g., passing `sortOrder` query parameters mapped to reflection/LINQ expressions) that can be easily plugged into any index page alongside the existing pagination logic.
-
-### 2. Expiring Soon Status Logic
-* **Description:** QA identified that certifications expiring on the current day still show as 'Active'. In the upcoming Notifications/Certifications phase, implement a global threshold calculation (e.g., < 30 days) to accurately apply an 'Expiring Soon' badge and status instead of just 'Active'.
-
-### 3. SRE Text-Based CSV Fallback Engine
-- **SRE Text-Based CSV Fallback Engine:** As a Site Reliability Engineering (SRE) protocol, implement a lightweight, text-only CSV export fallback for all PDF generation endpoints to protect against future library deprecations or rendering engine failures.
-
-## Post-MVP UI/UX & Code Reusability Audit
-Before final production handoff, a dedicated sprint must be executed to ensure strict DRY (Don't Repeat Yourself) principles across the portal:
-* **Global CSS Styling:** Verify all pages, sections, and tables utilize shared, reusable CSS classes/variables. Eliminate hard-coded, one-off inline styles.
-* **Component Standardization:** Ensure header titles, action icons, and table layouts share a unified visual design language.
-* **Backend Logic Reusability:** Audit the C# search, filtering, and pagination logic across all pages (Requests, Certifications, Admin). Abstract duplicate backend filtering logic into reusable services, extensions, or base classes where applicable.
-
-- [ ] **UX Polish (Admin Page):** Implement auto-scroll to the top of the data grid (`window.scrollTo` or `element.scrollIntoView`) when client-side JavaScript pagination is triggered. This will ensure the UX matches the server-side paginated tables (Requests/Certifications) which natively reset to the top of the page on load.
+## 5. Architectural Implementations
+- **Server-Side Sorting**: A global, reusable table sorting architecture using DOM Hydration and EF Core `IQueryable` routing to handle large datasets accurately.
+- **Dynamic Configuration Engine**: A database-driven settings UI allowing HR Admins to manage "Suggested Departments" and "Job Roles" as dynamic HTML5 `<datalist>` combo-boxes without requiring database migrations.
+- **Contextual Export Pipelines**: An in-memory CSV generation utility that dynamically evaluates active UI filters (search, agency, status) and streams precise datasets directly to the client.
+- **SRE Text-Based Fallback**: Pure Vanilla JS and native HTML implementations are prioritized over heavy third-party libraries (e.g., DataTables) to ensure absolute functionality in offline, air-gapped environments.
+- **Viewport Preservation**: Employs a custom Cookie Bridge and native anchor targeting to persist user preferences (rows per page) and table scroll positions across Server-Side Rendered (SSR) page reloads.

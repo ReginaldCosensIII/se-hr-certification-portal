@@ -33,8 +33,8 @@ This application is designed to be hosted on a Windows Server running Internet I
 The `ASPNETCORE_ENVIRONMENT` variable dictates application behavior. It should be set to `Development` on local machines for debugging and `Production` (or `Staging`) in IIS.
 
 ### Database Seeding (`DbSeeder.cs`)
-The application automatically seeds baseline dictionaries (Agencies and Certifications) on day 1 if tables are empty, regardless of environment.
-**CRITICAL:** Mock data (fake employees and requests) is strictly gated by `if (_env.IsDevelopment())`. This mathematically guarantees the mock data generator will physically never execute in Production.
+The application automatically seeds baseline dictionaries (Agencies and Certifications) on initialization if the tables are empty, regardless of the environment.
+**CRITICAL:** Mock data generation (test employees and requests) is strictly gated by `if (_env.IsDevelopment())`. This ensures the mock data pipeline will never execute in a Production environment.
 
 ## Database Configuration
 - Ensure the connection string in `appsettings.json` (or `appsettings.Production.json`) points to the production PostgreSQL instance.
