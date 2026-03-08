@@ -75,7 +75,13 @@ namespace SeHrCertificationPortal.Pages.Admin
         public int ExpiringSoonThresholdDays { get; set; }
 
         [BindProperty]
-        public string AdminEmail { get; set; } = string.Empty;
+        public string GlobalDepartments { get; set; } = "";
+
+        [BindProperty]
+        public string GlobalRoles { get; set; } = "";
+
+        [BindProperty]
+        public bool DisableAutocomplete { get; set; }
 
         [BindProperty(Name = "sortOrder", SupportsGet = true)]
         public string? CurrentSort { get; set; }
@@ -135,8 +141,9 @@ namespace SeHrCertificationPortal.Pages.Admin
                 var thresholdSetting = await _context.SystemSettings.FindAsync("ExpiringSoonThresholdDays");
                 ExpiringSoonThresholdDays = thresholdSetting != null && int.TryParse(thresholdSetting.Value, out int days) ? days : 30;
 
-                var emailSetting = await _context.SystemSettings.FindAsync("AdminEmail");
-                AdminEmail = emailSetting?.Value ?? "";
+                GlobalDepartments = (await _context.SystemSettings.FindAsync("Global_Departments"))?.Value ?? "Engineering, Human Resources, Field Operations";
+                GlobalRoles = (await _context.SystemSettings.FindAsync("Global_Roles"))?.Value ?? "Technician, Manager, Inspector";
+                DisableAutocomplete = (await _context.SystemSettings.FindAsync("Disable_Autocomplete"))?.Value == "true";
             } catch (Exception ex) {
                 _logger.LogError(ex, "Error fetching data for page load.");
                 TempData["ErrorMessage"] = "Unable to connect to the database to load records. The system may be experiencing an outage.";
@@ -180,20 +187,19 @@ namespace SeHrCertificationPortal.Pages.Admin
         public async Task<IActionResult> OnPostSaveSettingsAsync()
         {
             try {
-                var thresholdSetting = await _context.SystemSettings.FindAsync("ExpiringSoonThresholdDays");
-                if (thresholdSetting == null)
-                    _context.SystemSettings.Add(new SeHrCertificationPortal.Models.SystemSetting { Key = "ExpiringSoonThresholdDays", Value = ExpiringSoonThresholdDays.ToString() });
-                else
-                    thresholdSetting.Value = ExpiringSoonThresholdDays.ToString();
+                async Task SaveSetting(string key, string value) {
+                    var setting = await _context.SystemSettings.FindAsync(key);
+                    if (setting == null) _context.SystemSettings.Add(new SeHrCertificationPortal.Models.SystemSetting { Key = key, Value = value });
+                    else setting.Value = value;
+                }
 
-                var emailSetting = await _context.SystemSettings.FindAsync("AdminEmail");
-                if (emailSetting == null)
-                    _context.SystemSettings.Add(new SeHrCertificationPortal.Models.SystemSetting { Key = "AdminEmail", Value = AdminEmail });
-                else
-                    emailSetting.Value = AdminEmail;
+                await SaveSetting("ExpiringSoonThresholdDays", ExpiringSoonThresholdDays.ToString());
+                await SaveSetting("Global_Departments", GlobalDepartments);
+                await SaveSetting("Global_Roles", GlobalRoles);
+                await SaveSetting("Disable_Autocomplete", DisableAutocomplete ? "true" : "false");
 
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Settings saved successfully.";
+                TempData["SuccessMessage"] = "Global system settings saved successfully.";
             } catch (Exception ex) {
                 _logger.LogError(ex, "Error saving settings.");
                 TempData["ErrorMessage"] = "An unexpected error occurred. Please try again or contact IT.";

@@ -92,6 +92,16 @@ namespace SeHrCertificationPortal.Pages.Certifications
             try {
                 CurrentPage = p < 1 ? 1 : p;
 
+                // Apply User Preference Cookie if PageSize isn't explicitly set in URL
+                int[] validSizes = { 10, 25, 50, 100 };
+                if (!Request.Query.ContainsKey("PageSize")) 
+                {
+                    if (Request.Cookies.TryGetValue("userDefaultRows", out string? cookieVal) && int.TryParse(cookieVal, out int parsedCookie) && validSizes.Contains(parsedCookie)) {
+                        PageSize = parsedCookie;
+                    }
+                }
+                if (!validSizes.Contains(PageSize)) PageSize = 25;
+
                 var thresholdSetting = await _context.SystemSettings.FindAsync("ExpiringSoonThresholdDays");
                 if (thresholdSetting != null && int.TryParse(thresholdSetting.Value, out int explicitThreshold))
                 {
@@ -537,6 +547,74 @@ namespace SeHrCertificationPortal.Pages.Certifications
             return File(document.GeneratePdf(), "application/pdf", $"SPE_Analytics_Report_{DateTime.Now:yyyyMMdd}.pdf");
         }
 
+        public async Task<IActionResult> OnPostDownloadCsvAsync(string? searchString, int? agencyFilter, string? statusFilter)
+        {
+            try
+            {
+                var thresholdSetting = await _context.SystemSettings.FindAsync("ExpiringSoonThresholdDays");
+                int thresholdDays = thresholdSetting != null && int.TryParse(thresholdSetting.Value, out int explicitThreshold) ? explicitThreshold : 30;
+                DateTime today = DateTime.UtcNow;
+                DateTime thresholdDate = today.AddDays(thresholdDays);
 
+                var query = _context.CertificationRequests
+                    .Include(c => c.Employee)
+                    .Include(c => c.Agency)
+                    .Include(c => c.Certification)
+                    .Where(c => c.Status == RequestStatus.Passed || c.Status == RequestStatus.Revoked);
+
+                if (!string.IsNullOrWhiteSpace(searchString))
+                {
+                    query = query.Where(c => c.Employee != null && c.Employee.DisplayName.ToLower().Contains(searchString.ToLower()));
+                }
+
+                if (agencyFilter.HasValue && agencyFilter.Value > 0)
+                {
+                    query = query.Where(c => c.AgencyId == agencyFilter.Value);
+                }
+
+                if (!string.IsNullOrEmpty(statusFilter) && Enum.TryParse<TrackerStatus>(statusFilter, out var parsedStatus))
+                {
+                    switch (parsedStatus)
+                    {
+                        case TrackerStatus.Expired:
+                            query = query.Where(c => c.ExpirationDate.HasValue && c.ExpirationDate.Value < today);
+                            break;
+                        case TrackerStatus.ExpiringSoon:
+                            query = query.Where(c => c.ExpirationDate.HasValue && c.ExpirationDate.Value >= today && c.ExpirationDate.Value <= thresholdDate);
+                            break;
+                        case TrackerStatus.Active:
+                            query = query.Where(c => c.ExpirationDate.HasValue && c.ExpirationDate.Value > thresholdDate);
+                            break;
+                        case TrackerStatus.Permanent:
+                            query = query.Where(c => c.ExpirationDate == null);
+                            break;
+                    }
+                }
+
+                var records = await query.OrderByDescending(c => c.ExpirationDate).ToListAsync();
+
+                var headers = new[] { "Employee", "Agency", "Certification", "Date Passed", "Expiration Date", "Status" };
+                var csv = SeHrCertificationPortal.Utilities.CsvExportHelper.GenerateCsv(records, headers, r => {
+                    var status = GetComputedStatus(r.ExpirationDate);
+                    string statusText = r.Status == RequestStatus.Revoked ? "Revoked" : status.ToString();
+                    
+                    return new string[] { 
+                        r.Employee?.DisplayName ?? "Unknown", 
+                        r.Agency?.Abbreviation ?? r.CustomAgencyName ?? "Custom", 
+                        r.Certification?.Name ?? r.CustomCertificationName ?? "Custom", 
+                        r.RequestDate.ToString("yyyy-MM-dd"), 
+                        r.ExpirationDate?.ToString("yyyy-MM-dd") ?? "Permanent", 
+                        statusText
+                    };
+                });
+                return File(System.Text.Encoding.UTF8.GetBytes(csv), "text/csv", $"Employee_Certifications_Export_{DateTime.Now:yyyyMMdd}.csv");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting Certifications CSV.");
+                TempData["ErrorMessage"] = "Failed to export CSV. Please try again.";
+                return RedirectToPage();
+            }
+        }
     }
 }

@@ -639,3 +639,16 @@ a:focus {
 .sidebar-menu .nav-link.active i {
     color: #a19482 !important;
 }
+
+/* Custom Brand Utilities */
+.bg-brand {
+    background-color: var(--brand-primary) !important;
+}
+
+.border-brand {
+    border-color: var(--brand-primary) !important;
+}
+
+.text-brand {
+    color: var(--brand-primary) !important;
+}
