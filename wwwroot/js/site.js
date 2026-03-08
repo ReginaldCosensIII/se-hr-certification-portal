@@ -3,49 +3,43 @@
 
 // Write your JavaScript code.
 
-// Native Fullscreen API Interceptor for Header Toggle (State-Synced with F11 Override)
+// Persistent Theater Mode (Replaces Native Fullscreen API)
 document.addEventListener('DOMContentLoaded', function () {
     const fullscreenBtn = document.querySelector('[data-lte-toggle="fullscreen"]');
 
     if (fullscreenBtn) {
-        // 1. Unified Toggle Logic
-        const toggleFullscreen = function () {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.error(`Error attempting to enable fullscreen: ${err.message}`);
-                });
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
-            }
+        const toggleTheaterMode = function () {
+            document.body.classList.toggle('theater-mode');
+            const isTheater = document.body.classList.contains('theater-mode');
+            localStorage.setItem('theater-mode', isTheater);
+            updateIcon(isTheater);
         };
 
-        // 2. Handle Button Click
-        fullscreenBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            toggleFullscreen();
-        });
-
-        // 3. Intercept F11 Keyboard Shortcut
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'F11') {
-                e.preventDefault(); // Stop native browser UI fullscreen
-                toggleFullscreen(); // Force HTML5 Fullscreen API instead
-            }
-        });
-
-        // 4. Handle Icon Rendering (Listens for API changes and Esc key)
-        document.addEventListener('fullscreenchange', function () {
-            if (document.fullscreenElement) {
+        const updateIcon = function (isTheater) {
+            if (isTheater) {
                 fullscreenBtn.innerHTML = '<i data-lucide="minimize"></i>';
             } else {
                 fullscreenBtn.innerHTML = '<i data-lucide="maximize"></i>';
             }
-
-            // Instruct Lucide to immediately re-draw the SVG
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons({ root: fullscreenBtn });
+            }
+        };
+
+        // Initialize icon state on load (body class is handled by Layout FOUC script)
+        if (localStorage.getItem('theater-mode') === 'true') {
+            updateIcon(true);
+        }
+
+        fullscreenBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            toggleTheaterMode();
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'F11') {
+                e.preventDefault(); // Stop native browser UI fullscreen
+                toggleTheaterMode(); // Force persistent CSS Theater Mode instead
             }
         });
     }
