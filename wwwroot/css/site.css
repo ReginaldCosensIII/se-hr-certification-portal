@@ -654,13 +654,21 @@ a:focus {
 }
 
 /* --- Persistent Theater Mode --- */
-body.theater-mode .app-sidebar,
+body.theater-mode {
+    grid-template-columns: 0 1fr !important;
+}
+
+body.theater-mode .app-sidebar {
+    opacity: 0;
+    visibility: hidden;
+    overflow: hidden;
+}
+
 body.theater-mode .app-header {
     display: none !important;
 }
 
 body.theater-mode .app-main {
-    margin-left: 0 !important;
     padding-top: 1rem !important;
 }
 
