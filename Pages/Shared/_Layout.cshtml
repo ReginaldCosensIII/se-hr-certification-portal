@@ -27,11 +27,13 @@
         // Immediate State Restoration to prevent FOUC
         if (localStorage.getItem('sidebar-collapse') === 'true') {
             document.body.classList.add('sidebar-collapse');
+        } else if (window.innerWidth < 992 && localStorage.getItem('sidebar-collapse') !== 'false') {
+            // Auto-collapse sidebar on tablets/mobile to preserve table space
+            document.body.classList.add('sidebar-collapse');
         }
 
         // Remove transition disablement after paint
         document.addEventListener("DOMContentLoaded", function() {
-            // Small timeout allows the browser to paint the initial state without animating
             setTimeout(function() {
                 document.body.classList.remove("no-transition");
             }, 100);
