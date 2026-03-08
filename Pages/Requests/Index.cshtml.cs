@@ -50,9 +50,14 @@ namespace SeHrCertificationPortal.Pages.Requests
                 CurrentSort = sortOrder;
                 CurrentPage = p < 1 ? 1 : p;
 
-                // Restrict PageSize to valid options, default to 25
-                int[] validSizes = { 10, 15, 20, 25, 50 };
-                PageSize = pageSize.HasValue && validSizes.Contains(pageSize.Value) ? pageSize.Value : 25;
+                // Restrict PageSize to valid options, default to 25 (or User Preference Cookie)
+                int[] validSizes = { 10, 25, 50, 100 };
+                int defaultSize = 25;
+                if (Request.Cookies.TryGetValue("userDefaultRows", out string? cookieVal) && int.TryParse(cookieVal, out int parsedCookie) && validSizes.Contains(parsedCookie)) {
+                    defaultSize = parsedCookie;
+                }
+                
+                PageSize = pageSize.HasValue && validSizes.Contains(pageSize.Value) ? pageSize.Value : defaultSize;
 
                 var query = _context.CertificationRequests
                     .Include(c => c.Agency)

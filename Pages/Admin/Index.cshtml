@@ -1109,10 +1109,17 @@
             var prefStateCheck = document.getElementById('prefRememberState');
             
             if (prefRowsSelect) {
-                prefRowsSelect.value = localStorage.getItem('userDefaultRows') || '25';
+                var savedRows = localStorage.getItem('userDefaultRows') || '25';
+                prefRowsSelect.value = savedRows;
+                // Ensure cookie is synced on load for SSR pages
+                document.cookie = "userDefaultRows=" + savedRows + "; path=/; max-age=31536000"; 
+                
                 prefRowsSelect.addEventListener('change', function(e) {
-                    localStorage.setItem('userDefaultRows', e.target.value);
-                    window.location.reload(); // Reload to apply new row count
+                    var newVal = e.target.value;
+                    localStorage.setItem('userDefaultRows', newVal);
+                    // Set cookie so C# backend can read it for non-admin tables
+                    document.cookie = "userDefaultRows=" + newVal + "; path=/; max-age=31536000";
+                    window.location.reload();
                 });
             }
             
