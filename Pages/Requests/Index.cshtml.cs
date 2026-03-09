@@ -192,10 +192,17 @@ namespace SeHrCertificationPortal.Pages.Requests
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (string.IsNullOrWhiteSpace(EmployeeNameInput)) return RedirectToPage();
-
             try
             {
+                if (string.IsNullOrWhiteSpace(EmployeeNameInput) ||
+                    string.IsNullOrWhiteSpace(NewRequest.ManagerName) ||
+                    NewRequest.AgencyId == null ||
+                    NewRequest.CertificationId == null ||
+                    NewRequest.RequestType == null)
+                {
+                    TempData["ErrorMessage"] = "Please complete all required fields to submit a new request.";
+                    return RedirectToPage(new { openNew = "true" }); // Keeps the accordion open so the user sees the error
+                }
                 // 1. Auto-Add Logic: Find existing or create new employee silently
                 var employee = await _context.Employees
                     .FirstOrDefaultAsync(e => e.DisplayName.ToLower() == EmployeeNameInput.ToLower());
@@ -236,6 +243,12 @@ namespace SeHrCertificationPortal.Pages.Requests
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(managerName) || agencyId <= 0 || certificationId <= 0)
+                {
+                    TempData["ErrorMessage"] = "Please complete all required fields to save changes.";
+                    return RedirectToPage(new { p, pageSize, SearchString = searchString, StatusFilter = statusFilter });
+                }
+
                 var request = await _context.CertificationRequests.FindAsync(id);
                 if (request != null)
                 {
