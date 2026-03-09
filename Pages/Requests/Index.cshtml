@@ -23,7 +23,7 @@
                         <!-- Top Row: Employee, Date, Manager -->
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Employee Name</label>
-                            <select asp-for="EmployeeNameInput" id="employeeSelect" class="form-control select2" style="width: 100%;">
+                            <select asp-for="EmployeeNameInput" id="employeeSelect" class="form-control select2" style="width: 100%;" required>
                                 <option value=""></option>
                                 @foreach(var emp in Model.Employees) { <option value="@emp.DisplayName">@emp.DisplayName</option> }
                             </select>
@@ -34,13 +34,13 @@
                         </div>
                         <div class="col-md-5">
                              <label class="form-label fw-bold">Manager</label>
-                            <input asp-for="NewRequest.ManagerName" type="text" class="form-control" placeholder="Enter manager name">
+                            <input asp-for="NewRequest.ManagerName" type="text" class="form-control" placeholder="Enter manager name" required>
                         </div>
 
                         <!-- Second Row: Agency & Cert -->
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Certification Agency</label>
-                            <select asp-for="NewRequest.AgencyId" class="form-select select2" id="agencySelect" style="width: 100%;">
+                            <select asp-for="NewRequest.AgencyId" class="form-select select2" id="agencySelect" style="width: 100%;" required>
                                 <option value="" selected>Select Agency...</option>
                                 @foreach (var agency in Model.Agencies)
                                 {
@@ -50,7 +50,7 @@
                         </div>
                         <div class="col-md-8">
                             <label class="form-label fw-bold">Certification Desired</label>
-                             <select asp-for="NewRequest.CertificationId" class="form-select select2" id="certificationSelect" style="width: 100%;">
+                             <select asp-for="NewRequest.CertificationId" class="form-select select2" id="certificationSelect" style="width: 100%;" required>
                                 <option value="" selected>-- Select an Agency First --</option>
                             </select>
                         </div>
@@ -60,23 +60,23 @@
                             <label class="form-label fw-bold d-block mb-3">Request Type</label>
                             <div class="d-flex flex-wrap gap-4">
                                 <div class="form-check">
-                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="ReviewSession" id="typeReview">
+                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="ReviewSession" id="typeReview" required>
                                     <label class="form-check-label" for="typeReview">Review Session</label>
                                 </div>
                                 <div class="form-check">
-                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="WrittenExam" id="typeWritten">
+                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="WrittenExam" id="typeWritten" required>
                                     <label class="form-check-label" for="typeWritten">Written Exam</label>
                                 </div>
                                 <div class="form-check">
-                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="PracticalExam" id="typePractical">
+                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="PracticalExam" id="typePractical" required>
                                     <label class="form-check-label" for="typePractical">Practical Exam</label>
                                 </div>
                                 <div class="form-check">
-                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="Reciprocity" id="typeReciprocity">
+                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="Reciprocity" id="typeReciprocity" required>
                                     <label class="form-check-label" for="typeReciprocity">Reciprocity</label>
                                 </div>
                                 <div class="form-check">
-                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="Recertification" id="typeRecert">
+                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="Recertification" id="typeRecert" required>
                                     <label class="form-check-label" for="typeRecert">Recertification</label>
                                 </div>
                             </div>
@@ -343,11 +343,11 @@
 
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Manager Name</label>
-                                <input type="text" name="managerName" class="form-control" value="@item.ManagerName" />
+                                <input type="text" name="managerName" class="form-control" value="@item.ManagerName" required />
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Request Type</label>
-                                <select name="requestType" class="form-control" asp-items="@Html.GetEnumSelectList<SeHrCertificationPortal.Models.RequestType>()">
+                                <select name="requestType" class="form-control" asp-items="@Html.GetEnumSelectList<SeHrCertificationPortal.Models.RequestType>()" required>
                                     <option value="@((int)(item.RequestType ?? SeHrCertificationPortal.Models.RequestType.Other))" selected>@item.RequestType</option>
                                 </select>
                             </div>
