@@ -4,17 +4,17 @@ Welcome to the definitive user manual for the Specialized Engineering HR Certifi
 
 ---
 
-## 🛠️ Phase 1: Infrastructure & Authentication
+## 🛠️ Phase 1: Infrastructure & Portal Access
 
 **Accessing the Portal**
-The HR Certification Portal is deployed as an internal IIS web application.
+The HR Certification Portal is deployed as an internal IIS web application designed for desktop use.
 - **Production URL:** `http://[Internal-Server-IP]:8080` (Please check with your IT administrator for the specific server hostname or IP address).
-- **Authentication:** The portal uses your standard Windows Active Directory credentials. You will automatically be authenticated when accessing the URL from a domain-joined machine.
+- **Authentication:** This is an internal tool on the company intranet. It does not require a traditional username/password login screen; instead, access is restricted to the internal network.
 
 **Browser Compatibility**
-The User Interface is fully responsive and scales correctly on modern browsers including Google Chrome, Microsoft Edge, and mobile/tablet devices.
+The User Interface is optimized for desktop and laptop displays (Google Chrome, Microsoft Edge). *Please note that the portal is not optimized for use on mobile devices or tablets.*
 
-![Screenshot of the initial landing page/login view](images/landing-login-view.png)
+![Screenshot of the initial landing page/dashboard view](images/landing-dashboard-view.png)
 
 ---
 
