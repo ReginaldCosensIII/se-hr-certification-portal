@@ -15,5 +15,8 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     <PackageReference Include="QuestPDF" Version="2026.2.1" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="wwwroot\docs\**" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
 
 </Project>
