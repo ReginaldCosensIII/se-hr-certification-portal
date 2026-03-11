@@ -239,7 +239,7 @@ namespace SeHrCertificationPortal.Pages.Requests
             return RedirectToPage();
         }
 
-        public async Task<IActionResult> OnPostEditRequestAsync(int id, string managerName, SeHrCertificationPortal.Models.RequestType requestType, DateTime requestDate, int agencyId, int certificationId, int p = 1, int pageSize = 25, string? searchString = null, SeHrCertificationPortal.Models.RequestStatus? statusFilter = null)
+        public async Task<IActionResult> OnPostEditRequestAsync(int id, string managerName, SeHrCertificationPortal.Models.RequestType requestType, DateTime requestDate, int agencyId, int certificationId, SeHrCertificationPortal.Models.RequestStatus status, DateTime? expirationDate, int p = 1, int pageSize = 25, string? searchString = null, SeHrCertificationPortal.Models.RequestStatus? statusFilter = null)
         {
             try
             {
@@ -257,6 +257,10 @@ namespace SeHrCertificationPortal.Pages.Requests
                     request.RequestDate = DateTime.SpecifyKind(requestDate, DateTimeKind.Utc);
                     request.AgencyId = agencyId;
                     request.CertificationId = certificationId;
+                    request.Status = status;
+                    request.ExpirationDate = expirationDate.HasValue
+                        ? DateTime.SpecifyKind(expirationDate.Value, DateTimeKind.Utc)
+                        : null;
                     await _context.SaveChangesAsync();
                     TempData["SuccessMessage"] = "Request edited successfully.";
                 }
