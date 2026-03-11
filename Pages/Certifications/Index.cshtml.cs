@@ -250,8 +250,10 @@ namespace SeHrCertificationPortal.Pages.Certifications
                 var record = await _context.CertificationRequests.FindAsync(TargetCertId);
                 if (record != null)
                 {
-                    record.RequestDate = EditDatePassed;
-                    record.ExpirationDate = EditExpiration;
+                    record.RequestDate = DateTime.SpecifyKind(EditDatePassed, DateTimeKind.Utc);
+                    record.ExpirationDate = EditExpiration.HasValue
+                        ? DateTime.SpecifyKind(EditExpiration.Value, DateTimeKind.Utc)
+                        : null;
                     await _context.SaveChangesAsync();
                     TempData["SuccessMessage"] = "Certification edited successfully.";
                 }
