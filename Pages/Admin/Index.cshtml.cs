@@ -141,8 +141,8 @@ namespace SeHrCertificationPortal.Pages.Admin
                 var thresholdSetting = await _context.SystemSettings.FindAsync("ExpiringSoonThresholdDays");
                 ExpiringSoonThresholdDays = thresholdSetting != null && int.TryParse(thresholdSetting.Value, out int days) ? days : 30;
 
-                GlobalDepartments = (await _context.SystemSettings.FindAsync("Global_Departments"))?.Value ?? "Engineering, Human Resources, Field Operations";
-                GlobalRoles = (await _context.SystemSettings.FindAsync("Global_Roles"))?.Value ?? "Technician, Manager, Inspector";
+                GlobalDepartments = (await _context.SystemSettings.FindAsync("Global_Departments"))?.Value ?? "";
+                GlobalRoles = (await _context.SystemSettings.FindAsync("Global_Roles"))?.Value ?? "";
                 DisableAutocomplete = (await _context.SystemSettings.FindAsync("Disable_Autocomplete"))?.Value == "true";
             } catch (Exception ex) {
                 _logger.LogError(ex, "Error fetching data for page load.");

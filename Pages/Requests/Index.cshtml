@@ -374,6 +374,18 @@
                                     <option value="@item.CertificationId" selected>@item.Certification?.Name</option>
                                 </select>
                             </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Status</label>
+                                <select name="status" class="form-control"
+                                        asp-items="@Html.GetEnumSelectList<SeHrCertificationPortal.Models.RequestStatus>()">
+                                    <option value="@((int)item.Status)" selected>@item.Status</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Expiration Date <small class="text-muted fw-normal">(leave blank = Permanent)</small></label>
+                                <input type="date" name="expirationDate" class="form-control"
+                                       value="@(item.ExpirationDate.HasValue ? item.ExpirationDate.Value.ToString("yyyy-MM-dd") : "")" />
+                            </div>
                         </div>
                         <div class="modal-footer border-0 pt-0">
                             <button type="button" class="btn btn-light fw-bold" onclick="$(this).closest('.modal').modal('hide');">Cancel</button>
