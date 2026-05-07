@@ -302,7 +302,7 @@ namespace SeHrCertificationPortal.Data
                         ManagerName = manager,
                         RequestDate = requestDate,
                         Status = status,
-                        RequestType = requestType
+                        RequestTypes = new List<RequestType> { requestType }
                     };
 
                     // 10% Custom

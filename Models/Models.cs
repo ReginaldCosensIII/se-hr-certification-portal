@@ -39,7 +39,7 @@ namespace SeHrCertificationPortal.Models
         public int Id { get; set; }
         public DateTime RequestDate { get; set; } = DateTime.UtcNow;
         public string? ManagerName { get; set; }
-        public RequestType? RequestType { get; set; }
+        public List<RequestType> RequestTypes { get; set; } = new List<RequestType>();
         public RequestStatus Status { get; set; } = RequestStatus.Pending;
         public DateTime? ExpirationDate { get; set; }
         public string? CustomAgencyName { get; set; }

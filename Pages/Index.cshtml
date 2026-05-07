@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model IndexModel
 @{
     ViewData["Title"] = "Dashboard";
@@ -126,7 +126,7 @@
                     <td class="text-truncate">@(item.ManagerName ?? "N/A")</td>
                     <td class="text-truncate">@(item.Agency?.Abbreviation ?? item.CustomAgencyName ?? "Custom")</td>
                     <td class="text-truncate">@(item.Certification?.Name ?? item.CustomCertificationName ?? "Custom")</td>
-                    <td class="text-nowrap"><span class="fw-bold">@item.RequestType</span></td>
+                    <td class="text-nowrap"><span class="fw-bold">@(item.RequestTypes != null && item.RequestTypes.Any() ? string.Join(", ", item.RequestTypes) : "None")</span></td>
                     <td class="text-center text-nowrap">
                         @if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Pending)
                         {
