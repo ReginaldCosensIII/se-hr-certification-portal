@@ -6,7 +6,7 @@ using QuestPDF.Infrastructure;
 
 // Configure QuestPDF License
 QuestPDF.Settings.License = LicenseType.Community;
-QuestPDF.Settings.EnableDebugging = true;
+// EnableDebugging is only set once the app is built and environment is known (see below)
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,9 +40,24 @@ using (var scope = app.Services.CreateScope())
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    // HSTS: tells browsers to only use HTTPS for 30 days (max-age in seconds)
     app.UseHsts();
 }
+else
+{
+    // QuestPDF debug mode: only in Development to avoid extra error detail in production logs
+    QuestPDF.Settings.EnableDebugging = true;
+}
+
+// Security Headers Middleware — defense-in-depth even on internal LAN
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("X-Frame-Options", "SAMEORIGIN");
+    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    context.Response.Headers.Append("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    await next();
+});
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

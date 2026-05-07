@@ -561,10 +561,18 @@
     <script src="~/lib/chartjs/chart.min.js"></script>
     <script>
         function generatePdfReport() {
+            var analyticsCollapse = document.getElementById('analyticsCollapse');
+            var isHidden = !analyticsCollapse.classList.contains('show');
+            
+            // 1. If hidden, temporarily show it (off-screen) so charts can be captured
+            if (isHidden) {
+                analyticsCollapse.classList.add('show');
+            }
+
             var agencyCanvas = document.getElementById('agencyChart');
             var certCanvas = document.getElementById('certChart');
             
-            // Convert to Base64 (using light background to prevent transparency issues in PDF)
+            // 2. Convert to Base64
             if (agencyCanvas) {
                 var destCtx = cloneCanvasWithBg(agencyCanvas);
                 document.getElementById('agencyChartBase64').value = destCtx.canvas.toDataURL("image/png");
@@ -572,6 +580,11 @@
             if (certCanvas) {
                 var destCtx = cloneCanvasWithBg(certCanvas);
                 document.getElementById('certChartBase64').value = destCtx.canvas.toDataURL("image/png");
+            }
+            
+            // 3. Re-hide if it was hidden before we started
+            if (isHidden) {
+                analyticsCollapse.classList.remove('show');
             }
             
             document.getElementById('pdfExportForm').submit();
