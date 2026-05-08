@@ -126,7 +126,21 @@
                     <td class="text-truncate">@(item.ManagerName ?? "N/A")</td>
                     <td class="text-truncate">@(item.Agency?.Abbreviation ?? item.CustomAgencyName ?? "Custom")</td>
                     <td class="text-truncate">@(item.Certification?.Name ?? item.CustomCertificationName ?? "Custom")</td>
-                    <td class="text-nowrap"><span class="fw-bold">@(item.RequestTypes != null && item.RequestTypes.Any() ? string.Join(", ", item.RequestTypes) : "None")</span></td>
+                    <td class="text-nowrap">
+                        @if (item.RequestTypes != null && item.RequestTypes.Any())
+                        {
+                            <div class="d-flex flex-column">
+                                @foreach (var rt in item.RequestTypes)
+                                {
+                                    <span class="fw-bold">@rt</span>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="fw-bold text-muted">None</span>
+                        }
+                    </td>
                     <td class="text-center text-nowrap">
                         @if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Pending)
                         {
