@@ -60,23 +60,23 @@
                             <label class="form-label fw-bold d-block mb-3">Request Type</label>
                             <div class="d-flex flex-wrap gap-4">
                                 <div class="form-check">
-                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="ReviewSession" id="typeReview" required>
+                                    <input name="NewRequest.RequestTypes" class="form-check-input" type="checkbox" value="ReviewSession" id="typeReview">
                                     <label class="form-check-label" for="typeReview">Review Session</label>
                                 </div>
                                 <div class="form-check">
-                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="WrittenExam" id="typeWritten" required>
+                                    <input name="NewRequest.RequestTypes" class="form-check-input" type="checkbox" value="WrittenExam" id="typeWritten">
                                     <label class="form-check-label" for="typeWritten">Written Exam</label>
                                 </div>
                                 <div class="form-check">
-                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="PracticalExam" id="typePractical" required>
+                                    <input name="NewRequest.RequestTypes" class="form-check-input" type="checkbox" value="PracticalExam" id="typePractical">
                                     <label class="form-check-label" for="typePractical">Practical Exam</label>
                                 </div>
                                 <div class="form-check">
-                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="Reciprocity" id="typeReciprocity" required>
+                                    <input name="NewRequest.RequestTypes" class="form-check-input" type="checkbox" value="Reciprocity" id="typeReciprocity">
                                     <label class="form-check-label" for="typeReciprocity">Reciprocity</label>
                                 </div>
                                 <div class="form-check">
-                                    <input asp-for="NewRequest.RequestType" class="form-check-input" type="radio" value="Recertification" id="typeRecert" required>
+                                    <input name="NewRequest.RequestTypes" class="form-check-input" type="checkbox" value="Recertification" id="typeRecert">
                                     <label class="form-check-label" for="typeRecert">Recertification</label>
                                 </div>
                             </div>
@@ -172,7 +172,21 @@
                     <td class="text-truncate">@(item.ManagerName ?? "N/A")</td>
                     <td class="text-truncate">@(item.Agency?.Abbreviation ?? item.CustomAgencyName ?? "Custom")</td>
                     <td class="text-truncate" title="@(item.Certification?.Name ?? item.CustomCertificationName ?? "Custom")">@(item.Certification?.Name ?? item.CustomCertificationName ?? "Custom")</td>
-                    <td><span class="fw-bold">@item.RequestType</span></td>
+                    <td class="text-nowrap">
+                        @if (item.RequestTypes != null && item.RequestTypes.Any())
+                        {
+                            <div class="d-flex flex-column">
+                                @foreach (var rt in item.RequestTypes)
+                                {
+                                    <span class="fw-bold">@rt</span>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="fw-bold text-muted">None</span>
+                        }
+                    </td>
                     <td class="text-center">
                         @if (item.Status == SeHrCertificationPortal.Models.RequestStatus.Pending)
                         {
@@ -347,9 +361,15 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Request Type</label>
-                                <select name="requestType" class="form-control" asp-items="@Html.GetEnumSelectList<SeHrCertificationPortal.Models.RequestType>()" required>
-                                    <option value="@((int)(item.RequestType ?? SeHrCertificationPortal.Models.RequestType.Other))" selected>@item.RequestType</option>
-                                </select>
+                                <div class="d-flex flex-wrap gap-3">
+                                    @foreach (var rt in Enum.GetValues<SeHrCertificationPortal.Models.RequestType>())
+                                    {
+                                        <div class="form-check">
+                                            <input name="requestTypes" class="form-check-input" type="checkbox" value="@((int)rt)" id="edit_type_@(item.Id)_@rt" @(item.RequestTypes != null && item.RequestTypes.Contains(rt) ? "checked" : "")>
+                                            <label class="form-check-label" for="edit_type_@(item.Id)_@rt">@rt</label>
+                                        </div>
+                                    }
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Request Date</label>

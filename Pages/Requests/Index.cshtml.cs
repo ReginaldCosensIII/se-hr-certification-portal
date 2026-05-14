@@ -98,8 +98,8 @@ namespace SeHrCertificationPortal.Pages.Requests
             "agency_desc" => query.OrderByDescending(c => c.Agency!.Abbreviation ?? c.CustomAgencyName),
             "cert_asc" => query.OrderBy(c => c.Certification!.Name ?? c.CustomCertificationName),
             "cert_desc" => query.OrderByDescending(c => c.Certification!.Name ?? c.CustomCertificationName),
-            "type_asc" => query.OrderBy(c => c.RequestType),
-            "type_desc" => query.OrderByDescending(c => c.RequestType),
+            "type_asc" => query.OrderByDescending(c => c.RequestDate),
+            "type_desc" => query.OrderByDescending(c => c.RequestDate),
             "status_asc" => query.OrderBy(c => c.Status),
             "status_desc" => query.OrderByDescending(c => c.Status),
             "date_asc" => query.OrderBy(c => c.RequestDate),
@@ -198,7 +198,8 @@ namespace SeHrCertificationPortal.Pages.Requests
                     string.IsNullOrWhiteSpace(NewRequest.ManagerName) ||
                     NewRequest.AgencyId == null ||
                     NewRequest.CertificationId == null ||
-                    NewRequest.RequestType == null)
+                    NewRequest.RequestTypes == null ||
+                    !NewRequest.RequestTypes.Any())
                 {
                     TempData["ErrorMessage"] = "Please complete all required fields to submit a new request.";
                     return RedirectToPage(new { openNew = "true" }); // Keeps the accordion open so the user sees the error
@@ -239,11 +240,11 @@ namespace SeHrCertificationPortal.Pages.Requests
             return RedirectToPage();
         }
 
-        public async Task<IActionResult> OnPostEditRequestAsync(int id, string managerName, SeHrCertificationPortal.Models.RequestType requestType, DateTime requestDate, int agencyId, int certificationId, SeHrCertificationPortal.Models.RequestStatus status, DateTime? expirationDate, int p = 1, int pageSize = 25, string? searchString = null, SeHrCertificationPortal.Models.RequestStatus? statusFilter = null)
+        public async Task<IActionResult> OnPostEditRequestAsync(int id, string managerName, List<SeHrCertificationPortal.Models.RequestType> requestTypes, DateTime requestDate, int agencyId, int certificationId, SeHrCertificationPortal.Models.RequestStatus status, DateTime? expirationDate, int p = 1, int pageSize = 25, string? searchString = null, SeHrCertificationPortal.Models.RequestStatus? statusFilter = null)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(managerName) || agencyId <= 0 || certificationId <= 0)
+                if (string.IsNullOrWhiteSpace(managerName) || agencyId <= 0 || certificationId <= 0 || requestTypes == null || !requestTypes.Any())
                 {
                     TempData["ErrorMessage"] = "Please complete all required fields to save changes.";
                     return RedirectToPage(new { p, pageSize, SearchString = searchString, StatusFilter = statusFilter });
@@ -253,7 +254,7 @@ namespace SeHrCertificationPortal.Pages.Requests
                 if (request != null)
                 {
                     request.ManagerName = managerName;
-                    request.RequestType = requestType;
+                    request.RequestTypes = requestTypes;
                     request.RequestDate = DateTime.SpecifyKind(requestDate, DateTimeKind.Utc);
                     request.AgencyId = agencyId;
                     request.CertificationId = certificationId;
