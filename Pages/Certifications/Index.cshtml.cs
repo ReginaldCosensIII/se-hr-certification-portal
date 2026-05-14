@@ -360,6 +360,8 @@ namespace SeHrCertificationPortal.Pages.Certifications
                         RequestDate = utcDatePassed,
                         ExpirationDate = utcExpirationDate,
                         Status = RequestStatus.Passed,
+                        ManagerName = "N/A",
+                        RequestTypes = new List<RequestType> { RequestType.Other },
                         // Bypass approval lifecycle, no ActionDate included based on previous error
                     };
 
